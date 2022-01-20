@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
-import PyPDF2.pdf
-from PyPDF2.pdf import PdfFileReader
+import PyPDF2
+from PyPDF2 import PdfFileReader
 import re
 import gspread
 
 def read_pdf(file):
-    pdfReader = PyPDF2.PdfFileReader(file) #reads pdf
+    pdfReader = PdfFileReader(file) #reads pdf
     count = pdfReader.numPages #counts the number of pages
     content = " "#space holder for pdf content
     for i in range(count): #for loop to extract text from all pages
