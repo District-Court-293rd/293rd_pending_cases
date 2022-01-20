@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import PyPDF2
+import PyPDF2.pdf
+from PyPDF2.pdf import PdfFileReader
 import re
 import gspread
 
