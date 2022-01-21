@@ -3,7 +3,7 @@ import pandas as pd
 import PyPDF2
 from PyPDF2 import PdfFileReader
 import re
-import gspread
+import gspread as gs
 import df2gspread as d2g
 import docx2txt
 import openpyxl
@@ -38,7 +38,8 @@ pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_nu
 
 #opens the google sheet of pending case notes
     #sets the json to service account path
-#json_path = gspread.service_account(filename = '/Users/hector/codeup-data-science/293rd_pending_cases/pending_cases.json')
+pending_cases = gs.open('/Users/hector/codeup-data-science/293rd_pending_cases/pending_cases.json')
+json_path = gs.service_account(filename = 'pending_cases')
     #opens the google sheet by key found in the address
 opens_civil_pending_gs = json_path.open_by_key('1b3fmZrbfwZWMvu4kUGJSSGsp61utlE0Ny-ebozZ5aBk')
     #pulls the data from the google worksheet (civil_pending_notes tab)
