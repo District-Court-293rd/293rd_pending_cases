@@ -20,22 +20,19 @@ def read_pdf(file):
 
 def main():
     st.title("Pending Case Report")
+if __name__ == '__main__':
+	main()
 
 #uploads pdf
 pdf_file = st.file_uploader('Upload pdf', type = 'pdf')
 
 if pdf_file is not None:
     read_pdf(pdf_file)
-
-if __name__ == '__main__':
-	main()
-
-#pdf_raw_text = read_pdf(pdf_file) 
+ 
 #regex to find cause numbers
 finds_cause_numbers = re.findall(r'\d{2}-\d{2}-\d{5}-\w*', str(pdf_file))
 #puts the cause numbers into a dataframe with the column name 'cause_number'
 pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_number'])
-
 #opens the google sheet of pending case notes
     #sets the json to service account path
 credentials = {
