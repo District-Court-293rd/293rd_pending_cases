@@ -30,7 +30,7 @@ pdf_file = st.file_uploader('Upload pdf', type = 'pdf')
 if pdf_file is not None:
     read_pdf(pdf_file)
 
-st.write('total')
+
  
 #regex to find cause numbers
 finds_cause_numbers = re.findall(r'\d{2}-\d{2}-\d{5}-\w*', str(pdf_file))
@@ -65,7 +65,7 @@ df = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, columns=['
     #fills in the na with an empty space to avoid error
 df = df.drop_duplicates('cause_number').reset_index(drop=True).fillna(' ')
 total = df.cause_number.count()
-
+st.write(total)
 
 #Clears the google spreadsheet for the update
 civil_pending_notes_tab.clear()
