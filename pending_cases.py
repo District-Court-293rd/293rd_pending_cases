@@ -30,7 +30,7 @@ if pdf_file is not None:
 #if __name__ == '__main__':
 #	main()
 
-pdf_raw_text = read_pdf(pdf_file) 
+#pdf_raw_text = read_pdf(pdf_file) 
 #regex to find cause numbers
 finds_cause_numbers = re.findall(r'\d{2}-\d{2}-\d{5}-\w*', pdf_file)
 #puts the cause numbers into a dataframe with the column name 'cause_number'
