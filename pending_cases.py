@@ -38,7 +38,8 @@ pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_nu
 
 #opens the google sheet of pending case notes
     #sets the json to service account path
-pending_cases = gs.open('/Users/hector/codeup-data-science/293rd_pending_cases/pending_cases.json')
+gc=gs.service_account()
+pending_cases = gc.open('/Users/hector/codeup-data-science/293rd_pending_cases/pending_cases.json')
 json_path = gs.service_account(filename = 'pending_cases')
     #opens the google sheet by key found in the address
 opens_civil_pending_gs = json_path.open_by_key('1b3fmZrbfwZWMvu4kUGJSSGsp61utlE0Ny-ebozZ5aBk')
