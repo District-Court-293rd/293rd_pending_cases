@@ -8,8 +8,8 @@ import df2gspread as d2g
 import docx2txt
 import openpyxl
 
-def read_pdf(pdf_file):
-    pdfReader = PdfFileReader(pdf_file) #reads pdf
+def read_pdf(file):
+    pdfReader = PdfFileReader(file) #reads pdf
     count = pdfReader.numPages #counts the number of pages
     content = " "#space holder for pdf content
     for i in range(count): #for loop to extract text from all pages
@@ -18,8 +18,8 @@ def read_pdf(pdf_file):
     
     return content
 
-def main():
-    st.title("Pending Case Report")
+#def main():
+#    st.title("Pending Case Report")
 
 #uploads pdf
 pdf_file = st.file_uploader('Upload pdf', type = 'pdf')
@@ -27,8 +27,8 @@ pdf_file = st.file_uploader('Upload pdf', type = 'pdf')
 if pdf_file is not None:
     read_pdf(pdf_file)
 
-if __name__ == '__main__':
-	main()
+#if __name__ == '__main__':
+#	main()
 
 pdf_raw_text = read_pdf(pdf_file) 
 #regex to find cause numbers
