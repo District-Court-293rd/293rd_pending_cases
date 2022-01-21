@@ -1,3 +1,4 @@
+from pickle import TRUE
 import streamlit as st
 import pandas as pd
 import PyPDF2
@@ -61,8 +62,14 @@ df = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, columns=['
     #resets the index and drops the output index
     #fills in the na with an empty space to avoid error
 df = df.drop_duplicates('cause_number').reset_index(drop=True).fillna(' ')
+total_cases = df.count('cause_number')
+total_dispose = df.count('dispose', TRUE)
+total_pending = total_cases - total_dispose 
+
 
 #Clears the google spreadsheet for the update
 civil_pending_notes_tab.clear()
 #updates the google sheet with the new list of pending cases
 civil_pending_notes_tab.update([df.columns.values.tolist()] + df.values.tolist())
+
+st.write(total_pending)
