@@ -8,8 +8,8 @@ import df2gspread as d2g
 import docx2txt
 import openpyxl
 
-def read_pdf(file):
-    pdfReader = PdfFileReader(file) #reads pdf
+def read_pdf(pdf_file):
+    pdfReader = PdfFileReader(pdf_file) #reads pdf
     count = pdfReader.numPages #counts the number of pages
     content = " "#space holder for pdf content
     for i in range(count): #for loop to extract text from all pages
