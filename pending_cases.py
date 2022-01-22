@@ -64,11 +64,13 @@ df = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, columns=['
     #resets the index and drops the output index
     #fills in the na with an empty space to avoid error
 df = df.drop_duplicates('cause_number').reset_index(drop=True).fillna(' ')
-total = df.cause_number.count()
-disposed = df['disposed'].value_counts()
+total = df.cause_number.count() #Counts total pending cases
+disposed = (df['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
+pending = total - disposed#Calculates the remaining cases to be disposed of
+#Displays the number of...
 st.write('Total Cause Numbers:',total)
-st.write('Disposed (TRUE):', disposed)
-
+st.write('Total Disposed:', disposed)
+st.write ('Cases Remaining to be Disposed')
 #Clears the google spreadsheet for the update
 civil_pending_notes_tab.clear()
 #updates the google sheet with the new list of pending cases
