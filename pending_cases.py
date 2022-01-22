@@ -25,15 +25,15 @@ if __name__ == '__main__':
 	main()
 
 #uploads pdf
-content = st.file_uploader('Upload pdf', type = 'pdf')
+uploaded = st.file_uploader('Upload pdf', type = 'pdf')
 
-if content is not None:
-    read_pdf(content)
+if uploaded is not None:
+    read_pdf(uploaded)
 
 
  
 #regex to find cause numbers
-finds_cause_numbers = re.findall(r'\d{2}-\d{2}-\d{5}-\w*', str(content))
+finds_cause_numbers = re.findall(r'\d{2}-\d{2}-\d{5}-\w*', str(uploaded))
 #puts the cause numbers into a dataframe with the column name 'cause_number'
 pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_number'])
 #opens the google sheet of pending case notes
