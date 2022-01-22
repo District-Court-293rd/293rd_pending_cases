@@ -36,8 +36,11 @@ if uploaded is not None:
 finds_cause_numbers = re.findall(r'\d{2}-\d{2}-\d{5}-\w*', str(uploaded))
 #puts the cause numbers into a dataframe with the column name 'cause_number'
 pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_number'])
+total_new_pending = pending_cause_number_df.cause_number.count() #Counts total pending cases
 #opens the google sheet of pending case notes
     #sets the json to service account path
+
+
 credentials = {
   "type": "service_account",
   "project_id": "pending-cases",
@@ -68,6 +71,7 @@ total = df.cause_number.count() #Counts total pending cases
 disposed = (df['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
 pending = total - disposed #Calculates the remaining cases to be disposed of
 #Displays the number of...
+st.write('Total new', total_new_pending )
 st.write('Total Cause Numbers:',total)
 st.write('Total Disposed:', disposed)
 st.write ('Cases Remaining to be Disposed', pending)
