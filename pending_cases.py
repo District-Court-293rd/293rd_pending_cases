@@ -19,28 +19,36 @@ def read_pdf(file):
     
     return content
 
+#title
 def main():
     st.title("Pending Case Report")
 if __name__ == '__main__':
 	main()
 
-#uploads pdf
-uploaded = st.file_uploader('Upload pdf', type = 'pdf')
+###########reads and extracts text from pdf.
+#uploader
+docx_file = st.file_uploader('Upload pdf', type = 'pdf')
 
-if uploaded is not None:
-    read_pdf(uploaded)
+#checks to make sure it is a pdf doc
+if docx_file is not None:
+    if docx_file.type == "pdf":
+        read_pdf(docx_file)
+    else:
+        raw_text = read_pdf(docx_file)#reads as bites
 
-
- 
-#regex to find cause numbers
-finds_cause_numbers = re.findall(r'\d{2}-\d{2}-\d{5}-\w*', str(uploaded))
+#regex to find cause numbers from raw text and converts it to a string.
+finds_cause_numbers = re.findall(r'\d{2}-\d{2}-\d{5}-\w*', raw_text)
 #puts the cause numbers into a dataframe with the column name 'cause_number'
 pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_number'])
-total_new_pending = pending_cause_number_df.cause_number.count() #Counts total pending cases
-#opens the google sheet of pending case notes
-    #sets the json to service account path
+#prints dataframe on app
+st.dataframe(pending_cause_number_df)
+#counts the number of cause_numbers in the uploaded pdf.
+uploaded_count = pending_cause_number_df.cause_number.count()
+#writesd the number count to the app.
+st.write("Uploaded Count", uploaded_count)
 
-
+########Pulls in the goolge sheet data, compares it, drops the duplicates and updates the spreadsheet with the latest cause numbers
+#json credentials
 credentials = {
   "type": "service_account",
   "project_id": "pending-cases",
@@ -53,6 +61,7 @@ credentials = {
   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pending-cause-numbers%40pending-cases.iam.gserviceaccount.com"
 }
+
 json_path = gs.service_account_from_dict(credentials)
     #opens the google sheet by key found in the address
 opens_civil_pending_gs = json_path.open_by_key('1b3fmZrbfwZWMvu4kUGJSSGsp61utlE0Ny-ebozZ5aBk')
@@ -60,23 +69,33 @@ opens_civil_pending_gs = json_path.open_by_key('1b3fmZrbfwZWMvu4kUGJSSGsp61utlE0
 civil_pending_notes_tab = opens_civil_pending_gs.get_worksheet(0)
     #puts the data from the google sheet and puts it into a dataframe
 civil_pending_notes = pd.DataFrame(civil_pending_notes_tab.get_all_records())
-
+    #Clears the google spreadsheet for the update
+civil_pending_notes_tab.clear()
 #adds both lists together in order to search for dups later
-df = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, columns=['cause_number']), ignore_index=True)
+appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, columns=['cause_number']), ignore_index=True)
     #drops the duplicated cause numbers and reindexes the dataframe
     #resets the index and drops the output index
     #fills in the na with an empty space to avoid error
-df = df.drop_duplicates('cause_number').reset_index(drop=True).fillna(' ')
-total = df.cause_number.count() #Counts total pending cases
-disposed = (df['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
-pending = total - disposed #Calculates the remaining cases to be disposed of
-#Displays the number of...
-st.write('Total new', total_new_pending )
-st.write('Total Cause Numbers:',total)
-st.write('Total Disposed:', disposed)
-st.write ('Cases Remaining to be Disposed', pending)
-#Clears the google spreadsheet for the update
-civil_pending_notes_tab.clear()
-#updates the google sheet with the new list of pending cases
-civil_pending_notes_tab.update([df.columns.values.tolist()] + df.values.tolist())
+ready_to_work_pending_list = appended_pending.drop_duplicates('cause_number').reset_index(drop=True).fillna(' ')
+#########Calculates counts
+not_worked = (ready_to_work_pending_list['notes'].values == ' ').sum()
+total = ready_to_work_pending_list.cause_number.count() #Counts total pending cases
+worked = total - not_worked
+disposed = (ready_to_work_pending_list['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
+remaing_cases_to_be_worked = total - disposed #Calculates the remaining cases to be disposed of
 
+#updates the google sheet with the new list of pending cases
+civil_pending_notes_tab.update([ready_to_work_pending_list.columns.values.tolist()] + ready_to_work_pending_list.values.tolist())
+
+
+
+#Displays the number of...
+st.write('Latest Counts')
+#subtracts total count minus not worked (count of empty cells in notes column)
+st.write('Worked:', worked)
+#total count oof cause numbers after appended both lists
+st.write('Total Cause Numbers:',total)
+#total where disposed is TRUE
+st.write('Total Disposed:', disposed)
+#Total minus total disposed
+st.write ('Cases Remaining to be Disposed', remaing_cases_to_be_worked )
