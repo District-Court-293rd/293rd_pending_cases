@@ -23,14 +23,14 @@ def check_for_combined_case(string):
         - Boolean: True or False
     """
     
-    #If the string contains a hyphen or the letters 'cv', return True
-    if string.count('CV') > 0 or string.count('TX') > 0:
+    #If the string contains the letters 'CV' or 'TX' and IS NOT 'TX DFPS', return True
+    if (string.count('CV') > 0 or string.count('TX') > 0) and (string.count('TX DFPS') == 0):
         return True
     else:
         return False
 
 #Create a function that collects data from combined cases
-def collect_civil_case_data(case_info):
+def collect_civil_case_data(case_info, county):
     """
     This function takes in a list of strings that represent a single case. Each string may contain relevant information
     that will need to be collected, and added to a dictionary. That dictionary will then be added to a list 
@@ -40,6 +40,7 @@ def collect_civil_case_data(case_info):
     
     Parameter:
         -case_info: The list of strings representing a single case
+        -county: The county information acquired from the previous function
         
     Returns:
         -case_list: A list containing the case dictionaries
@@ -99,7 +100,7 @@ def collect_civil_case_data(case_info):
                 combined_case_text.append(case_info[index])
 
             #Collect combined case data
-            combined_case = collect_civil_case_data(combined_case_text)
+            combined_case = collect_civil_case_data(combined_case_text, county)
 
             #Add the temp dictionary to the overall container dict
             case_list.extend(combined_case)
@@ -184,7 +185,7 @@ def extract_civil_pdf_data(text):
     header = text[:389]
     
     #For body
-    text = text[392:]
+    text = text[389:]
     
     #Remove headers from all subsequent pages
     text = re.sub(r"""COUNTY OF .{6,8} 293RD DISTRICT COURT CIVIL PENDING CASES AS OF .{10}
@@ -210,6 +211,12 @@ PLAINTIFF NAME                PLAINTIFF ATTORNEY        DEFENDANT NAME          
     
     #Drop the last case. It only consists of the count of cases in the pdf. Not needed here
     cases.pop()
+
+    #For testing
+    for i, case in enumerate(cases):
+        print(f'Case Number {i}')
+        print(case)
+        print('\n\n')
     
     #Loop through each case and build a dictionary with its info
     for case in cases:
@@ -224,7 +231,7 @@ PLAINTIFF NAME                PLAINTIFF ATTORNEY        DEFENDANT NAME          
         case_info = case.split('\n')
         
         #Gather the case data
-        case_list = collect_civil_case_data(case_info)
+        case_list = collect_civil_case_data(case_info, county)
         
         #Finally, append this dictionary to the container dict
         case_dicts.extend(case_list)
