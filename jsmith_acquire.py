@@ -9,7 +9,38 @@ from pdfminer3.converter import PDFPageAggregator
 from pdfminer3.converter import TextConverter
 import io
 
-#Create a function to identify combined cases
+def build_dataframe(pdf_path):
+    """
+    This function takes in a path to the desired PDF, determines whether or not it is a civil
+    or criminal case PDF, and then calls the respective function to extract the PDF data
+    and build a dataframe.
+
+    Parameter:
+        - pdf_path: A string representing the file path for the PDF
+
+    Returns:
+        - df: A dataframe of the information extracted from the given PDF
+    """
+
+    #Verify the file is a pdf. If not, print a message and return -1
+    if pdf_path[-4:] != '.pdf':
+        print('This file is not a PDF. Please use PDF files only.')
+        return -1
+
+    #Now check if it is criminal or civil and then call the associated functions
+    if pdf_path.count('CR') > 0:
+        df = build_criminal_cases_dataframe(pdf_path)
+    elif pdf_path.count('CV') > 0:
+        df = build_civil_cases_dataframe(pdf_path)
+    else:
+        #Leave a message
+        print("Something Went Wrong! Could not identify the PDF as Criminal or Civil.")
+        return -1
+
+    return df
+
+
+#Create a function to identify combined cases in the civil cases PDF
 def check_for_combined_case(string):
     """
     This function takes in a string from the case. Normally, this string would represent the plaintiff's name,
@@ -211,12 +242,6 @@ PLAINTIFF NAME                PLAINTIFF ATTORNEY        DEFENDANT NAME          
     
     #Drop the last case. It only consists of the count of cases in the pdf. Not needed here
     cases.pop()
-
-    #For testing
-    for i, case in enumerate(cases):
-        print(f'Case Number {i}')
-        print(case)
-        print('\n\n')
     
     #Loop through each case and build a dictionary with its info
     for case in cases:
