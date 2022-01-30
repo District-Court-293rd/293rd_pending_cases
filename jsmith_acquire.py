@@ -291,3 +291,180 @@ def build_civil_cases_dataframe(pdf_path):
     
     return df
 
+
+
+    ###################################### FOR CRIMINAL CASE PDFS #########################################
+
+
+
+def extract_criminal_pdf_data(text):
+    """
+    This function takes in the entire PDF document as a string of text. It will gather the info for each case
+    and add the info to a dictionary. The dictionary for each case will be added to a list which will be turned into
+    a dataframe.
+    
+    Parameter:
+        -text: A string consisting of the text of the entire PDF document.
+        
+    Returns:
+        -df: A dataframe of the newly gathered case info
+    """
+    
+    #Initialize container list
+    case_list = []
+    
+    #Separate the first header from the body
+    #We'll use this to identify the county later
+    header = text[:517]
+    
+    #Body
+    body = text[517:]
+    
+    #Remove leading and trailing whitespaces from the body text
+    body = body.strip()
+    
+    #Use if statement to check for county names inside the header info
+    if header.count('MAVERICK') >= 1:
+        county = 'Maverick'
+    elif header.count('DIMMIT') >= 1:
+        county = 'Dimmit'
+    elif header.count('ZAVALA') >= 1:
+        county = 'Zavala'
+    else:
+        county = 'Something went wrong!'
+        
+    #Set up regex to remove all subsequent headers
+    #This regex should identify the headers even if the name of the district clerk changes later on
+    body = re.sub(r"""\n
+                                                  .{6,8} COUNTY CRIMINAL PENDING REPORT -- PAGE: \d{1,3}
+                                                        .*, DISTRICT CLERK
+                                                              RUN ON .{19}
+                                                                   AS OF .{10}
+
+CAUSE #           FILE DATE  DEFENDANT NAME             ATTORNEY         BONDSMAN NAME    OFFENSE DESCRIPTION                  CASE STATUS""",
+    '', body)
+    
+    
+    #########################################################################################################
+    #Set up regex to remove the MTR/MTA separation
+    body = re.sub("""TOTAL FILED CASES: \d{1,4}
+
+MTR/MTA CASES FILED
+
+""", '', body)
+    
+    
+    #########################################################################################################
+    #Set up regex to remove the case count section at the end
+    body = re.sub("""
+NUMBER OF MTR/MTA CASES: \d{1,4}
+
+.*\d{1,4}
+.*\d{1,4}
+------------------------------
+.*\d{1,4}""", '', body)
+    
+    #########################################################################################################
+    
+    #Split the text on the '\n' to isolate each case
+    cases = body.split('\n')
+    
+    #Remove cases that happen to be empty or consist of whitespace only
+    cases = [case for case in cases if case.isspace() == False and len(case) > 0]
+    
+    #Loop through each case. Add case info to temp dict, and then add that to the case list
+    for case in cases:
+        #Create temp_dict
+        temp_dict = {}
+
+        #Verify this is a valid case. Check for cause number
+        if case[:17].isspace():
+            continue
+        
+        #Strip leading and trailing whitespace
+        case = case.strip()
+
+        #Gather the cause number
+        cause_num = case[:17].strip()
+
+        #Gather the file date
+        file_date = case[17:29].strip()
+
+        #Get defendant name
+        defendant_name = case[29:56].strip()
+
+        #Get attorney name
+        attorney = case[56:72].strip()
+
+        #Get bondsman name
+        bondsman = case[72:90].strip()
+
+        #Get offense description
+        offense = case[90:127].strip()
+
+        #Get case status
+        status = case[127:].strip()
+
+        #Add info to temp dict
+        temp_dict['County'] = county
+        temp_dict['Cause Number'] = cause_num
+        temp_dict['File Date'] = file_date
+        temp_dict['Defendant Name'] = defendant_name
+        temp_dict['Attorney Name'] = attorney
+        temp_dict['Bondsman Name'] = bondsman
+        temp_dict['Offense'] = offense
+        temp_dict['Status'] = status
+
+        #Append to case list
+        case_list.append(temp_dict)
+    
+    #How many?
+    print(f'Collected Data From {len(case_list)} Cases.')
+    
+    #Create dataframe
+    df = pd.DataFrame(case_list)
+    
+    return df
+
+
+def build_criminal_cases_dataframe(pdf_path):
+    """
+    This function reads in the criminal cases pdf document and extracts all available information for each case. 
+    It then returns a dataframe.
+    
+    Parameter:
+        - pdf_path: The file path for the pdf to be read.
+        
+    Returns:
+        - df: A dataframe of the resulting case information
+    """
+    
+    #Set up resource manager to handle pdf content. text, images, etc.
+    resource_manager = PDFResourceManager()
+
+    #Used to display text
+    fake_file_handle = io.StringIO()
+
+    #Set up converter
+    converter = TextConverter(resource_manager, fake_file_handle, laparams=LAParams())
+
+    #Set up page interpreter
+    page_interpreter = PDFPageInterpreter(resource_manager, converter)
+
+    with open(pdf_path, 'rb') as fh:
+
+        for page_num, page in enumerate(PDFPage.get_pages(fh, caching=True, check_extractable=True)):
+            #Process the current page
+            page_interpreter.process_page(page)
+
+        #Save the current page's text to a variable
+        text = fake_file_handle.getvalue()
+
+    # close open handles
+    converter.close()
+    fake_file_handle.close()
+    
+    #Collect criminal case info and get the df
+    df = extract_criminal_pdf_data(text)
+    
+    return df
