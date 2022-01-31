@@ -90,7 +90,7 @@ def collect_civil_case_data(case_info, county):
     cause_num = case_info[0][:19].strip()
 
     #Get the file date
-    file_date = case_info[0][15:30].strip()
+    file_date = case_info[0][19:30].strip()
 
     #Get the Cause of Action
     coa = case_info[0][30:56].strip()
