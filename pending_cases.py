@@ -23,29 +23,28 @@ def read_pdf(file):
 def main():
     st.title("Pending Case Report")
 if __name__ == '__main__':
-	main()
+	main() 
 
 ###########reads and extracts text from pdf.
 #uploader
 docx_file = st.file_uploader('Upload pdf', type = 'pdf')
 
 #checks to make sure it is a pdf doc
-if docx_file is not None:
-    if docx_file.type == "pdf":
-        read_pdf(docx_file)
+def raw_text():
+    if docx_file is not None:
+        if docx_file.type == "pdf":
+            read_pdf(docx_file)
     else:
         raw_text = read_pdf(docx_file)#reads as bites
-
-
+        print(raw_text)   
+        
+        
+        
 #regex to find cause numbers from raw text and converts it to a string.
-finds_cause_numbers = re.findall(r'(\d{2}-\d{2}-\d{5}-\w*|\d*-\d*-\d*-\w*|\d*-\w*)\s*(\d{2}/\d{2}/\d{4})\s*(\D.{23})\s*(\d{2}/\d{2}/\d{4}|[ ]{0,1})(\D.[M$][O$][T$][I$].{,12}|\D.[W$][O$][N$]..{,12}|\D.[T$][R$][I$]..{,12}|\D.[J$][U$][R$]..{,12}|\D.[S$][T$][A$]..{,12}|\D.[H$][E$][A$]..{,12}|\D.[P$][R$][E$]..{,12}|\D.[E$][N$][T$]..{,12}|\D.[P$][E$][T$]..{,12}|\D.[F$][I$][N$]..{,12}|\D.[C$][O$][M$]..{,12}|\D.[P$][L$][E$]..{,12}|\D.[N$][O$][T$]..{,12}|[ ]{0,1})\s(\D.{,20})', raw_text)
+finds_cause_numbers = re.findall(r'(\d{2}-\d{2}-\d{5}-\w*|\d*-\d*-\d*-\w*|\d*-\w*)\s*(\d{2}/\d{2}/\d{4})\s*(\D.{23})\s*(\d{2}/\d{2}/\d{4}|[ ]{0,1})(\D.[M$][O$][T$][I$].{,12}|\D.[W$][O$][N$]..{,12}|\D.[T$][R$][I$]..{,12}|\D.[J$][U$][R$]..{,12}|\D.[S$][T$][A$]..{,12}|\D.[H$][E$][A$]..{,12}|\D.[P$][R$][E$]..{,12}|\D.[E$][N$][T$]..{,12}|\D.[P$][E$][T$]..{,12}|\D.[F$][I$][N$]..{,12}|\D.[C$][O$][M$]..{,12}|\D.[P$][L$][E$]..{,12}|\D.[N$][O$][T$]..{,12}|[ ]{0,1})\s(\D.{,20})', str(raw_text))
 #puts the cause numbers into a dataframe with the column name 'cause_number'
-pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_number', 'file_date', 'cause_of_action', 'docket_date', 'docket_type', 'plaintiff'])
+pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_number'])#, 'file_date', 'cause_of_action', 'docket_date', 'docket_type', 'plaintiff'
 
-#counts the number of cause_numbers in the uploaded pdf.
-uploaded_count = pending_cause_number_df.cause_number.count()
-#writesd the number count to the app.
-st.write("Uploaded Count", uploaded_count)
 
 ########Pulls in the goolge sheet data, compares it, drops the duplicates and updates the spreadsheet with the latest cause numbers
 #json credentials
@@ -72,7 +71,7 @@ civil_pending_notes = pd.DataFrame(civil_pending_notes_tab.get_all_records())
     #Clears the google spreadsheet for the update
 civil_pending_notes_tab.clear()
 #adds both lists together in order to search for dups later
-appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, ignore_index=True))
+appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, columns=['cause_number']), ignore_index=True)#, 'notes', 'disposed', 'disposed_date', 'on_track', 'notes_lupita'
     #drops the duplicated cause numbers and reindexes the dataframe
     #resets the index and drops the output index
     #fills in the na with an empty space to avoid error
@@ -97,4 +96,4 @@ st.write('Total Cause Numbers:',total)
 #total where disposed is TRUE
 st.write('Total Disposed:', disposed)
 #Total minus total disposed
-st.write ('Cases Remaining to be Disposed', remaing_cases_to_be_worked )
+st.write ('Cases Remaining to be Worked', remaing_cases_to_be_worked )
