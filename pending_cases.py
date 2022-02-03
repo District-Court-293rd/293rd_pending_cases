@@ -70,7 +70,7 @@ civil_pending_notes = pd.DataFrame(civil_pending_notes_tab.get_all_records())
     #Clears the google spreadsheet for the update
 civil_pending_notes_tab.clear()
 #adds both lists together in order to search for dups later
-appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, columns=['cause_number']), ignore_index=True)#, 'notes', 'disposed', 'disposed_date', 'on_track', 'notes_lupita'
+appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, columns=['cause_number','notes', 'disposed', 'disposed_date', 'on_track', 'notes_lupita']), ignore_index=True)#, 'notes', 'disposed', 'disposed_date', 'on_track', 'notes_lupita'
     #drops the duplicated cause numbers and reindexes the dataframe
     #resets the index and drops the output index
     #fills in the na with an empty space to avoid error
