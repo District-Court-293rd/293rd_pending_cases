@@ -85,7 +85,7 @@ remaing_cases_to_be_worked = total - disposed #Calculates the remaining cases to
 #updates the google sheet with the new list of pending cases
 civil_pending_notes_tab.update([ready_to_work_pending_list.columns.values.tolist()] + ready_to_work_pending_list.values.tolist())
 
-st.dataframe(ready_to_work_pending_list)
+#st.dataframe(ready_to_work_pending_list)
 #Displays the number of...
 st.write('Latest Counts')
 #subtracts total count minus not worked (count of empty cells in notes column)
