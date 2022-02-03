@@ -74,7 +74,7 @@ appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_
     #drops the duplicated cause numbers and reindexes the dataframe
     #resets the index and drops the output index
     #fills in the na with an empty space to avoid error
-ready_to_work_pending_list = appended_pending.drop_duplicates('cause_number').reset_index(drop=True).fillna(' ')
+ready_to_work_pending_list = appended_pending.drop_duplicates().reset_index(drop=True).fillna(' ')
 #########Calculates counts
 not_worked = (ready_to_work_pending_list['notes'].values == ' ').sum()
 total = ready_to_work_pending_list.cause_number.count() #Counts total pending cases
