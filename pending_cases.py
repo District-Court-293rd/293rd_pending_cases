@@ -77,9 +77,9 @@ appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_
     #fills in the na with an empty space to avoid error
 ready_to_work_pending_list = appended_pending.drop_duplicates('cause_number').reset_index(drop=True).fillna(' ')
 #########Calculates counts
-not_worked = (ready_to_work_pending_list['notes'].values == ' ').sum()
+#not_worked = (ready_to_work_pending_list['notes'].values == ' ').sum()
 total = ready_to_work_pending_list.cause_number.count() #Counts total pending cases
-worked = total - not_worked
+#worked = total - not_worked
 disposed = (ready_to_work_pending_list['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
 remaing_cases_to_be_worked = total - disposed #Calculates the remaining cases to be disposed of
 
@@ -90,7 +90,7 @@ st.dataframe(ready_to_work_pending_list)
 #Displays the number of...
 st.write('Latest Counts')
 #subtracts total count minus not worked (count of empty cells in notes column)
-st.write('Worked:', worked)
+#st.write('Worked:', worked)
 #total count oof cause numbers after appended both lists
 st.write('Total Cause Numbers:',total)
 #total where disposed is TRUE
