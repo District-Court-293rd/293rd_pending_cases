@@ -87,8 +87,8 @@ remaing_cases_to_be_worked = total - disposed #Calculates the remaining cases to
 
 #total count oof cause numbers after appended both lists
 st.write('Total Pending Cases', total)
-st.dataframe(ready_to_work_pending_list)
-
+#st.dataframe(ready_to_work_pending_list)
+st.write(ready_to_work_pending_list)
 #Displays the number of...
 st.write('Latest Counts')
 #subtracts total count minus not worked (count of empty cells in notes column)
