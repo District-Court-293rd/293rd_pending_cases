@@ -42,8 +42,7 @@ def raw_text():
 #regex to find cause numbers from raw text and converts it to a string.
 finds_cause_numbers = re.findall(r'(\d{2}-\d{2}-\d{5}-\w*|\d*-\d*-\d*-\w*|\d*-\w*)\s*(\d{2}/\d{2}/\d{4})\s*(\D.{23})\s*(\d{2}/\d{2}/\d{4}|[ ]{0,1})(\D.[M$][O$][T$][I$].{,12}|\D.[W$][O$][N$]..{,12}|\D.[T$][R$][I$]..{,12}|\D.[J$][U$][R$]..{,12}|\D.[S$][T$][A$]..{,12}|\D.[H$][E$][A$]..{,12}|\D.[P$][R$][E$]..{,12}|\D.[E$][N$][T$]..{,12}|\D.[P$][E$][T$]..{,12}|\D.[F$][I$][N$]..{,12}|\D.[C$][O$][M$]..{,12}|\D.[P$][L$][E$]..{,12}|\D.[N$][O$][T$]..{,12}|[ ]{0,1})\s(\D.{,20})', str(raw_text))
 #puts the cause numbers into a dataframe with the column name 'cause_number'
-pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_number'])#, 'file_date', 'cause_of_action', 'docket_date', 'docket_type', 'plaintiff'
-
+pending_cause_number_df = pd.DataFrame(finds_cause_numbers, columns = ['cause_number', 'file_date', 'cause_of_action', 'docket_date', 'docket_type', 'plaintiff'])
 
 ########Pulls in the goolge sheet data, compares it, drops the duplicates and updates the spreadsheet with the latest cause numbers
 #json credentials
@@ -69,29 +68,32 @@ civil_pending_notes_tab = opens_civil_pending_gs.get_worksheet(0)
 civil_pending_notes = pd.DataFrame(civil_pending_notes_tab.get_all_records())
     #Clears the google spreadsheet for the update
 civil_pending_notes_tab.clear()
-#adds both lists together in order to search for dups later
-appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df, columns=['cause_number']), ignore_index=True)#, 'notes', 'disposed', 'disposed_date', 'on_track', 'notes_lupita'
+    #adds both lists together in order to search for dups later
+appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_df), ignore_index=True)
     #drops the duplicated cause numbers and reindexes the dataframe
     #resets the index and drops the output index
     #fills in the na with an empty space to avoid error
-ready_to_work_pending_list = appended_pending.drop_duplicates().reset_index(drop=True).fillna(' ')
-#########Calculates counts
-not_worked = (ready_to_work_pending_list['notes'].values == ' ').sum()
-total = ready_to_work_pending_list.cause_number.count() #Counts total pending cases
-#worked = total - not_worked
-disposed = (ready_to_work_pending_list['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
-remaing_cases_to_be_worked = total - disposed #Calculates the remaining cases to be disposed of
-
+ready_to_work_pending_list = appended_pending.drop_duplicates('cause_number').reset_index(drop=True).fillna(' ')
 #updates the google sheet with the new list of pending cases
 civil_pending_notes_tab.update([ready_to_work_pending_list.columns.values.tolist()] + ready_to_work_pending_list.values.tolist())
 
-#st.dataframe(ready_to_work_pending_list)
+
+#########Calculates counts
+not_worked = (ready_to_work_pending_list['notes'].values == ' ').sum()
+total = ready_to_work_pending_list.cause_number.count() #Counts total pending cases
+worked = total - not_worked
+disposed = (ready_to_work_pending_list['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
+remaing_cases_to_be_worked = total - disposed #Calculates the remaining cases to be disposed of
+
+#total count oof cause numbers after appended both lists
+st.write('Total Pending Cases', total)
+st.dataframe(ready_to_work_pending_list)
+
 #Displays the number of...
 st.write('Latest Counts')
 #subtracts total count minus not worked (count of empty cells in notes column)
-#st.write('Worked:', worked)
-#total count oof cause numbers after appended both lists
-st.write('Total Cause Numbers:',total)
+st.write('Worked:', worked)
+
 #total where disposed is TRUE
 st.write('Total Disposed:', disposed)
 #Total minus total disposed
