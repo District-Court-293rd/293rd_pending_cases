@@ -434,6 +434,7 @@ NUMBER OF MTR/MTA CASES: \d{1,4}
         temp_dict['County'] = county
         temp_dict['Cause Number'] = cause_num
         temp_dict['File Date'] = file_date
+        temp_dict['Docket Date'] = ''
         temp_dict['Defendant Name'] = defendant_name
         temp_dict['Attorney Name'] = attorney
         temp_dict['Bondsman Name'] = bondsman
