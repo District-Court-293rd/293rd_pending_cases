@@ -67,7 +67,24 @@ def check_on_track(value):
     else:
         return True
 
-def prepare_case_dataframe(df):
+def convert_name_list_to_string(name_list):
+    """
+    This function takes in the list of names for the Plaintiff, Plaintiff Attorney, Defendant, and Defendant Attorney
+    in the civil cases dataframe. It will join the names in each list with a new line character. This is necessary to
+    upload the dataframe to a google sheet.
+
+    Parameter:
+        - name_list: The list of names
+
+    Returns:
+        - string: A single string consisting of all the names in the list joined by new lines.
+    """
+
+    name_string = '\n'.join(name_list)
+
+    return name_string
+
+def prepare_dataframe(df):
     """
     This function takes in a newly created case dataframe and adds additional columns. Do not pass in a dataframe
     that has already been manually updated. It will remove any previous work.
@@ -102,5 +119,12 @@ def prepare_case_dataframe(df):
     
     #Create Finding Date column
     df['Finding Date'] = ''
+
+    #Convert the lists of names in the civil cases dataframe to single strings with each name separated by a new line
+    if df['Case Type'][0] != 'Criminal':
+        df['Plaintiff Name'] = df['Plaintiff Name'].apply(convert_name_list_to_string)
+        df['Plaintiff Attorney'] = df['Plaintiff Attorney'].apply(convert_name_list_to_string)
+        df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
+        df['Defendant Attorney'] = df['Defendant Attorney'].apply(convert_name_list_to_string)
     
     return df
