@@ -439,7 +439,6 @@ NUMBER OF MTR/MTA CASES: \d{1,4}
         temp_dict['Attorney Name'] = attorney
         temp_dict['Bondsman Name'] = bondsman
         temp_dict['Offense'] = offense
-        temp_dict['Status'] = status
 
         #Append to case list
         case_list.append(temp_dict)
