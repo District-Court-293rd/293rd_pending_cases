@@ -79,10 +79,8 @@ civil_pending_notes_tab.update([ready_to_work_pending_list.columns.values.tolist
 
 
 #########Calculates counts
-total = ready_to_work_pending_list.cause_number.count() #Counts total pending cases
-worked_2 = ready_to_work_pending_list.notes.notnull().sum()
-
-worked = (ready_to_work_pending_list['notes'].values == ' ').sum()
+total = ready_to_work_pending_list['cause_number'].count() #Counts total pending cases
+worked = ready_to_work_pending_list['notes'].notnull().sum()
 disposed = (ready_to_work_pending_list['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
 remaing_cases_to_be_worked = total - worked #Calculates the remaining cases to be disposed of
 
@@ -94,7 +92,7 @@ st.write('Latest Counts')
 #total count oof cause numbers after appended both lists
 st.write('Total Pending Cases', total)
 #subtracts total count minus not worked (count of empty cells in notes column)
-st.write('Worked:', worked_2)
+st.write('Worked:', worked)
 #total where disposed is TRUE
 st.write('Total Disposed:', disposed)
 #Total minus total disposed
