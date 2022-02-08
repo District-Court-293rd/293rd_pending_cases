@@ -94,7 +94,7 @@ st.write('Latest Counts')
 #total count oof cause numbers after appended both lists
 st.write('Total Pending Cases', total)
 #subtracts total count minus not worked (count of empty cells in notes column)
-st.write('Worked:', worked)
+st.write('Worked:', worked_2)
 #total where disposed is TRUE
 st.write('Total Disposed:', disposed)
 #Total minus total disposed
