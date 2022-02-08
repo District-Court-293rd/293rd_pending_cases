@@ -74,6 +74,7 @@ appended_pending = civil_pending_notes.append(pd.DataFrame(pending_cause_number_
     #resets the index and drops the output index
     #fills in the na with an empty space to avoid error
 ready_to_work_pending_list = appended_pending.drop_duplicates('cause_number').reset_index(drop=True).fillna(' ')
+ready_to_work_pending_list['cause_number'] = ready_to_work_pending_list['cause_number'].astype(str)
 #updates the google sheet with the new list of pending cases
 civil_pending_notes_tab.update([ready_to_work_pending_list.columns.values.tolist()] + ready_to_work_pending_list.values.tolist())
 
@@ -88,7 +89,6 @@ remaing_cases_to_be_worked = total - disposed #Calculates the remaining cases to
 #total count oof cause numbers after appended both lists
 st.write('Total Pending Cases', total)
 st.dataframe(ready_to_work_pending_list)
-#st.write(ready_to_work_pending_list)
 #Displays the number of...
 st.write('Latest Counts')
 #subtracts total count minus not worked (count of empty cells in notes column)
