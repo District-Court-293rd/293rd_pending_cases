@@ -16,11 +16,11 @@ def get_case_type(value):
     """
     
     #Check for TX type first
-    if value.count('TX') > 0:
+    if value.upper().count('TX') > 0:
         return 'Tax'
-    elif value.count('CV') > 0:
+    elif value.upper().count('CV') > 0:
         return 'Civil'
-    elif value.count('CR') > 0:
+    elif value.upper().count('CR') > 0:
         return 'Criminal'
     else:
         #Since there are many civil cases that don't follow the same formatting, 
@@ -107,9 +107,6 @@ def prepare_dataframe(df):
     
     #Create File Has Image column
     df['File Has Image'] = ''
-    
-    #Create Need File column
-    df['Need File'] = ''
     
     #Create Disposed Date column
     df['Disposed Date'] = ''
