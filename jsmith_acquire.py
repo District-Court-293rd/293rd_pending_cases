@@ -28,9 +28,9 @@ def build_dataframe(pdf_path):
         return -1
 
     #Now check if it is criminal or civil and then call the associated functions
-    if pdf_path.count('CR') > 0:
+    if pdf_path.upper().count('CR') > 0:
         df = build_criminal_cases_dataframe(pdf_path)
-    elif pdf_path.count('CV') > 0:
+    elif pdf_path.upper().count('CV') > 0:
         df = build_civil_cases_dataframe(pdf_path)
     else:
         #Leave a message
