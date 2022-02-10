@@ -56,10 +56,10 @@ def update_spreadsheet(path_list):
     gsheet = gc.open("Pending Reports")
     
     #Civil cases go to the 'Civil Cases' tab
-    civil_sheet = gsheet.worksheet('Civil Cases')
+    civil_sheet = gsheet.worksheet('test_civil_cases')
 
     #Criminal cases go to the 'Criminal Cases' tab
-    crim_sheet = gsheet.worksheet('Criminal Cases')
+    crim_sheet = gsheet.worksheet('test_criminal_cases')
     
     #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
     current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
