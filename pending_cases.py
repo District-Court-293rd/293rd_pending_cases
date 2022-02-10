@@ -85,7 +85,6 @@ disposed = (ready_to_work_pending_list['disposed']).value_counts()['TRUE']#Count
 #combined dataframe
 st.dataframe(ready_to_work_pending_list)
 
-
 #total count oof cause numbers after appended both lists
 st.write('Total Pending Cases', total)
 #total where disposed is TRUE
