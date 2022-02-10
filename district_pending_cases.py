@@ -19,7 +19,7 @@ if __name__ == '__main__':
 	main() 
 
 #uploader
-pdf_path = st.file_uploader('Upload Pending Reports')
+path_list = st.file_uploader('Upload Pending Reports')
 
 def update_spreadsheet(path_list):
     """
