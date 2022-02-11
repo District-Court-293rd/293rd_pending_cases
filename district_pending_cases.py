@@ -10,9 +10,9 @@ import docx2txt
 import openpyxl
 
 import jsmith_acquire
-from jsmith_acquire import crim_df
-from jsmith_acquire import civil_df
 import jsmith_prepare
+from jsmith_prepare import crim_df
+from jsmith_prepare import civil_df
 
 #title
 def main():
