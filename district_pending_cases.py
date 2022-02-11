@@ -27,7 +27,7 @@ def raw_text():
         if path_list.type == "pdf":
             path(path_list)
     else:
-        raw_text = path(path_list)#reads as bites
+        path(path_list)#reads as bites
 
 #def update_spreadsheet(path_list):
     #"""
