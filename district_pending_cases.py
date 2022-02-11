@@ -1,16 +1,26 @@
+from cgitb import text
 from pickle import TRUE
+from pydoc import pager
 import streamlit as st
+import streamlit.components.v1 as stc
 import numpy as np
 import pandas as pd
-import gspread
+import pdfminer
+from pdfminer.pdfinterp import PDFResourceManager,PDFPageInterpreter
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from pdfminer.pdfpage import PDFPage
+import io
+from io import StringIO
+import gspread as gs
 from oauth2client.service_account import ServiceAccountCredentials
 
 import df2gspread as d2g
 import docx2txt
 import openpyxl
-
 import jsmith_acquire
 import jsmith_prepare
+
 
 
 #title
@@ -20,99 +30,65 @@ if __name__ == '__main__':
 	main() 
 
 #uploader
-path_list = st.file_uploader('Upload Pending Reports')
-
-def raw_text():
-    if path_list is not None:
-        if path_list.type == "pdf":
-            path(path_list)
-    else:
-        path(path_list)#reads as bites
-
-#def update_spreadsheet(path_list):
-    #"""
-    #This function takes in a list containing the file paths of the PDFs that need to be extracted. It'll loop
-#    and build civil and criminal case dataframes. Then, it will load the data currently stored in the 'Pending Reports'
-#    google sheet and turn it into a dataframe. Finally, it will append the dataframes appropriately, drop duplicates,
-#   and then upload the updated data to the 'Pending Reports' google sheet.
-#    """
-    #Set up dataframes for new data
-new_civil_df = pd.DataFrame()
-    
-new_crim_df = pd.DataFrame()
-    
-    
-for path in path_list:
-        #Extract the PDF data
-    df = jsmith_acquire
-    df.build_dataframe(raw_text)
-
-        #Prepare the df and add new columns
-    df = jsmith_prepare
-    df.prepare_dataframe(df)
-
-    if df['Case Type'][0] == 'Criminal':
-            #Add to criminal cases tab
-        new_crim_df = new_crim_df.append(df, ignore_index = True)
-    elif df['Case Type'][0] == 'Civil' or df['Case Type'][0] == 'Tax':
-        new_civil_df = new_civil_df.append(df, ignore_index = True)
-    else:
-        print('Something went wrong in the loop!')
-            
-        
-    #Set up credentials to interact with Google Sheets
-gc = gspread.service_account(filename='credentials.json')
-    
-    #Open 'Pending Reports' Google Sheet By Name
-gsheet = gc.open("Pending Reports")
-    
-    #Civil cases go to the 'Civil Cases' tab
-civil_sheet = gsheet.worksheet('test_civil_cases')
-
-    #Criminal cases go to the 'Criminal Cases' tab
-crim_sheet = gsheet.worksheet('test_criminal_cases')
-    
-    #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
-current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
-    
-    #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
-current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
-    
-    #Append new_civil_df to current_civil_df
-current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
-    
-    #Append new_crim_df to current_crim_df
-current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
-    
-    #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
-    #For civil cases
-current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
-    
-    #For criminal cases
-current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
-    
-    #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
-    #For civil cases
-current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
-    
-    #For criminal cases
-current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
-    
-    #Now sort by county and then by cause number
-    #For civil cases
-current_civil_df = current_civil_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
-    
-    #For criminal cases
-current_crim_df = current_crim_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
-    
-    #Now upload to appropriate tabs in 'Pending Reports' spreadsheet and leave a message
-    #For civil cases
-civil_sheet.update([current_civil_df.columns.values.tolist()] + current_civil_df.values.tolist())
-
-    #For criminal cases
-crim_sheet.update([current_crim_df.columns.values.tolist()] + current_crim_df.values.tolist())
-
-    
-    #return
+uploaded_file = st.file_uploader('Upload Pending Reports', type = 'pdf')
+if uploaded_file is not None:
+    file_details = {"FileName":uploaded_file.name,"FileType":uploaded_file.type,"FileSize":uploaded_file.size}
+    st.write(file_details)
 
 
+
+
+def pdf_to_text(path):
+    manager = PDFResourceManager()
+    retstr = StringIO()
+    codec = 'utf-8'
+    layout = LAParams(all_texts=True)
+    device = TextConverter(manager, retstr, laparams=layout)
+    filepath = open(path, 'rb')
+    interpreter = PDFPageInterpreter(manager, device)
+    maxpages = 0
+    caching = True
+    pagenos=set()
+    
+    for page in PDFPage.get_pages(filepath, pagenos, maxpages=maxpages, caching=caching, check_extractable=True):
+        interpreter.process_page(page)
+    
+    text = retstr.getvalue()
+    
+    filepath.close()
+    device.close()
+    retstr.close()
+    return text
+
+
+credentials = {
+  "type": "service_account",
+  "project_id": "pending-cases",
+  "private_key_id": "1c8af459c6494b0a2194be2aeb894ebc2e83655b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCtw8TucD1nvIqA\nsJUWc1pW7VFguuL3UqVgEnOg/q3KPguu4F/L7ZJV9nEnYl711suYMzyH1Q6VgfTU\n4d2SklFIX86V+GaQRdpxMML7fohdG7dULGIeX+TAMMbLg57xFTFFyAplyOFZfaVl\nI17L1e7mnRXpLh10wqDOwf4vmVk6f36/QabszABZqwSkY4mRQFRK1qcefjND9Yl0\nbTG9x31X6TUcOGVNLweNLaHfvcyakUsib0ZPeNFtKcZr3bv01xyzTXgrcW6QHmeQ\nwrXepSsAahPolIfJe3h+Dwbf6a9qJSUI6IKKl11MFyzHku0EnN+OaNJufsJwWeOP\nOmW3/YFnAgMBAAECggEAQucaXremXNeR+CSE8oTtZoSvDXBHTPRsKgZQsM79+N1U\nwDsxhyHsct6VCJXue/b8opgvmRjmKZhEvOZN2k4tr5D7yHBAhRHwHh6pJA2+0SKH\nvofsK0e+mmTtVZRS0P3Y38Y6gqAKa9tdoAgzSoYPGomm0wXnX3pEUfcNOCRx33xu\nmPAVB2lbGaTkFI72/DS/KRVpuBYIJ4kCN7oR1CI4PHi8xA73HW4P1IwdrpLGo9kn\nF4vpqVFgXhcqYRu1kb787nGTZ20v9UQUihYL/b7DwdVjqX66IUal4j9Swzil/2H0\nC/57b50KvlEJkKI6uC7tSifpI76olump08pXDLD7yQKBgQDepqod/V38nvyuAELu\niwvMuxjJ3GPCqdV73T0/kyNuV3i8RRlLOvE/F8AxOWRp12V+p6YZ/BRySuduv2Ue\nkP20+s5UeaI4vuc560GZWeMnIW2MFUtew15pb6jUnTjH8aHwv2ZrKuh9Csh5B5gB\nIL5EJwlvH4kjNvJXpXtt7KBiSwKBgQDHyptuW/4DiVVqmlD2oC9xZTn3Ilm+t1pC\nkAgmX3pTnlVKO/W06DJjFuH1SMsamgX08+66vsLMZ9n7TosxwzX0hmIVnNfKFANE\nG1kOcFZq5vBhpjIK5uskQErasI1IA7VhFwd6r8GZ0mEeCXSfY6evWVGy31yTFaEL\nHK8+f2eL1QKBgQCWlHsrCyccad4UQ+MAd5OEY+jw5JenmLrkKY15yKZGwuvJ0KW5\npmRwOjzmTZ1mo6Fl1jZVDpI5dgUtdk4KLR8Y3iLbKOQYoqu5FS1pbExfM5FmEyTF\nMzZP8o9pM+ep+fZ+3sOCqSNRJhDNIeCgqqdjak9MEzTpVwjxU961SjpyHwKBgQCh\nZfSAh8JBex1MvBMx2R/afEsCcXaMkjRRV2euEC2TBXKjQKLynS2vTNoHO+IPwGOV\nicXOiLJ3TGIVGVNrROb+fd0Y1paggeBNkcY02t2FCMEiMY91rSxCIcoWts+7YHuT\nTnZVT0yYBhM8n6jd5jSdfAt68+QmUi/B+U88rtGobQKBgEp8gPH50S4J7DXK3P4y\nlw5ubAxN8tCYu/Kq7gRd0EZxRazSXeOj6NPr/5/wA5drYo4FcNX3cZiRGb3Wyp6z\nizSnrDTVPX895EXGATzFJmtg9RbfUs0w+td5Tj2mIGsFJw1n/DwptsurppGR8R3i\ngHDptPNdZuhRmwkfL9Y7Ynt2\n-----END PRIVATE KEY-----\n",
+  "client_email": "pending-cause-numbers@pending-cases.iam.gserviceaccount.com",
+  "client_id": "117866190398620410804",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pending-cause-numbers%40pending-cases.iam.gserviceaccount.com"
+}
+
+json_path = gs.service_account_from_dict(credentials)
+#opens the google sheet by key found in the address
+opens_pending_cases_gs = json_path.open_by_key('1b3fmZrbfwZWMvu4kUGJSSGsp61utlE0Ny-ebozZ5aBk')
+#pulls the data from the civil_cases tab from the google pending_cases workbook
+district_civil_cases_tab = opens_pending_cases_gs.get_worksheet(4)
+#pulls the data from the criminal_cases tab from the google pending_cases workbook
+district_criminal_cases_tab = opens_pending_cases_gs.get_worksheet(5)
+#puts the district_civil_cases_tab into a dataframe
+district_civil_pending_notes = pd.DataFrame(district_civil_cases_tab.get_all_records())
+#puts the district_criminal_cases_tab into a dataframe
+district_criminal_pending_notes = pd.DataFrame(district_criminal_cases_tab.get_all_records())
+#Clears the google spreadsheet for the update
+
+st.write('District Civil Pending Cases')
+st.dataframe(district_civil_pending_notes)
+
+st.write('District Criminal Pending Cases')
+st.dataframe(district_civil_pending_notes)

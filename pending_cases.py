@@ -9,6 +9,7 @@ import df2gspread as d2g
 import docx2txt
 import openpyxl
 
+
 def read_pdf(file):
     pdfReader = PdfFileReader(file) #reads pdf
     count = pdfReader.numPages #counts the number of pages
