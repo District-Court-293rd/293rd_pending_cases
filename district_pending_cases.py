@@ -11,8 +11,7 @@ import openpyxl
 
 import jsmith_acquire
 import jsmith_prepare
-from jsmith_prepare import crim_df
-from jsmith_prepare import civil_df
+
 
 #title
 def main():
@@ -45,9 +44,9 @@ for path in path_list:
 
     if df['Case Type'][0] == 'Criminal':
             #Add to criminal cases tab
-        new_crim_df = crim_df.append(df, ignore_index = True)
+        new_crim_df = new_crim_df.append(df, ignore_index = True)
     elif df['Case Type'][0] == 'Civil' or df['Case Type'][0] == 'Tax':
-        new_civil_df = civil_df.append(df, ignore_index = True)
+        new_civil_df = new_civil_df.append(df, ignore_index = True)
     else:
         print('Something went wrong in the loop!')
             
