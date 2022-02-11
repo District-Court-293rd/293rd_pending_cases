@@ -48,7 +48,7 @@ for path in path_list:
 
         #Prepare the df and add new columns
     df = jsmith_prepare
-    df.prepare_dataframe()
+    df.prepare_dataframe(path_list, df)
 
     if df['Case Type'][0] == 'Criminal':
             #Add to criminal cases tab
