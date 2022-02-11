@@ -44,10 +44,10 @@ new_crim_df = pd.DataFrame()
     
 for path in path_list:
         #Extract the PDF data
-    df = jsmith_acquire.build_dataframe(path)
+    x_df = jsmith_acquire.build_dataframe(path)
 
         #Prepare the df and add new columns
-    df = jsmith_prepare.prepare_dataframe(df)
+    df = jsmith_prepare.prepare_dataframe(x_df)
 
     if df['Case Type'][0] == 'Criminal':
             #Add to criminal cases tab
