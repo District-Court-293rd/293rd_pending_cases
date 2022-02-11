@@ -80,7 +80,7 @@ civil_pending_notes_tab.update([ready_to_work_pending_list.columns.values.tolist
 
 #########Calculates counts
 total = ready_to_work_pending_list.cause_number.count() #Counts total pending cases
-disposed = (ready_to_work_pending_list['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
+#disposed = (ready_to_work_pending_list['disposed']).value_counts()['TRUE']#Counts the total of disposed cases
 
 #combined dataframe
 st.dataframe(ready_to_work_pending_list)
@@ -88,4 +88,4 @@ st.dataframe(ready_to_work_pending_list)
 #total count oof cause numbers after appended both lists
 st.write('Total Pending Cases', total)
 #total where disposed is TRUE
-st.write('Total Disposed:', disposed)
+#st.write('Total Disposed:', disposed)
