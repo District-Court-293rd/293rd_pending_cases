@@ -48,7 +48,7 @@ def update_spreadsheet(path_list):
             new_civil_df = civil_df.append(df, ignore_index = True)
         else:
             print('Something went wrong in the loop!')
-            st.dataframe(new_civil_df)
+            
         
     #Set up credentials to interact with Google Sheets
     gc = gspread.service_account(filename='credentials.json')
@@ -64,7 +64,6 @@ def update_spreadsheet(path_list):
     
     #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
     current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
-    st.dataframe(current_civil_df)
     
     #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
@@ -106,5 +105,5 @@ def update_spreadsheet(path_list):
     print('Criminal Cases Updated!')
     
     return
-
+st.dataframe(current_civil_df)
 
