@@ -105,5 +105,5 @@ def update_spreadsheet(path_list):
     print('Criminal Cases Updated!')
     
     return
-st.dataframe(current_civil_df)
+
 
