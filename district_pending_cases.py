@@ -20,7 +20,14 @@ if __name__ == '__main__':
 	main() 
 
 #uploader
-path = st.file_uploader('Upload Pending Reports')
+path_list = st.file_uploader('Upload Pending Reports')
+
+def raw_text():
+    if path_list is not None:
+        if path_list.type == "pdf":
+            path(path_list)
+    else:
+        raw_text = path(path_list)#reads as bites
 
 #def update_spreadsheet(path_list):
     #"""
@@ -99,11 +106,10 @@ current_crim_df = current_crim_df.sort_values(by = ['County', 'Cause Number'], i
     #Now upload to appropriate tabs in 'Pending Reports' spreadsheet and leave a message
     #For civil cases
 civil_sheet.update([current_civil_df.columns.values.tolist()] + current_civil_df.values.tolist())
-print('Civil Cases Updated!')
-    
+
     #For criminal cases
 crim_sheet.update([current_crim_df.columns.values.tolist()] + current_crim_df.values.tolist())
-print('Criminal Cases Updated!')
+
     
     #return
 
