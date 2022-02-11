@@ -45,7 +45,7 @@ new_crim_df = pd.DataFrame()
 for path in path_list:
         #Extract the PDF data
     df = jsmith_acquire
-    df.build_dataframe(path)
+    df.build_dataframe(raw_text)
 
         #Prepare the df and add new columns
     df = jsmith_prepare
