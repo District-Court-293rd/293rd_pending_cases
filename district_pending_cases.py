@@ -103,4 +103,8 @@ def update_spreadsheet(path_list):
     crim_sheet.update([current_crim_df.columns.values.tolist()] + current_crim_df.values.tolist())
     print('Criminal Cases Updated!')
     
+    st.write(current_civil_df)
+    
     return
+
+
