@@ -14,6 +14,8 @@ import io
 from io import StringIO
 import gspread as gs
 from oauth2client.service_account import ServiceAccountCredentials
+import PyPDF2
+from PyPDF2 import PdfFileReader
 
 import df2gspread as d2g
 import docx2txt
@@ -21,6 +23,7 @@ import openpyxl
 import jsmith_acquire
 import jsmith_prepare
 
+import pdfplumber
 
 
 #title
@@ -31,35 +34,19 @@ if __name__ == '__main__':
 
 #uploader
 uploaded_file = st.file_uploader('Upload Pending Reports', type = 'pdf')
-if uploaded_file is not None:
-    file_details = {"FileName":uploaded_file.name,"FileType":uploaded_file.type,"FileSize":uploaded_file.size}
-    st.write(file_details)
-
-
-
-
-def pdf_to_text(path):
-    manager = PDFResourceManager()
-    retstr = StringIO()
-    codec = 'utf-8'
-    layout = LAParams(all_texts=True)
-    device = TextConverter(manager, retstr, laparams=layout)
-    filepath = open(path, 'rb')
-    interpreter = PDFPageInterpreter(manager, device)
-    maxpages = 0
-    caching = True
-    pagenos=set()
-    
-    for page in PDFPage.get_pages(filepath, pagenos, maxpages=maxpages, caching=caching, check_extractable=True):
-        interpreter.process_page(page)
-    
-    text = retstr.getvalue()
-    
-    filepath.close()
-    device.close()
-    retstr.close()
-    return text
-
+def raw_text():
+    if uploaded_file is not None:
+#       file_details = {"FileName":uploaded_file.name,"FileType":uploaded_file.type,"FileSize":uploaded_file.size}
+#       st.write(file_details)
+        if uploaded_file.type == "application/pdf":
+            try:
+                with pdfplumber.open(uploaded_file) as pdf:
+                    pages = pdf.pages[0]
+                    st.write(pages.extract_text())
+            except:
+                st.write("None")
+                raw_text = docx2txt.process(uploaded_file)
+                st.write(raw_text)
 
 credentials = {
   "type": "service_account",
@@ -86,6 +73,8 @@ district_civil_pending_notes = pd.DataFrame(district_civil_cases_tab.get_all_rec
 #puts the district_criminal_cases_tab into a dataframe
 district_criminal_pending_notes = pd.DataFrame(district_criminal_cases_tab.get_all_records())
 #Clears the google spreadsheet for the update
+
+
 
 st.write('District Civil Pending Cases')
 st.dataframe(district_civil_pending_notes)
