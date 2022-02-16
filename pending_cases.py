@@ -37,9 +37,7 @@ def raw_text():
             read_pdf(docx_file)
     else:
         raw_text = read_pdf(docx_file)#reads as bites
-        
-        
-        
+       
 #regex to find cause numbers from raw text and converts it to a string.
 finds_cause_numbers = re.findall(r'(\d{2}-\d{2}-\d{5}-\w*|\d*-\d*-\d*-\w*|\d*-\w*)\s*(\d{2}/\d{2}/\d{4})\s*(\D.{23})\s*(\d{2}/\d{2}/\d{4}|[ ]{0,1})(\D.[M$][O$][T$][I$].{,12}|\D.[W$][O$][N$]..{,12}|\D.[T$][R$][I$]..{,12}|\D.[J$][U$][R$]..{,12}|\D.[S$][T$][A$]..{,12}|\D.[H$][E$][A$]..{,12}|\D.[P$][R$][E$]..{,12}|\D.[E$][N$][T$]..{,12}|\D.[P$][E$][T$]..{,12}|\D.[F$][I$][N$]..{,12}|\D.[C$][O$][M$]..{,12}|\D.[P$][L$][E$]..{,12}|\D.[N$][O$][T$]..{,12}|[ ]{0,1})\s(\D.{,20})', str(raw_text))
 #puts the cause numbers into a dataframe with the column name 'cause_number'
