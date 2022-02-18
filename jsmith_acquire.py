@@ -9,6 +9,7 @@ from pdfminer3.converter import PDFPageAggregator
 from pdfminer3.converter import TextConverter
 import io
 
+
 def build_dataframe(pdf_path):
     """
     This function takes in a path to the desired PDF, determines whether or not it is a civil
@@ -25,7 +26,7 @@ def build_dataframe(pdf_path):
     #Verify the file is a pdf. If not, print a message and return -1
     if pdf_path[-4:] != '.pdf':
         print('This file is not a PDF. Please use PDF files only.')
-        return -1
+        return -1 
 
     #Now check if it is criminal or civil and then call the associated functions
     if pdf_path.upper().count('CR') > 0:
