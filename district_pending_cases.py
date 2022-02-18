@@ -5,12 +5,6 @@ import numpy as np
 import pandas as pd
 import PyPDF2
 from PyPDF2 import PdfFileReader
-import gspread
-import pdfminer
-import io
-import re
-import jsmith_acquire
-import jsmith_prepare
 import pending_upload
 
 #title
@@ -22,6 +16,6 @@ if pdf_path is not None:
     file_details = {"FileName":pdf_path.name,"FileType":pdf_path.type,"FileSize":pdf_path.size}
     st.write(file_details)
 
-df = pending_upload.update_spreadsheet(file_details)
+df = pending_upload.update_spreadsheet(str(pdf_path))
 
 st.dataframe(df)

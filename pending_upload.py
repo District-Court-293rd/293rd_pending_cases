@@ -5,7 +5,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import jsmith_acquire
 import jsmith_prepare
 
-def update_spreadsheet(path_path):
+def update_spreadsheet(pdf_path):
     """
     This function takes in a list containing the file paths of the PDFs that need to be extracted. It'll loop
     and build civil and criminal case dataframes. Then, it will load the data currently stored in the 'Pending Reports'
@@ -18,10 +18,9 @@ def update_spreadsheet(path_path):
     new_crim_df = pd.DataFrame()
     
     
-    for path in path_path:
+    for path in pdf_path:
         #Extract the PDF data
         df = jsmith_acquire.build_dataframe(path)
-
         #Prepare the df and add new columns
         df = jsmith_prepare.prepare_dataframe(df)
 
@@ -34,16 +33,16 @@ def update_spreadsheet(path_path):
             print('Something went wrong in the loop!')
         
     #Set up credentials to interact with Google Sheets
-    gc = gspread.service_account(filename='credentials.json')
+    gc = gspread.service_account(filename='pending_cases.json')
     
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open("Pending Reports")
     
     #Civil cases go to the 'Civil Cases' tab
-    civil_sheet = gsheet.worksheet('Civil Cases')
+    civil_sheet = gsheet.worksheet('test_civil_cases')
 
     #Criminal cases go to the 'Criminal Cases' tab
-    crim_sheet = gsheet.worksheet('Criminal Cases')
+    crim_sheet = gsheet.worksheet('test_criminal_cases')
     
     #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
     current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
