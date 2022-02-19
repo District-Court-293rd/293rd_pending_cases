@@ -10,29 +10,24 @@ from pdfminer3.converter import TextConverter
 import io
 
 
-def build_dataframe(pdf_path):
+def build_dataframe(file_name, content):
     """
-    This function takes in a path to the desired PDF, determines whether or not it is a civil
-    or criminal case PDF, and then calls the respective function to extract the PDF data
-    and build a dataframe.
+    This function takes in the file name and text content of the uploaded PDF. It will use the file name to determine
+    whether the PDF is a civil case or criminal case PDF. After that, it will feed the text content to the appropriate
+    function to gather the data and build a dataframe.
 
     Parameter:
-        - pdf_path: A string representing the file path for the PDF
+        - file_name: A string representing the file name of the uploaded PDF.
+        - content: A string representing the text content of the uploaded PDF.
 
     Returns:
-        - df: A dataframe of the information extracted from the given PDF
+        - df: A dataframe of the information extracted from the uploaded PDF.
     """
-
-    #Verify the file is a pdf. If not, print a message and return -1
-    if pdf_path[-4:] != '.pdf':
-        print('This file is not a PDF. Please use PDF files only.')
-        return -1 
-
-    #Now check if it is criminal or civil and then call the associated functions
-    if pdf_path.upper().count('CR') > 0:
-        df = build_criminal_cases_dataframe(pdf_path)
-    elif pdf_path.upper().count('CV') > 0:
-        df = build_civil_cases_dataframe(pdf_path)
+    #Check if it is criminal or civil and then call the associated functions
+    if file_name.upper().count('CR') > 0:
+        df = build_criminal_cases_dataframe(content)
+    elif file_name.upper().count('CV') > 0:
+        df = build_civil_cases_dataframe(content)
     else:
         #Leave a message
         print("Something Went Wrong! Could not identify the PDF as Criminal or Civil.")
@@ -264,56 +259,26 @@ PLAINTIFF NAME                PLAINTIFF ATTORNEY        DEFENDANT NAME          
         
     return case_dicts
         
-def build_civil_cases_dataframe(pdf_path):
+def build_civil_cases_dataframe(content):
     """
-    This function reads in a pdf and extracts all available information for each case. It then returns a dataframe.
+    This function takes in the text content of the uploaded PDF, passes it to the extraction function, 
+    and builds a dataframe.
     
     Parameter:
-        - pdf_path: The file path for the pdf to be read.
+        - content: The text content of the uploaded PDF file.
         
     Returns:
         - df: A dataframe of the resulting case information
     """
-    
-    #Set up the container list
-    container_list = []
-    
-    #Set up resource manager to handle pdf content. text, images, etc.
-    resource_manager = PDFResourceManager()
 
-    #Used to display text
-    fake_file_handle = io.StringIO()
-
-    #Set up converter
-    converter = TextConverter(resource_manager, fake_file_handle, laparams=LAParams())
-
-    #Set up page interpreter
-    page_interpreter = PDFPageInterpreter(resource_manager, converter)
-
-    with open(pdf_path, 'rb') as fh:
-
-        for page in PDFPage.get_pages(fh, caching=True, check_extractable=True):
-            #Process the current page
-            page_interpreter.process_page(page)
-            
-        #Save the current page's text to a variable
-        text = fake_file_handle.getvalue()
-
-        #Extract info from current page
-        case_dicts = extract_civil_pdf_data(text)
-
-        #Extend case_dicts to container_dict
-        container_list.extend(case_dicts)
-
-    # close open handles
-    converter.close()
-    fake_file_handle.close()
+    #Extract info from current page
+    case_dicts = extract_civil_pdf_data(content)
     
     #How many cases were collected?
-    print(f"Collected Data From {len(container_list)} Cases.")
+    print(f"Collected Data From {len(case_dicts)} Cases.")
     
     #Build dataframe
-    df = pd.DataFrame(container_list)
+    df = pd.DataFrame(case_dicts)
     
     return df
 
@@ -453,44 +418,19 @@ NUMBER OF MTR/MTA CASES: \d{1,4}
     return df
 
 
-def build_criminal_cases_dataframe(pdf_path):
+def build_criminal_cases_dataframe(content):
     """
-    This function reads in the criminal cases pdf document and extracts all available information for each case. 
-    It then returns a dataframe.
+    This function takes in the text content of the uploaded PDF, passes it to the extraction function, 
+    and builds a dataframe.
     
     Parameter:
-        - pdf_path: The file path for the pdf to be read.
+        - content: The text content of the uploaded PDF file.
         
     Returns:
         - df: A dataframe of the resulting case information
     """
     
-    #Set up resource manager to handle pdf content. text, images, etc.
-    resource_manager = PDFResourceManager()
-
-    #Used to display text
-    fake_file_handle = io.StringIO()
-
-    #Set up converter
-    converter = TextConverter(resource_manager, fake_file_handle, laparams=LAParams())
-
-    #Set up page interpreter
-    page_interpreter = PDFPageInterpreter(resource_manager, converter)
-
-    with open(pdf_path, 'rb') as fh:
-
-        for page_num, page in enumerate(PDFPage.get_pages(fh, caching=True, check_extractable=True)):
-            #Process the current page
-            page_interpreter.process_page(page)
-
-        #Save the current page's text to a variable
-        text = fake_file_handle.getvalue()
-
-    # close open handles
-    converter.close()
-    fake_file_handle.close()
-    
     #Collect criminal case info and get the df
-    df = extract_criminal_pdf_data(text)
+    df = extract_criminal_pdf_data(content)
     
     return df
