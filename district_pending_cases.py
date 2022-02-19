@@ -7,15 +7,34 @@ import PyPDF2
 from PyPDF2 import PdfFileReader
 import pending_upload
 
+#Function for gathering text content of uploaded PDF 
+def read_pdf(file):
+    pdfReader = PdfFileReader(file) #reads pdf
+    count = pdfReader.numPages #counts the number of pages
+    content = " "#space holder for pdf content
+    for i in range(count): #for loop to extract text from all pages
+        page = pdfReader.getPage(i) #gets page numbers
+        content += page.extractText() #extracts text from iterated pages
+    
+    return content
+
 #title
 st.title("293rd District Court Civil and Criminal Pending Cases")
 
 #uploader
 pdf_path = st.file_uploader('Upload pdf', type = 'pdf')
+
 if pdf_path is not None:
+    #Get file)name, file_type, and file_size
     file_details = {"FileName":pdf_path.name,"FileType":pdf_path.type,"FileSize":pdf_path.size}
+
+    #Print it to streamlit app page
     st.write(file_details)
 
-df = pending_upload.update_spreadsheet(str(pdf_path))
+    #Get PDF text content
+    content = read_pdf(pdf_path)
 
-st.dataframe(df)
+    #Pass file name and text content to update function
+    df = pending_upload.update_spreadsheet(file_details['FileName'], content)
+
+    st.dataframe(df)
