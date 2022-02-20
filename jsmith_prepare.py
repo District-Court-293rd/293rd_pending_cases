@@ -131,6 +131,6 @@ def prepare_dataframe(pdf_path, df):
         df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
         df['Defendant Attorney'] = df['Defendant Attorney'].apply(convert_name_list_to_string)
     
-    return df
+    return
 
     

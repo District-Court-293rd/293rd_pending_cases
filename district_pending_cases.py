@@ -16,6 +16,8 @@ if pdf_path is not None:
     file_details = {"FileName":pdf_path.name,"FileType":pdf_path.type,"FileSize":pdf_path.size}
     st.write(file_details)
 
-df = pending_upload.update_spreadsheet(str(pdf_path))
+df = pending_upload.update_spreadsheet(pdf_path)
 
 st.dataframe(df)
+st.dataframe(pending_upload.current_civil_df)
+st.dataframe(pending_upload.current_crim_df)

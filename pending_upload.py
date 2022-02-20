@@ -13,30 +13,28 @@ def update_spreadsheet(pdf_path):
     and then upload the updated data to the 'Pending Reports' google sheet.
     """
     #Set up dataframes for new data
-    new_civil_df = pd.DataFrame()
+    civil_df = pd.DataFrame()
     
-    new_crim_df = pd.DataFrame()
+    crim_df = pd.DataFrame()
     
     
-    for path in pdf_path:
-        #Extract the PDF data
-        df = jsmith_acquire.build_dataframe(path)
-        #Prepare the df and add new columns
-        df = jsmith_prepare.prepare_dataframe(df)
-
+    for file in pdf_path:
+        df = jsmith_acquire.build_dataframe(file)
+        df = jsmith_prepare.prepare_dataframe()
+        
         if df['Case Type'][0] == 'Criminal':
             #Add to criminal cases tab
-            new_crim_df = new_crim_df.append(df, ignore_index = True)
+            new_crim_df = crim_df.append(df, ignore_index = True)
         elif df['Case Type'][0] == 'Civil' or df['Case Type'][0] == 'Tax':
-            new_civil_df = new_civil_df.append(df, ignore_index = True)
+            new_civil_df = civil_df.append(df, ignore_index = True)
         else:
             print('Something went wrong in the loop!')
-        
+    
     #Set up credentials to interact with Google Sheets
     gc = gspread.service_account(filename='pending_cases.json')
     
     #Open 'Pending Reports' Google Sheet By Name
-    gsheet = gc.open("Pending Reports")
+    gsheet = gc.open('Pending Reportds')
     
     #Civil cases go to the 'Civil Cases' tab
     civil_sheet = gsheet.worksheet('test_civil_cases')
@@ -87,5 +85,5 @@ def update_spreadsheet(pdf_path):
     print('Criminal Cases Updated!')
     
     return
-    
+
     
