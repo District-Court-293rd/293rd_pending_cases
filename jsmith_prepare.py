@@ -84,7 +84,7 @@ def convert_name_list_to_string(name_list):
 
     return name_string
 
-def prepare_dataframe(pdf_path, df):
+def prepare_dataframe(file_name, df):
     """
     This function takes in a newly created case dataframe and adds additional columns. Do not pass in a dataframe
     that has already been manually updated. It will remove any previous work.
@@ -97,7 +97,7 @@ def prepare_dataframe(pdf_path, df):
     """
 
     #Now check if it is criminal or civil
-    if pdf_path.upper().count('CR') > 0:
+    if file_name.upper().count('CR') > 0:
         #Assign as Criminal case type
         df['Case Type'] = 'Criminal'
     else:
