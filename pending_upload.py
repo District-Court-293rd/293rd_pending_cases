@@ -12,12 +12,6 @@ def update_spreadsheet(file_name, content):
     google sheet and turn it into a dataframe. Finally, it will append the dataframes appropriately, drop duplicates,
     and then upload the updated data to the 'Pending Reports' google sheet.
     """
-<<<<<<< HEAD
-    #Set up dataframes for new data
-    civil_df = pd.DataFrame()
-    
-    crim_df = pd.DataFrame()
-=======
     
     #Extract the PDF data
     df = jsmith_acquire.build_dataframe(file_name, content)
@@ -35,24 +29,9 @@ def update_spreadsheet(file_name, content):
     else:
         print('Something went wrong in the loop!')
         
->>>>>>> dfabe4bd66903f1135fa76d906fe5d8d7525333a
     
     return
     
-<<<<<<< HEAD
-    for file in pdf_path:
-        df = jsmith_acquire.build_dataframe(file)
-        df = jsmith_prepare.prepare_dataframe()
-        
-        if df['Case Type'][0] == 'Criminal':
-            #Add to criminal cases tab
-            new_crim_df = crim_df.append(df, ignore_index = True)
-        elif df['Case Type'][0] == 'Civil' or df['Case Type'][0] == 'Tax':
-            new_civil_df = civil_df.append(df, ignore_index = True)
-        else:
-            print('Something went wrong in the loop!')
-    
-=======
 def update_civil_cases_dataframe(new_civil_df):
     """
     This function takes in the newly created civil cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
@@ -66,7 +45,6 @@ def update_civil_cases_dataframe(new_civil_df):
         - Nothing.
     """
 
->>>>>>> dfabe4bd66903f1135fa76d906fe5d8d7525333a
     #Set up credentials to interact with Google Sheets
     gc = gspread.service_account(filename='pending_cases.json')
     
@@ -137,12 +115,5 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Now upload to appropriate tabs in 'Pending Reports' spreadsheet and leave a message
     crim_sheet.update([current_crim_df.columns.values.tolist()] + current_crim_df.values.tolist())
     print('Criminal Cases Updated!')
-<<<<<<< HEAD
-    
-    return
-
-    
-=======
 
     return
->>>>>>> dfabe4bd66903f1135fa76d906fe5d8d7525333a
