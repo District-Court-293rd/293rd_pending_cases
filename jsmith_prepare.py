@@ -96,15 +96,13 @@ def prepare_dataframe(pdf_path, df):
         - df: The same dataframe, but with new columns added.
     """
 
-    #Now check if it is criminal or civil and then call the associated functions
+    #Now check if it is criminal or civil
     if pdf_path.upper().count('CR') > 0:
+        #Assign as Criminal case type
         df['Case Type'] = 'Criminal'
-    elif pdf_path.upper().count('CV') > 0:
-        df['Case Type'] = 'Civil'
+    else:
         #Check if any civil cases are tax cases and update accordingly
         df['Case Type'] = df['Cause Number'].apply(get_case_type)
-    else:
-        print("Something went wrong with Case Type!")
     
     #Create On Track column
     df['On Track'] = df['Docket Date'].apply(check_on_track)
@@ -131,6 +129,4 @@ def prepare_dataframe(pdf_path, df):
         df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
         df['Defendant Attorney'] = df['Defendant Attorney'].apply(convert_name_list_to_string)
     
-    return
-
-    
+    return df
