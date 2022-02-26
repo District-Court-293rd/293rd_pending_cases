@@ -16,7 +16,7 @@ def update_spreadsheet(file_name, content):
     #Extract the PDF data
     df = jsmith_acquire.build_dataframe(file_name, content)
     #Prepare the df and add new columns
-    df = jsmith_prepare.prepare_dataframe(df)
+    df = jsmith_prepare.prepare_dataframe(file_name, df)
 
     if df['Case Type'][0] == 'Criminal':
         #Add to criminal cases tab
