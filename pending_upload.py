@@ -73,6 +73,9 @@ def update_civil_cases_dataframe(new_civil_df):
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
+    #Verify that all Cause Numbers are represented as strings
+    current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str)
+
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
 
@@ -118,6 +121,9 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
+
+    #Verify that all Cause Numbers are represented as strings
+    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str)
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
