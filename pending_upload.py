@@ -46,7 +46,7 @@ def update_civil_cases_dataframe(new_civil_df):
     """
 
     #Set up credentials to interact with Google Sheets
-    gc = gspread.service_account(filename='pending_cases.json')
+    gc = gspread.service_account(filename='credentials.json')
     
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open('Pending Reports')
@@ -89,7 +89,7 @@ def update_criminal_cases_dataframe(new_crim_df):
     """
 
     #Set up credentials to interact with Google Sheets
-    gc = gspread.service_account(filename='pending_cases.json')
+    gc = gspread.service_account(filename='credentials.json')
     
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open("Pending Reports")
