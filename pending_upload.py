@@ -49,7 +49,7 @@ def update_civil_cases_dataframe(new_civil_df):
     gc = gspread.service_account(filename='pending_cases.json')
     
     #Open 'Pending Reports' Google Sheet By Name
-    gsheet = gc.open('Pending Reportds')
+    gsheet = gc.open('Pending Reports')
     
     #Civil cases go to the 'Civil Cases' tab
     civil_sheet = gsheet.worksheet('test_civil_cases')
