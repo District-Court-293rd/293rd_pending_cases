@@ -52,14 +52,16 @@ file_objects = st.file_uploader("File Names Must Include Either 'CR' or 'CV' for
 #Create a progress bar for visual verification that something is happening
 progress_bar = st.progress(0)
 
-#Use the remainder of 100 / the number of uploaded files to start the progress bar
-bar_value = 100 % len(file_objects)
+#Only update progress bar if files have been uploaded
+if len(file_objects) > 0:
+    #Use the remainder of 100 / the number of uploaded files to start the progress bar
+    bar_value = 100 % len(file_objects)
 
-#Update progress bar
-progress_bar.progress(bar_value)
+    #Update progress bar
+    progress_bar.progress(bar_value)
 
-#How much progress should be made per file?
-progress_per_file = (100 - bar_value) / len(file_objects)
+    #How much progress should be made per file?
+    progress_per_file = (100 - bar_value) / len(file_objects)
 
 #Use a for loop to iterate through the uploaded files
 for file_object in file_objects:
