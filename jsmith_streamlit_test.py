@@ -1,14 +1,11 @@
 import streamlit as st
-from pdfminer3.layout import LAParams, LTTextBox
+from pdfminer3.layout import LAParams
 from pdfminer3.pdfpage import PDFPage
 from pdfminer3.pdfinterp import PDFResourceManager
 from pdfminer3.pdfinterp import PDFPageInterpreter
-from pdfminer3.converter import PDFPageAggregator
 from pdfminer3.converter import TextConverter
 import io
 import os
-import jsmith_acquire
-import jsmith_prepare
 import pending_upload
 
 def get_file_content(file_name):
@@ -46,45 +43,60 @@ def get_file_content(file_name):
 
 ############################################## Begin App ##################################################
 
+#Title
+st.title("Update Pending Reports Spreadsheet")
+
 #Get the file object
-file_object = st.file_uploader("Please upload a .pdf file.", type = 'pdf', help = "One File At A Time, Please")
+file_objects = st.file_uploader("File Names Must Include Either 'CR' or 'CV' for Criminal and Civil Cases, Respectively.", type = 'pdf', accept_multiple_files = True)
 
-if file_object is not None:
+#Create a progress bar for visual verification that something is happening
+progress_bar = st.progress(0)
 
-    #Print file_object name, type, and size
-    st.write("File Name: ", file_object.name)
-    st.write("File Type: ", file_object.type)
-    st.write("File Size: ", str(file_object.size))
+#Use the remainder of 100 / the number of uploaded files to start the progress bar
+bar_value = 100 % len(file_objects)
 
-    #Save the file. Will be deleted after data is uploaded
-    with open(file_object.name, 'wb') as f:
-        f.write(file_object.getbuffer())
+#Update progress bar
+progress_bar.progress(bar_value)
 
-    #Create content container
-    content = get_file_content(file_object.name)
+#How much progress should be made per file?
+progress_per_file = (100 - bar_value) / len(file_objects)
 
-    #Try extracting info with current functions
-    df = jsmith_acquire.build_dataframe(file_object.name, content)
+#Use a for loop to iterate through the uploaded files
+for file_object in file_objects:
 
-    #Take a look at the df
-    st.title("Unprepared DataFrame")
-    st.write(df)
+    if file_object is not None:
 
-    #Try preparing the df with current functions
-    df = jsmith_prepare.prepare_dataframe(file_object.name, df)
+        #Print file_object name, type, and size
+        st.info("Began Processing ", file_object.name)
 
-    #Take a look at the dataframe
-    st.title("Prepared DataFrame")
-    st.write(df)
+        #Save the file. Will be deleted after data is uploaded
+        with open(file_object.name, 'wb') as f:
+            f.write(file_object.getbuffer())
 
-    #Do a complete test using pending_uploads function
-    pending_upload.update_spreadsheet(file_object.name, content)
+        #Create content container
+        content = get_file_content(file_object.name)
 
-    #Delete the saved file
-    if os.path.exists(file_object.name):
-        os.remove(file_object.name)
+        #Build and prepare the dataframe, then update the spreadsheet
+        pending_upload.update_spreadsheet(file_object.name, content)
+
+        #Delete the saved file. Leave messages for success or failure
+        if os.path.exists(file_object.name):
+            os.remove(file_object.name)
+
+            #Leave a success message
+            st.success("Pending Reports was successfully updated with ", file_object.name)
+        
+        else:
+            st.error("Could Not Delete File")
+
     else:
-        print("The file does not exist")
+        #Print an error message
+        st.error("A File Was Not Uploaded Correctly. Please Try Again")
 
-    #Try uploading the new data to the google spreadsheet
-    #pending_upload.update_spreadsheet(file_object.name, content)
+    #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
+    bar_value += progress_per_file
+    progress_bar.progress(bar_value)
+
+#All files have been processed, so set progress bar equal to 100
+progress_bar.progress(100)
+
