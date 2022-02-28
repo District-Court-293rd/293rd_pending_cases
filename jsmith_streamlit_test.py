@@ -64,13 +64,16 @@ if len(file_objects) > 0:
     #How much progress should be made per file?
     progress_per_file = int((100 - bar_value) / len(file_objects))
 
+    #Also create a container for the info messages
+    container = st.empty()
+
 #Use a for loop to iterate through the uploaded files
 for file_object in file_objects:
 
     if file_object is not None:
 
         #Inform the user which file is being processed
-        st.info("Began Processing " + file_object.name)
+        container.info("Began Processing " + file_object.name)
 
         #Save the file. Will be deleted after data is uploaded
         with open(file_object.name, 'wb') as f:
@@ -87,10 +90,13 @@ for file_object in file_objects:
             os.remove(file_object.name)
 
             #Leave a success message
-            st.success("Pending Reports was successfully updated with " + file_object.name)
+            container.success("Pending Reports was successfully updated with " + file_object.name)
         
         else:
             st.error("Could Not Delete File " + file_object.name)
+
+        #Clear container
+        container.empty()
 
     else:
         #Print an error message
@@ -102,5 +108,5 @@ for file_object in file_objects:
 
 #If files were uploaded, processing is complete at this point. Leave a message
 if len(file_objects) > 0:
-    st.header("Complete! All Files Updated Successfully!")
+    st.header("Complete! All Files Processed")
 
