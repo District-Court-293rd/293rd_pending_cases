@@ -44,16 +44,17 @@ def get_file_content(file_name):
 ############################################## Begin App ##################################################
 
 #Title
-st.title("Update Pending Reports Spreadsheet")
+st.title("Update Pending Reports")
 
 #Get the file object
 file_objects = st.file_uploader("File Names Must Include Either 'CR' or 'CV' for Criminal and Civil Cases, Respectively.", type = 'pdf', accept_multiple_files = True)
 
-#Create a progress bar for visual verification that something is happening
-progress_bar = st.progress(0)
-
-#Only update progress bar if files have been uploaded
+#Only create and update progress bar if files have been uploaded
 if len(file_objects) > 0:
+    #Create a progress bar for visual verification that something is happening
+    st.header("Please Wait, Processing In Progress:")
+    progress_bar = st.progress(0)
+
     #Use the remainder of 100 / the number of uploaded files to start the progress bar
     bar_value = int(100 % len(file_objects))
 
