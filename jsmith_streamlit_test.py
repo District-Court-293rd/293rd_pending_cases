@@ -100,3 +100,7 @@ for file_object in file_objects:
     bar_value += progress_per_file
     progress_bar.progress(bar_value)
 
+#If files were uploaded, processing is complete at this point. Leave a message
+if len(file_objects) > 0:
+    st.header("Complete! All Files Updated Successfully!")
+
