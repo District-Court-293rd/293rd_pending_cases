@@ -19,6 +19,29 @@ credentials = {
   "client_x509_cert_url": st.secrets["client_x509_cert_url"]
 }
 
+def convert_to_bool(value):
+    """
+    This function takes in a string. The string could be "TRUE", "FALSE", or empty. This funciton will replace the given string
+    with the appropriate boolean value. This is necessary because the boolean values read in from the google spreadsheet is 
+    represented as a string. So when that value is uploaded back to the spreadsheet, the data validation doesn't recognize it
+    and flags the value. This should fix that problem.
+
+    Parameter:
+        - value: "TRUE", "FALSE", or nothing
+
+    Returns:
+        - boolean: The appropriate boolean value for the given string. If the given string is empty, it will return an empty string
+    """
+
+    #Use an if else statement to assign the proper boolean values
+    if value == "TRUE":
+        return True
+    elif value == "FALSE":
+        return False
+    else:
+        return ''
+
+
 def update_spreadsheet(file_name, content):
     """
     This function takes in a list containing the file paths of the PDFs that need to be extracted. It'll loop
@@ -76,6 +99,12 @@ def update_civil_cases_dataframe(new_civil_df):
     #Verify that all Cause Numbers are represented as strings
     current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str)
 
+    #Convert the google boolean values for the 'On Track' column to python booleans
+    current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
+
+    #Convert the google boolean values for the 'File Has Image' column to python booleans
+    current_civil_df['File Has Image'] = current_civil_df['File Has Image'].apply(convert_to_bool)
+
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
 
@@ -124,6 +153,12 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Verify that all Cause Numbers are represented as strings
     current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str)
+
+    #Convert the google boolean values for the 'On Track' column to python booleans
+    current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
+
+    #Convert the google boolean values for the 'File Has Image' column to python booleans
+    current_crim_df['File Has Image'] = current_crim_df['File Has Image'].apply(convert_to_bool)
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
