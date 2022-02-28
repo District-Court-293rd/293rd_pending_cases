@@ -68,8 +68,8 @@ for file_object in file_objects:
 
     if file_object is not None:
 
-        #Print file_object name, type, and size
-        st.info("Began Processing ", file_object.name)
+        #Inform the user which file is being processed
+        st.info("Began Processing " + file_object.name)
 
         #Save the file. Will be deleted after data is uploaded
         with open(file_object.name, 'wb') as f:
