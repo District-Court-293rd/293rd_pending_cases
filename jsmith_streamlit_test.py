@@ -51,8 +51,11 @@ file_objects = st.file_uploader("File Names Must Include Either 'CR' or 'CV' for
 
 #Only create and update progress bar if files have been uploaded
 if len(file_objects) > 0:
+    #Create a container for the progress bar message
+    progress_message_container = st.empty()
+
     #Create a progress bar for visual verification that something is happening
-    st.header("Please Wait, Processing In Progress:")
+    progress_message_container.header("Please Wait, Processing In Progress:")
     progress_bar = st.progress(0)
 
     #Use the remainder of 100 / the number of uploaded files to start the progress bar
@@ -65,7 +68,7 @@ if len(file_objects) > 0:
     progress_per_file = int((100 - bar_value) / len(file_objects))
 
     #Also create a container for the info messages
-    container = st.empty()
+    info_container = st.empty()
 
 #Use a for loop to iterate through the uploaded files
 for file_object in file_objects:
@@ -73,7 +76,7 @@ for file_object in file_objects:
     if file_object is not None:
 
         #Inform the user which file is being processed
-        container.info("Began Processing " + file_object.name)
+        info_container.info("Began Processing " + file_object.name)
 
         #Save the file. Will be deleted after data is uploaded
         with open(file_object.name, 'wb') as f:
@@ -90,13 +93,13 @@ for file_object in file_objects:
             os.remove(file_object.name)
 
             #Leave a success message
-            container.success("Pending Reports was successfully updated with " + file_object.name)
+            st.success("Pending Reports was successfully updated with " + file_object.name)
         
         else:
             st.error("Could Not Delete File " + file_object.name)
 
         #Clear container
-        container.empty()
+        info_container.empty()
 
     else:
         #Print an error message
@@ -108,5 +111,5 @@ for file_object in file_objects:
 
 #If files were uploaded, processing is complete at this point. Leave a message
 if len(file_objects) > 0:
-    st.header("Complete! All Files Processed")
+    progress_message_container.header("Complete! All Files Processed!")
 
