@@ -100,6 +100,3 @@ for file_object in file_objects:
     bar_value += progress_per_file
     progress_bar.progress(bar_value)
 
-#All files have been processed, so set progress bar equal to 100
-progress_bar.progress(100)
-
