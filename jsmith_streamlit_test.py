@@ -86,10 +86,10 @@ for file_object in file_objects:
             os.remove(file_object.name)
 
             #Leave a success message
-            st.success("Pending Reports was successfully updated with ", file_object.name)
+            st.success("Pending Reports was successfully updated with " + file_object.name)
         
         else:
-            st.error("Could Not Delete File")
+            st.error("Could Not Delete File " + file_object.name)
 
     else:
         #Print an error message
