@@ -55,13 +55,13 @@ progress_bar = st.progress(0)
 #Only update progress bar if files have been uploaded
 if len(file_objects) > 0:
     #Use the remainder of 100 / the number of uploaded files to start the progress bar
-    bar_value = 100 % len(file_objects)
+    bar_value = int(100 % len(file_objects))
 
     #Update progress bar
     progress_bar.progress(bar_value)
 
     #How much progress should be made per file?
-    progress_per_file = (100 - bar_value) / len(file_objects)
+    progress_per_file = int((100 - bar_value) / len(file_objects))
 
 #Use a for loop to iterate through the uploaded files
 for file_object in file_objects:
