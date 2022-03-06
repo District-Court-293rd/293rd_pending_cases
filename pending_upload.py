@@ -34,9 +34,9 @@ def convert_to_bool(value):
     """
 
     #Use an if else statement to assign the proper boolean values
-    if value == "TRUE":
+    if value == "TRUE" or value == True:
         return True
-    elif value == "FALSE":
+    elif value == "FALSE" or value == False:
         return False
     else:
         return ''
