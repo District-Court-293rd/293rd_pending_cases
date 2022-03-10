@@ -182,7 +182,7 @@ elif page_choice == 'Civil Dashboard':
         )
 
         #Load the data for the civil dashboard
-        df = get_spreadsheet_data('test_civil_cases', 'credentials.json')
+        df = get_spreadsheet_data('test_civil_cases', credentials)
 
         #Title
         st.title("Civil Dashboard")
@@ -292,7 +292,7 @@ elif page_choice == 'Criminal Dashboard':
         )
 
         #Load the data for the civil dashboard
-        df = get_spreadsheet_data('test_criminal_cases', 'credentials.json')
+        df = get_spreadsheet_data('test_criminal_cases', credentials)
 
         #Title
         st.title("Criminal Dashboard")
