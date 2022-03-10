@@ -64,7 +64,7 @@ def get_spreadsheet_data(sheet_name, credentials):
     """
 
     #Set up credentials to interact with Google Sheets
-    gc = gspread.service_account(filename = credentials)
+    gc = gspread.service_account_from_dict(credentials)
     
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open('Pending Reports')
@@ -81,7 +81,6 @@ def get_spreadsheet_data(sheet_name, credentials):
 
 st.set_page_config(
      page_title="Pending Reports",
-     page_icon="🧊",
      initial_sidebar_state="expanded"
  )
 
