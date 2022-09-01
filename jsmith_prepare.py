@@ -96,7 +96,8 @@ def get_months_ahead_or_behind(value):
     value = pd.to_datetime(value)
     
     #Calculate months ahead or behind
-    num_months = ((value.dt.year - today.dt.year) * 12) + (value.dt.month - today.dt.month) 
+    #num_months = ((value.dt.year - today.dt.year) * 12) + (value.dt.month - today.dt.month) 
+    num_months = (value - today) // pd.Timedelta('1m')
     
     #Separate into categories based on the number of months ahead or behind
     if num_months < -12:
@@ -183,7 +184,7 @@ def prepare_dataframe(file_name, df):
     df['On Track'] = df['Docket Date'].apply(check_on_track)
 
     #Create Months to Docket Date column
-    #df['Months Ahead Or Behind'] = df['Docket Date'].apply(get_months_ahead_or_behind)
+    df['Months Ahead Or Behind'] = df['Docket Date'].apply(get_months_ahead_or_behind)
 
     #Create Bad Cause Number column
     df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)
