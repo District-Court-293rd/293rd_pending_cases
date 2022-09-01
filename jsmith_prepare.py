@@ -93,7 +93,7 @@ def get_months_ahead_or_behind(value):
     today = pd.to_datetime(today)
     
     #Convert current value to datetime object
-    value = pd.to_datetime(value)
+    value = pd.to_datetime(value, format='%m/%d/%Y')
     
     #Calculate months ahead or behind
     #num_months = ((value.dt.year - today.dt.year) * 12) + (value.dt.month - today.dt.month) 
