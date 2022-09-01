@@ -102,9 +102,6 @@ def update_civil_cases_dataframe(new_civil_df):
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
 
-    #Convert the google boolean values for the 'File Has Image' column to python booleans
-    current_civil_df['File Has Image'] = current_civil_df['File Has Image'].apply(convert_to_bool)
-
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
 
@@ -156,9 +153,6 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
-
-    #Convert the google boolean values for the 'File Has Image' column to python booleans
-    current_crim_df['File Has Image'] = current_crim_df['File Has Image'].apply(convert_to_bool)
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
