@@ -96,7 +96,7 @@ def get_months_ahead_or_behind(value):
     value = pd.to_datetime(value)
     
     #Calculate months ahead or behind
-    num_months = int(((value.dt.year - today.dt.year) * 12)) + int((value.dt.month - today.dt.month)) 
+    num_months = ((int(value.dt.year) - int(today.dt.year)) * 12) + (int(value.dt.month) - int(today.dt.month)) 
     #num_months = (value - today) // pd.Timedelta('1m')
     
     #Separate into categories based on the number of months ahead or behind
