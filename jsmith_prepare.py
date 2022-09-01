@@ -96,11 +96,31 @@ def get_months_ahead_or_behind(value):
     value = pd.to_datetime(value)
     
     #Calculate months ahead or behind
-    num_months = ((int(value.dt.year) - int(today.dt.year)) * 12) + (int(value.dt.month) - int(today.dt.month)) 
-    #num_months = (value - today) // pd.Timedelta('1m')
-    
+    num_months = ((int(value.strftime("%Y")) - int(today.strftime("%Y"))) * 12) + (int(value.strftime("%m")) - int(today.strftime("%m"))) 
+
     #Separate into categories based on the number of months ahead or behind
-    return num_months
+    if num_months < -12:
+        return "More Than 12 Months Late"
+    elif num_months < -6 and num_months >= -12:
+        return "Between 6 and 12 Months Late"
+    elif num_months < -3 and num_months >= -6:
+        return "Between 3 and 6 Months Late"
+    elif num_months < -1 and num_months >= -3:
+        return "Between 1 and 3 Months Late"
+    elif num_months < 0 and num_months >= -1:
+        return "1 Month Late"
+    elif num_months == 0:
+        return "Current"
+    elif num_months > 0 and num_months <= 1:
+        return "1 Month Ahead"
+    elif num_months > 1 and num_months <= 3:
+        return "Between 1 and 3 Months Ahead"
+    elif num_months > 3 and num_months <= 6:
+        return "Between 3 and 6 Months Ahead"
+    elif num_months > 6 and num_months <= 12:
+        return "Between 6 and 12 Months Ahead"
+    else:
+        return "More Than 12 Months Ahead"
     
 def check_cause_number_format(value):
     """
