@@ -163,7 +163,7 @@ def prepare_dataframe(file_name, df):
     df['On Track'] = df['Docket Date'].apply(check_on_track)
 
     #Create Months to Docket Date column
-    df['Months Ahead Or Behind'] = df['Docket Date'].apply(get_months_ahead_or_behind)
+    #df['Months Ahead Or Behind'] = df['Docket Date'].apply(get_months_ahead_or_behind)
 
     #Create Bad Cause Number column
     df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)
