@@ -101,6 +101,9 @@ def update_civil_cases_dataframe(new_civil_df):
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
 
+    #Convert the google boolean values for the 'On Track' column to python booleans
+    current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
+
     #Check for any updated cause numbers. The entry with the old case number will be manually removed so that 
     #it does not count as a closed case
     current_civil_df = current_civil_df.sort_values(by = ['Bad Cause Number'], ignore_index = True)
@@ -178,6 +181,9 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
+
+    #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
+    current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
 
     #Check for any updated cause numbers. The entry with the old case number will be manually removed so that 
     #it does not count as a closed case
