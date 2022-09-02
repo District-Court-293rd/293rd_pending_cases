@@ -189,7 +189,7 @@ def prepare_closed_cases(closed_cases_df):
     closed_cases_df['Days To Close'] = days_to_close
 
     #Drop the 'Months ahead or behind' and 'On track' columns
-    closed_cases_df = closed_cases_df.drop(['On Track', 'Months Ahead or Behind'], axis = 1)
+    closed_cases_df = closed_cases_df.drop(['On Track', 'Months Ahead Or Behind'], axis = 1)
 
     return closed_cases_df
 
