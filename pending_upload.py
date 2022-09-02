@@ -118,6 +118,9 @@ def update_civil_cases_dataframe(new_civil_df):
     #Prepare closed cases df
     closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
 
+    #Verify that closed_cases_df is still a df
+    closed_cases_df = pd.DataFrame(closed_cases_df)
+
     #If any cases were closed, add the newly closed cases to the 'Closed Civil Cases' tab
     if len(closed_cases_df) > 0:
         closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
@@ -199,6 +202,9 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Prepare closed cases df
     closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
+
+    #Verify that closed_cases_df is still a df
+    closed_cases_df = pd.DataFrame(closed_cases_df)
 
     #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
     if len(closed_cases_df) > 0:
