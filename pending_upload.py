@@ -206,6 +206,9 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Verify that closed_cases_df is still a df
     closed_cases_df = pd.DataFrame(closed_cases_df)
 
+    #Try clearing the spreadsheet before adding the new closed cases
+    closed_sheet.clear()
+
     #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
     if len(closed_cases_df) > 0:
         closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
