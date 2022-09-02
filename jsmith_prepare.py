@@ -174,7 +174,7 @@ def prepare_closed_cases(closed_cases_df):
     closed_cases_df['Status'] = 'Closed'
 
     #Set the closed date to the current date
-    closed_cases_df['Closed Date'] = date.today()
+    closed_cases_df['Closed Date'] = str(date.today())
 
     #Calculate the number of days to the final docket date
     file_date = pd.to_datetime(closed_cases_df['File Date'])
