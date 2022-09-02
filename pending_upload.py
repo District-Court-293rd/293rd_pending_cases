@@ -96,7 +96,7 @@ def update_civil_cases_dataframe(new_civil_df):
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
     #Verify that all Cause Numbers are represented as strings
-    current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str)
+    current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str).strip()
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
@@ -117,9 +117,6 @@ def update_civil_cases_dataframe(new_civil_df):
 
     #Prepare closed cases df
     closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
-
-    #Verify that closed_cases_df is still a df
-    closed_cases_df = pd.DataFrame(closed_cases_df)
 
     #If any cases were closed, add the newly closed cases to the 'Closed Civil Cases' tab
     if len(closed_cases_df) > 0:
@@ -181,7 +178,7 @@ def update_criminal_cases_dataframe(new_crim_df):
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
     #Verify that all Cause Numbers are represented as strings
-    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str)
+    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).strip()
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
@@ -198,16 +195,12 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Create closed cases df.
     closed_cases_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = False)
+    #If the cause number remains, it is not a duplicate. 
+    closed_cases_df['Duplicate Cause Number'] = False
     closed_cases_df = closed_cases_df[closed_cases_df['Months Ahead Or Behind'] != '']
 
     #Prepare closed cases df
     closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
-
-    #Verify that closed_cases_df is still a df
-    closed_cases_df = pd.DataFrame(closed_cases_df)
-
-    #Try clearing the spreadsheet before adding the new closed cases
-    closed_sheet.clear()
 
     #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
     if len(closed_cases_df) > 0:

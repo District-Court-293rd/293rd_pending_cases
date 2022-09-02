@@ -176,7 +176,17 @@ def prepare_closed_cases(closed_cases_df):
     #Set the closed date to the current date
     closed_cases_df['Closed Date'] = str(date.today())
 
+    #Calculate the number of days to the final docket date
+    #file_date = pd.to_datetime(closed_cases_df['File Date'])
+    #docket_date = pd.to_datetime(closed_cases_df['Docket Date'])
+    #closed_date = pd.to_datetime(closed_cases_df['Closed Date'])
 
+    #days_to_docket_date = (docket_date - file_date) // pd.Timedelta('1d')
+    #closed_cases_df['Days To Docket Date'] = days_to_docket_date
+
+    #Calculate the number of days to the final closing date
+    #days_to_close = (closed_date - file_date) // pd.Timedelta('1d')
+    #closed_cases_df['Days To Close'] = days_to_close
 
     #Drop the 'Months ahead or behind' and 'On track' columns
     closed_cases_df = closed_cases_df.drop(['On Track', 'Months Ahead Or Behind'], axis = 1)
