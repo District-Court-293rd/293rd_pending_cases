@@ -96,7 +96,7 @@ def update_civil_cases_dataframe(new_civil_df):
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
     #Verify that all Cause Numbers are represented as strings
-    current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str).strip()
+    current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str).str.strip()
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
@@ -178,7 +178,7 @@ def update_criminal_cases_dataframe(new_crim_df):
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
     #Verify that all Cause Numbers are represented as strings
-    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).strip()
+    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
