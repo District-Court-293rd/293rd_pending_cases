@@ -92,6 +92,9 @@ def update_civil_cases_dataframe(new_civil_df):
     #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
     current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
 
+    #Before appending the new cases, create the closed cases df
+    closed_cases_df = current_civil_df[~(current_civil_df['Cause Number'].isin(new_civil_df['Cause Number']))]
+
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
@@ -104,16 +107,9 @@ def update_civil_cases_dataframe(new_civil_df):
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
 
-    #Check for any updated cause numbers. The entry with the old case number will be manually removed so that 
-    #it does not count as a closed case
-    current_civil_df = current_civil_df.sort_values(by = ['Bad Cause Number'], ignore_index = True)
-
-    #Check for dups and keep the first entry. The first entry should be the one with the good cause number
-    current_civil_df = current_civil_df.drop_duplicates(subset = ['County', 'File Date', 'Cause of Action', 'Plaintiff Name', 'Defendant Name'], ignore_index = True, keep = 'first')
-
     #Create closed cases df. 
-    closed_cases_df = current_civil_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = False)
-    closed_cases_df = closed_cases_df[closed_cases_df['Months Ahead Or Behind'] != '']
+    #closed_cases_df = current_civil_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = False)
+    #closed_cases_df = closed_cases_df[closed_cases_df['Months Ahead Or Behind'] != '']
 
     #Prepare closed cases df
     closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
@@ -174,6 +170,9 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
 
+    #Before appending the new cases, create the closed cases df
+    closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
+
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
@@ -186,18 +185,9 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
     current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
 
-    #Check for any updated cause numbers. The entry with the old case number will be manually removed so that 
-    #it does not count as a closed case
-    current_crim_df = current_crim_df.sort_values(by = ['Bad Cause Number'], ignore_index = True)
-    
-    #Check for dups and keep the first entry. The first entry should be the one with the good cause number
-    current_crim_df = current_crim_df.drop_duplicates(subset = ['County', 'File Date', 'Offense', 'Defendant Name'], ignore_index = True, keep = 'first')
-
     #Create closed cases df.
-    closed_cases_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = False)
-    #If the cause number remains, it is not a duplicate. 
-    closed_cases_df['Duplicate Cause Number'] = False
-    closed_cases_df = closed_cases_df[closed_cases_df['Months Ahead Or Behind'] != '']
+    #closed_cases_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = False)
+    #closed_cases_df = closed_cases_df[closed_cases_df['Months Ahead Or Behind'] != '']
 
     #Prepare closed cases df
     closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
