@@ -29,7 +29,6 @@ def get_case_type(value):
         #I will assume that anything not matching above is a civil case.
         return 'Civil'
 
-
 #Build a function to calculate the days passed and determine if a case is on track or not
 def check_on_track(value):
     """
@@ -139,8 +138,6 @@ def check_cause_number_format(value):
         return True
     else:
         return False
-    
-
 
 def convert_name_list_to_string(name_list):
     """
@@ -158,6 +155,43 @@ def convert_name_list_to_string(name_list):
     name_string = '\n'.join(name_list)
 
     return name_string
+
+def prepare_closed_cases(closed_cases_df):
+    """
+    This function takes in a dataframe of newly closed cases and prepares them to be added to the appropriate closed cases tab.
+    It will set the closed date to the current date, set case status to closed, calculate the number of days it took to get a docket date
+    as well as the number of days it took to close, and remove the 'Months ahead or behind' and 'On track' columns since they won't matter once a case
+    is closed.
+
+    Parameter:
+        -closed_cases_df: The dataframe containing the newly closed cases
+
+    Returns:
+        -closed_cases_df: The dataframe containing the newly closed cases with the updated information
+    """
+
+    #Set status to closed
+    closed_cases_df['Status'] = 'Closed'
+
+    #Set the closed date to the current date
+    closed_cases_df['Closed Date'] = date.today()
+
+    #Calculate the number of days to the final docket date
+    file_date = pd.to_datetime(closed_cases_df['File Date'])
+    docket_date = pd.to_datetime(closed_cases_df['Docket Date'])
+    closed_date = pd.to_datetime(closed_cases_df['Closed Date'])
+
+    days_to_docket_date = (docket_date - file_date) // pd.Timedelta('1d')
+    closed_cases_df['Days To Docket Date'] = days_to_docket_date
+
+    #Calculate the number of days to the final closing date
+    days_to_close = (closed_date - file_date) // pd.Timedelta('1d')
+    closed_cases_df['Days To Close'] = days_to_close
+
+    #Drop the 'Months ahead or behind' and 'On track' columns
+    closed_cases_df = closed_cases_df.drop(['On Track', 'Months Ahead or Behind'], axis = 1)
+
+    return closed_cases_df
 
 def prepare_dataframe(file_name, df):
     """
@@ -182,8 +216,9 @@ def prepare_dataframe(file_name, df):
     #Create On Track column
     df['On Track'] = df['Docket Date'].apply(check_on_track)
 
-    #Create Months to Docket Date column
-    df['Months Ahead Or Behind'] = df['Docket Date'].apply(get_months_ahead_or_behind)
+    #Create Months to Docket Date column. The actual values will be created later since they need to be updated for all
+    #open cases every time a new report is uploaded.
+    df['Months Ahead Or Behind'] = ''
 
     #Create Bad Cause Number column
     df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)
