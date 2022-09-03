@@ -172,10 +172,12 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Verify that all Cause Numbers are represented as strings
     new_crim_df['Cause Number'] = new_crim_df['Cause Number'].astype(str).str.strip()
-    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
 
     #Before appending the new cases, create the closed cases df and udpate the closed cases tab
     if len(current_crim_df) > 0:
+        #First, Verify that all Cause Numbers are represented as strings
+        current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
+        #Create closed cases df
         closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
         #Remove closed cases from current_crim_df
         current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
