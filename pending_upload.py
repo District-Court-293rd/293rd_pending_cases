@@ -171,7 +171,13 @@ def update_criminal_cases_dataframe(new_crim_df):
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
 
     #Before appending the new cases, create the closed cases df
-    closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
+    if len(current_crim_df) > 0:
+        closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
+        #Prepare closed cases df
+        closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
+        #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
+        if len(closed_cases_df) > 0:
+            closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
 
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
@@ -184,17 +190,6 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
     current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
-
-    #Create closed cases df.
-    #closed_cases_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = False)
-    #closed_cases_df = closed_cases_df[closed_cases_df['Months Ahead Or Behind'] != '']
-
-    #Prepare closed cases df
-    closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
-
-    #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
-    if len(closed_cases_df) > 0:
-        closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
 
     #Remove closed cases from current_crim_df
     current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
