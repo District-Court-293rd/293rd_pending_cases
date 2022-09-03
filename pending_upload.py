@@ -170,9 +170,11 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
 
-    #Before appending the new cases, create the closed cases df
+    #Before appending the new cases, create the closed cases df and udpate the closed cases tab
     if len(current_crim_df) > 0:
         closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
+        #Remove closed cases from current_crim_df
+        current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
         closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
         #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
@@ -190,9 +192,6 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
     current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
-
-    #Remove closed cases from current_crim_df
-    current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
