@@ -170,6 +170,10 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
 
+    #Verify that all Cause Numbers are represented as strings
+    new_crim_df['Cause Number'] = new_crim_df['Cause Number'].astype(str).str.strip()
+    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
+
     #Before appending the new cases, create the closed cases df and udpate the closed cases tab
     if len(current_crim_df) > 0:
         closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
