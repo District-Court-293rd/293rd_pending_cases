@@ -98,7 +98,9 @@ def update_civil_cases_dataframe(new_civil_df):
         new_civil_df['Cause Number'] = new_civil_df['Cause Number'].astype(str).str.strip()
         current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str).str.strip()
         #Create closed cases df
-        closed_cases_df = current_civil_df[~((current_civil_df['County'] != new_civil_df['County']) or (current_civil_df['Cause Number'].isin(new_civil_df['Cause Number'])))]
+        closed_cases_df = current_civil_df[~(current_civil_df['Cause Number'].isin(new_civil_df['Cause Number']))]
+        #Make sure the closed cases are only cases from the same county as the new_civil_df
+        closed_cases_df = closed_cases_df[closed_cases_df['County'] == new_civil_df['County'][0]]
         #Remove closed cases from current_civil_df
         current_civil_df = current_civil_df[~(current_civil_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
@@ -174,7 +176,9 @@ def update_criminal_cases_dataframe(new_crim_df):
         new_crim_df['Cause Number'] = new_crim_df['Cause Number'].astype(str).str.strip()
         current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
         #Create closed cases df
-        closed_cases_df = current_crim_df[~((current_crim_df['County'] != new_crim_df['County']) or (current_crim_df['Cause Number'].isin(new_crim_df['Cause Number'])))]
+        closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
+        #Make sure the closed cases are only cases from the same county as the new_crim_df
+        closed_cases_df = closed_cases_df[closed_cases_df['County'] == new_crim_df['County'][0]]
         #Remove closed cases from current_crim_df
         current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
