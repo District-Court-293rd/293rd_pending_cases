@@ -41,6 +41,24 @@ def convert_to_bool(value):
     else:
         return ''
 
+def find_next_available_row(worksheet):
+    """
+    This function takes in a google spreadsheet and finds the first available row. It will return a string representing the first
+    empty cell in the first column.
+
+    Parameter:
+        - worksheet: The google sheet you wish to find the first available row for
+
+    Returns:
+        - str: The first available cell in the first row. Represented in A1 format
+    """
+    #Count the number of unavailable rows
+    num_unavailable_rows = len(list(worksheet.col_values(1)))
+
+    #Add one and create the string
+    first_available_row = 'A' + str(num_unavailable_rows + 1)
+
+    return first_available_row
 
 def update_spreadsheet(file_name, content):
     """
@@ -105,9 +123,17 @@ def update_civil_cases_dataframe(new_civil_df):
         current_civil_df = current_civil_df[~(current_civil_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
         closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
+        #Find next available row
+        next_available_row = find_next_available_row(closed_sheet)
         #If any cases were closed, add the newly closed cases to the 'Closed Civil Cases' tab
         if len(closed_cases_df) > 0:
-            closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
+            #If the first available row is the first row in the sheet, include the column names when updating
+            #Otherwise, only send the values
+            if next_available_row == 'A1':
+                closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
+            else:
+                closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
+
 
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
@@ -183,9 +209,16 @@ def update_criminal_cases_dataframe(new_crim_df):
         current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
         closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
+        #Find the next available row
+        next_available_row = find_next_available_row(closed_sheet)
         #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
         if len(closed_cases_df) > 0:
-            closed_sheet.update('A3',[closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
+            #If the first available row is the first row in the sheet, include the column names when updating
+            #Otherwise, only send the values
+            if next_available_row == 'A1':
+                closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
+            else:
+                closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
 
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
