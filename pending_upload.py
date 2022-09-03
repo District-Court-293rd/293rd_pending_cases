@@ -185,7 +185,7 @@ def update_criminal_cases_dataframe(new_crim_df):
         closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
         #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
         if len(closed_cases_df) > 0:
-            closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
+            closed_sheet.update('A3',[closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
 
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
