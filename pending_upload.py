@@ -92,8 +92,20 @@ def update_civil_cases_dataframe(new_civil_df):
     #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
     current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
 
-    #Before appending the new cases, create the closed cases df
-    closed_cases_df = current_civil_df[~(current_civil_df['Cause Number'].isin(new_civil_df['Cause Number']))]
+    #Before appending the new cases, create the closed cases df and udpate the closed cases tab
+    if len(current_civil_df) > 0:
+        #First, Verify that all Cause Numbers are represented as strings
+        new_civil_df['Cause Number'] = new_civil_df['Cause Number'].astype(str).str.strip()
+        current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str).str.strip()
+        #Create closed cases df
+        closed_cases_df = current_civil_df[~(current_civil_df['Cause Number'].isin(new_civil_df['Cause Number']))]
+        #Remove closed cases from current_civil_df
+        current_civil_df = current_civil_df[~(current_civil_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
+        #Prepare closed cases df
+        closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
+        #If any cases were closed, add the newly closed cases to the 'Closed Civil Cases' tab
+        if len(closed_cases_df) > 0:
+            closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
 
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
@@ -106,20 +118,6 @@ def update_civil_cases_dataframe(new_civil_df):
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
-
-    #Create closed cases df. 
-    #closed_cases_df = current_civil_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = False)
-    #closed_cases_df = closed_cases_df[closed_cases_df['Months Ahead Or Behind'] != '']
-
-    #Prepare closed cases df
-    closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
-
-    #If any cases were closed, add the newly closed cases to the 'Closed Civil Cases' tab
-    if len(closed_cases_df) > 0:
-        closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
-
-    #Remove closed cases from current_civil_df
-    current_civil_df = current_civil_df[~(current_civil_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
@@ -170,12 +168,10 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
 
-    #Verify that all Cause Numbers are represented as strings
-    new_crim_df['Cause Number'] = new_crim_df['Cause Number'].astype(str).str.strip()
-
     #Before appending the new cases, create the closed cases df and udpate the closed cases tab
     if len(current_crim_df) > 0:
         #First, Verify that all Cause Numbers are represented as strings
+        new_crim_df['Cause Number'] = new_crim_df['Cause Number'].astype(str).str.strip()
         current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
         #Create closed cases df
         closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
