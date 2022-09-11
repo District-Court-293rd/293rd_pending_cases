@@ -229,6 +229,9 @@ def prepare_dataframe(file_name, df):
     #Create Closed Date column
     df['Closed Date'] = ''
 
+    #Create Load Date column
+    df['load_date'] = str(date.today())
+
     #Convert the lists of names in the civil cases dataframe to single strings with each name separated by a new line
     if df['Case Type'][0] != 'Criminal':
         df['Plaintiff Name'] = df['Plaintiff Name'].apply(convert_name_list_to_string)

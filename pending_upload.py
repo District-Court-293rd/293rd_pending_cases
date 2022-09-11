@@ -2,9 +2,9 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import gspread
-#from oauth2client.service_account import ServiceAccountCredentials
 import jsmith_acquire
 import jsmith_prepare
+import jsmith_historical
 
 credentials = {
   "type": st.secrets["type"],
