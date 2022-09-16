@@ -221,7 +221,7 @@ def update_historical_table(current_open_cases, newly_closed_cases):
     prepared_closed_cases = prepare_closed_cases(newly_closed_cases)
 
     #Merge the two prepared time series dataframes on the common datetime index 'load_date'
-    complete_historical_df = prepared_open_cases.merge(right = prepared_closed_cases, kind = 'inner', on = 'load_date')
+    complete_historical_df = prepared_open_cases.merge(right = prepared_closed_cases, how = 'inner', on = 'load_date')
 
     #Set up credentials to interact with Google Sheets
     gc = gspread.service_account_from_dict(credentials)
