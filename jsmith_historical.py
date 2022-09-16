@@ -47,7 +47,7 @@ def prepare_open_cases(open_cases):
 
     #Get total number of open cases and number of newly opened cases in Dimmit county
     temp_dict['total_open_dimmit_cases'] = len(open_cases[open_cases['County'] == 'Dimmit'])
-    temp_dict['total_new_dimmit_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['load_date'] == today])
+    temp_dict['total_new_dimmit_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') and (open_cases['load_date'] == today)])
 
     #Get total number of open cases and number of newly opened cases in Maverick county
     temp_dict['total_open_maverick_cases'] = len(open_cases[open_cases['County'] == 'Maverick'])
