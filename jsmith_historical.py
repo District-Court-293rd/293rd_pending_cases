@@ -46,7 +46,7 @@ def prepare_open_cases(open_cases):
     temp_dict['total_open_cases'] = len(open_cases)
 
     #For testing, print the names of the available columns in open_cases
-    print(open_cases.columns)
+    st.info(print(open_cases.columns))
 
     #Get total number of open cases and number of newly opened cases in Dimmit county
     temp_dict['total_open_dimmit_cases'] = len(open_cases[open_cases['County'] == 'Dimmit'])
