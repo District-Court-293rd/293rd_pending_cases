@@ -221,8 +221,8 @@ def update_historical_table(current_open_cases, newly_closed_cases):
     prepared_closed_cases = prepare_closed_cases(newly_closed_cases)
 
     #For testing
-    st.info("Open Cases Columns: ", prepared_open_cases.columns)
-    st.info("Closed Cases Columns: ", prepared_closed_cases.columns)
+    st.info(prepared_open_cases.columns)
+    st.info(prepared_closed_cases.columns)
 
     #Merge the two prepared time series dataframes on the common datetime index 'load_date'
     complete_historical_df = prepared_open_cases.merge(right = prepared_closed_cases, how = 'inner', on = 'load_date')
