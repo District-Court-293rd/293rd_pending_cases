@@ -101,6 +101,9 @@ if page_choice == "Update Pending Reports":
     #Create container for update page content
     with page_content.container():
 
+        #Start with files_uploaded equal to False
+        files_uploaded = False
+
         #Title
         st.title("Update Pending Reports")
 
