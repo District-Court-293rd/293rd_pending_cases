@@ -164,20 +164,23 @@ if page_choice == "Update Pending Reports":
                 st.error("A File Was Not Uploaded Correctly. Please Try Again")
 
             #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
+            #Add a files_uploaded flag for use in the next section
             bar_value += progress_per_file
             progress_bar.progress(bar_value)
+            files_uploaded = True
 
         #If files were uploaded, processing is complete at this point. Now update historical data
-        if len(file_objects) > 0:
+        if files_uploaded == True:
             progress_message_container.header("Updating Civil Case Historical Data...")
-            #Get all open civil cases
-            open_civil_cases = get_spreadsheet_data('Civil Cases', credentials)
             #Get all closed civil cases. Eventually, I'd like to be able to only select the necessary columns instead of loading all closed cases ever
             newly_closed_civil_cases = get_spreadsheet_data('Closed Civil Cases', credentials)
-            #Drop all entries where closed date does not equal today's date
-            newly_closed_civil_cases = newly_closed_civil_cases[newly_closed_civil_cases['Closed Date'] == str(date.today())]
-            #Update historical data
-            jsmith_historical.update_historical_table(open_civil_cases, newly_closed_civil_cases)
+            if len(newly_closed_civil_cases ) > 0:
+                #Drop all entries where closed date does not equal today's date
+                newly_closed_civil_cases = newly_closed_civil_cases[newly_closed_civil_cases['Closed Date'] == str(date.today())]
+                #Get all open civil cases
+                open_civil_cases = get_spreadsheet_data('Civil Cases', credentials)
+                #Update historical data
+                jsmith_historical.update_historical_table(open_civil_cases, newly_closed_civil_cases)
             
             #Update progress bar and message
             bar_value += progress_per_file
@@ -185,19 +188,21 @@ if page_choice == "Update Pending Reports":
             progress_message_container.header("Updating Criminal Case Historical Data...")
 
             #Now update criminal historical data
-            #Get all open criminal cases
-            open_criminal_cases = get_spreadsheet_data('Criminal Cases', credentials)
             #Get all closed criminal cases. Eventually, I'd like to be able to only select the necessary columns instead of loading all closed cases ever
             newly_closed_criminal_cases = get_spreadsheet_data('Closed Criminal Cases', credentials)
-            #Drop all entries where closed date does not equal today's date
-            newly_closed_criminal_cases = newly_closed_criminal_cases[newly_closed_criminal_cases['Closed Date'] == str(date.today())]
-            #Update historical data
-            jsmith_historical.update_historical_table(open_criminal_cases, newly_closed_criminal_cases)
+            if len(newly_closed_criminal_cases) > 0:
+                #Get all open criminal cases
+                open_criminal_cases = get_spreadsheet_data('Criminal Cases', credentials)
+                #Drop all entries where closed date does not equal today's date
+                newly_closed_criminal_cases = newly_closed_criminal_cases[newly_closed_criminal_cases['Closed Date'] == str(date.today())]
+                #Update historical data
+                jsmith_historical.update_historical_table(open_criminal_cases, newly_closed_criminal_cases)
             
             #Update progress bar and message
             bar_value += progress_per_file
             progress_bar.progress(bar_value)
             progress_message_container.header("Complete! All Files Processed and Historical Data Updated!")
+            files_uploaded = False
         
 ################################################### Civil Dashboard ###################################################
 
