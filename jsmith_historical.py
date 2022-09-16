@@ -45,9 +45,6 @@ def prepare_open_cases(open_cases):
     #Get total number of open cases
     temp_dict['total_open_cases'] = len(open_cases)
 
-    #For testing, print the names of the available columns in open_cases
-    st.info(open_cases.columns)
-
     #Get total number of open cases and number of newly opened cases in Dimmit county
     temp_dict['total_open_dimmit_cases'] = len(open_cases[open_cases['County'] == 'Dimmit'])
     temp_dict['total_new_dimmit_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['load_date'] == today)])
@@ -123,7 +120,7 @@ def prepare_open_cases(open_cases):
     #Create the prepared_df dataframe with all the calculated values from above
     prepared_df = pd.DataFrame(container_list.append(temp_dict))
 
-    return
+    return prepared_df
 
 def prepare_closed_cases(closed_cases):
     """
@@ -200,7 +197,7 @@ def prepare_closed_cases(closed_cases):
     #Create the prepared_df dataframe with all the calculated values from above
     prepared_df = pd.DataFrame(container_list.append(temp_dict))
 
-    return
+    return prepared_df
 
 
 def update_historical_table(current_open_cases, newly_closed_cases):
