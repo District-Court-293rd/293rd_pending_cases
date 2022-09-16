@@ -33,9 +33,6 @@ def prepare_open_cases(open_cases):
     #Get today's date
     today = str(date.today())
 
-    #Create container list
-    container_list = []
-
     #Create temp_dict
     temp_dict = {}
 
@@ -118,7 +115,7 @@ def prepare_open_cases(open_cases):
     #Stop here for testing, then add more data
 
     #Create the prepared_df dataframe with all the calculated values from above
-    prepared_df = pd.DataFrame(container_list.append(temp_dict))
+    prepared_df = pd.DataFrame.from_dict(temp_dict)
 
     return prepared_df
 
@@ -135,10 +132,7 @@ def prepare_closed_cases(closed_cases):
     """
     #Get today's date
     today = str(date.today())
-
-    #Create container list
-    container_list = []
-
+    
     #Create temp_dict
     temp_dict = {}
 
@@ -195,7 +189,7 @@ def prepare_closed_cases(closed_cases):
     #Stop here for testing, then add more data
 
     #Create the prepared_df dataframe with all the calculated values from above
-    prepared_df = pd.DataFrame(container_list.append(temp_dict))
+    prepared_df = pd.DataFrame.from_dict(temp_dict)
 
     return prepared_df
 
