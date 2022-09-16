@@ -47,15 +47,15 @@ def prepare_open_cases(open_cases):
 
     #Get total number of open cases and number of newly opened cases in Dimmit county
     temp_dict['total_open_dimmit_cases'] = len(open_cases[open_cases['County'] == 'Dimmit'])
-    temp_dict['total_new_dimmit_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') and (open_cases['load_date'] == today)])
+    temp_dict['total_new_dimmit_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['load_date'] == today)])
 
     #Get total number of open cases and number of newly opened cases in Maverick county
     temp_dict['total_open_maverick_cases'] = len(open_cases[open_cases['County'] == 'Maverick'])
-    temp_dict['total_new_maverick_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['load_date'] == today])
+    temp_dict['total_new_maverick_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['load_date'] == today)])
 
     #Get total number of open cases and number of newly opened cases in Zavala county
     temp_dict['total_open_zavala_cases'] = len(open_cases[open_cases['County'] == 'Zavala'])
-    temp_dict['total_new_zavala_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['load_date'] == today])
+    temp_dict['total_new_zavala_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['load_date'] == today)])
 
     #Get counts of case type per day and per county
     if open_cases['Case Type'][0] == 'Criminal':
@@ -72,48 +72,48 @@ def prepare_open_cases(open_cases):
     else:
         #Total counts regardless of county
         temp_dict['total_open_civil_cases'] = len(open_cases[open_cases['Case Type'] == 'Civil'])
-        temp_dict['total_new_civil_cases'] = len(open_cases[open_cases['Case Type'] == 'Civil' and open_cases['load_date'] == today])
+        temp_dict['total_new_civil_cases'] = len(open_cases[(open_cases['Case Type'] == 'Civil') & (open_cases['load_date'] == today)])
         temp_dict['total_open_tax_cases'] = len(open_cases[open_cases['Case Type'] == 'Tax'])
-        temp_dict['total_new_tax_cases'] = len(open_cases[open_cases['Case Type'] == 'Tax' and open_cases['load_date'] == today])
+        temp_dict['total_new_tax_cases'] = len(open_cases[(open_cases['Case Type'] == 'Tax') & (open_cases['load_date'] == today)])
         temp_dict['total_open_family_cases'] = len(open_cases[open_cases['Case Type'] == 'Family'])
-        temp_dict['total_new_family_cases'] = len(open_cases[open_cases['Case Type'] == 'Family' and open_cases['load_date'] == today])
+        temp_dict['total_new_family_cases'] = len(open_cases[(open_cases['Case Type'] == 'Family') & (open_cases['load_date'] == today)])
         temp_dict['total_open_juvenile_cases'] = len(open_cases[open_cases['Case Type'] == 'Juvenile'])
-        temp_dict['total_new_juvenile_cases'] = len(open_cases[open_cases['Case Type'] == 'Juvenile' and open_cases['load_date'] == today])
+        temp_dict['total_new_juvenile_cases'] = len(open_cases[(open_cases['Case Type'] == 'Juvenile') & (open_cases['load_date'] == today)])
         temp_dict['total_open_ols_cases'] = len(open_cases[open_cases['Case Type'] == 'OLS'])
-        temp_dict['total_new_ols_cases'] = len(open_cases[open_cases['Case Type'] == 'OLS' and open_cases['load_date'] == today])
+        temp_dict['total_new_ols_cases'] = len(open_cases[(open_cases['Case Type'] == 'OLS') & (open_cases['load_date'] == today)])
         #For Dimmit county
-        temp_dict['total_open_dimmit_civil_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'Civil'])
-        temp_dict['total_new_dimmit_civil_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'Civil' and open_cases['load_date'] == today])
-        temp_dict['total_open_dimmit_tax_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'Tax'])
-        temp_dict['total_new_dimmit_tax_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'Tax' and open_cases['load_date'] == today])
-        temp_dict['total_open_dimmit_family_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'Family'])
-        temp_dict['total_new_dimmit_family_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'Family' and open_cases['load_date'] == today])
-        temp_dict['total_open_dimmit_juvenile_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'Juvenile'])
-        temp_dict['total_new_dimmit_juvenile_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'Juvenile' and open_cases['load_date'] == today])
-        temp_dict['total_open_dimmit_ols_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'OLS'])
-        temp_dict['total_new_dimmit_ols_cases'] = len(open_cases[open_cases['County'] == 'Dimmit' and open_cases['Case Type'] == 'OLS' and open_cases['load_date'] == today])
+        temp_dict['total_open_dimmit_civil_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'Civil')])
+        temp_dict['total_new_dimmit_civil_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'Civil') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_dimmit_tax_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'Tax')])
+        temp_dict['total_new_dimmit_tax_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'Tax') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_dimmit_family_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'Family')])
+        temp_dict['total_new_dimmit_family_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'Family') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_dimmit_juvenile_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'Juvenile')])
+        temp_dict['total_new_dimmit_juvenile_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'Juvenile') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_dimmit_ols_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'OLS')])
+        temp_dict['total_new_dimmit_ols_cases'] = len(open_cases[(open_cases['County'] == 'Dimmit') & (open_cases['Case Type'] == 'OLS') & (open_cases['load_date'] == today)])
         #For Maverick county
-        temp_dict['total_open_maverick_civil_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'Civil'])
-        temp_dict['total_new_maverick_civil_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'Civil' and open_cases['load_date'] == today])
-        temp_dict['total_open_maverick_tax_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'Tax'])
-        temp_dict['total_new_maverick_tax_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'Tax' and open_cases['load_date'] == today])
-        temp_dict['total_open_maverick_family_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'Family'])
-        temp_dict['total_new_maverick_family_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'Family' and open_cases['load_date'] == today])
-        temp_dict['total_open_maverick_juvenile_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'Juvenile'])
-        temp_dict['total_new_maverick_juvenile_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'Juvenile' and open_cases['load_date'] == today])
-        temp_dict['total_open_maverick_ols_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'OLS'])
-        temp_dict['total_new_maverick_ols_cases'] = len(open_cases[open_cases['County'] == 'Maverick' and open_cases['Case Type'] == 'OLS' and open_cases['load_date'] == today])
+        temp_dict['total_open_maverick_civil_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'Civil')])
+        temp_dict['total_new_maverick_civil_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'Civil') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_maverick_tax_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'Tax')])
+        temp_dict['total_new_maverick_tax_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'Tax') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_maverick_family_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'Family')])
+        temp_dict['total_new_maverick_family_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'Family') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_maverick_juvenile_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'Juvenile')])
+        temp_dict['total_new_maverick_juvenile_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'Juvenile') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_maverick_ols_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'OLS')])
+        temp_dict['total_new_maverick_ols_cases'] = len(open_cases[(open_cases['County'] == 'Maverick') & (open_cases['Case Type'] == 'OLS') & (open_cases['load_date'] == today)])
         #For Zavala county
-        temp_dict['total_open_zavala_civil_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'Civil'])
-        temp_dict['total_new_zavala_civil_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'Civil' and open_cases['load_date'] == today])
-        temp_dict['total_open_zavala_tax_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'Tax'])
-        temp_dict['total_new_zavala_tax_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'Tax' and open_cases['load_date'] == today])
-        temp_dict['total_open_zavala_family_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'Family'])
-        temp_dict['total_new_zavala_family_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'Family' and open_cases['load_date'] == today])
-        temp_dict['total_open_zavala_juvenile_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'Juvenile'])
-        temp_dict['total_new_zavala_juvenile_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'Juvenile' and open_cases['load_date'] == today])
-        temp_dict['total_open_zavala_ols_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'OLS'])
-        temp_dict['total_new_zavala_ols_cases'] = len(open_cases[open_cases['County'] == 'Zavala' and open_cases['Case Type'] == 'OLS' and open_cases['load_date'] == today])
+        temp_dict['total_open_zavala_civil_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'Civil')])
+        temp_dict['total_new_zavala_civil_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'Civil') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_zavala_tax_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'Tax')])
+        temp_dict['total_new_zavala_tax_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'Tax') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_zavala_family_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'Family')])
+        temp_dict['total_new_zavala_family_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'Family') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_zavala_juvenile_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'Juvenile')])
+        temp_dict['total_new_zavala_juvenile_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'Juvenile') & (open_cases['load_date'] == today)])
+        temp_dict['total_open_zavala_ols_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'OLS')])
+        temp_dict['total_new_zavala_ols_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['Case Type'] == 'OLS') & (open_cases['load_date'] == today)])
         
     #Stop here for testing, then add more data
 
@@ -146,7 +146,7 @@ def prepare_closed_cases(closed_cases):
     temp_dict['load_date'] = today
 
     #Get total number of open cases
-    temp_dict['total_newly_closed_cases'] = len(open_cases)
+    temp_dict['total_newly_closed_cases'] = len(closed_cases)
 
     #Get total number of open cases and number of newly opened cases in Dimmit county
     temp_dict['total_newly_closed_dimmit_cases'] = len(closed_cases[closed_cases['County'] == 'Dimmit'])
@@ -174,23 +174,23 @@ def prepare_closed_cases(closed_cases):
         temp_dict['total_newly_closed_juvenile_cases'] = len(closed_cases[closed_cases['Case Type'] == 'Juvenile'])
         temp_dict['total_newly_closed_ols_cases'] = len(closed_cases[closed_cases['Case Type'] == 'OLS'])
         #For Dimmit county
-        temp_dict['total_newly_closed_dimmit_civil_cases'] = len(closed_cases[closed_cases['County'] == 'Dimmit' and closed_cases['Case Type'] == 'Civil'])
-        temp_dict['total_newly_closed_dimmit_tax_cases'] = len(closed_cases[closed_cases['County'] == 'Dimmit' and closed_cases['Case Type'] == 'Tax'])
-        temp_dict['total_newly_closed_dimmit_family_cases'] = len(closed_cases[closed_cases['County'] == 'Dimmit' and closed_cases['Case Type'] == 'Family'])
-        temp_dict['total_newly_closed_dimmit_juvenile_cases'] = len(closed_cases[closed_cases['County'] == 'Dimmit' and closed_cases['Case Type'] == 'Juvenile'])
-        temp_dict['total_newly_closed_dimmit_ols_cases'] = len(closed_cases[closed_cases['County'] == 'Dimmit' and closed_cases['Case Type'] == 'OLS'])
+        temp_dict['total_newly_closed_dimmit_civil_cases'] = len(closed_cases[(closed_cases['County'] == 'Dimmit') & (closed_cases['Case Type'] == 'Civil')])
+        temp_dict['total_newly_closed_dimmit_tax_cases'] = len(closed_cases[(closed_cases['County'] == 'Dimmit') & (closed_cases['Case Type'] == 'Tax')])
+        temp_dict['total_newly_closed_dimmit_family_cases'] = len(closed_cases[(closed_cases['County'] == 'Dimmit') & (closed_cases['Case Type'] == 'Family')])
+        temp_dict['total_newly_closed_dimmit_juvenile_cases'] = len(closed_cases[(closed_cases['County'] == 'Dimmit') & (closed_cases['Case Type'] == 'Juvenile')])
+        temp_dict['total_newly_closed_dimmit_ols_cases'] = len(closed_cases[(closed_cases['County'] == 'Dimmit') & (closed_cases['Case Type'] == 'OLS')])
         #For Maverick county
-        temp_dict['total_newly_closed_maverick_civil_cases'] = len(closed_cases[closed_cases['County'] == 'Maverick' and closed_cases['Case Type'] == 'Civil'])
-        temp_dict['total_newly_closed_maverick_tax_cases'] = len(closed_cases[closed_cases['County'] == 'Maverick' and closed_cases['Case Type'] == 'Tax'])
-        temp_dict['total_newly_closed_maverick_family_cases'] = len(closed_cases[closed_cases['County'] == 'Maverick' and closed_cases['Case Type'] == 'Family'])
-        temp_dict['total_newly_closed_maverick_juvenile_cases'] = len(closed_cases[closed_cases['County'] == 'Maverick' and closed_cases['Case Type'] == 'Juvenile'])
-        temp_dict['total_newly_closed_maverick_ols_cases'] = len(closed_cases[closed_cases['County'] == 'Maverick' and closed_cases['Case Type'] == 'OLS'])
+        temp_dict['total_newly_closed_maverick_civil_cases'] = len(closed_cases[(closed_cases['County'] == 'Maverick') & (closed_cases['Case Type'] == 'Civil')])
+        temp_dict['total_newly_closed_maverick_tax_cases'] = len(closed_cases[(closed_cases['County'] == 'Maverick') & (closed_cases['Case Type'] == 'Tax')])
+        temp_dict['total_newly_closed_maverick_family_cases'] = len(closed_cases[(closed_cases['County'] == 'Maverick') & (closed_cases['Case Type'] == 'Family')])
+        temp_dict['total_newly_closed_maverick_juvenile_cases'] = len(closed_cases[(closed_cases['County'] == 'Maverick') & (closed_cases['Case Type'] == 'Juvenile')])
+        temp_dict['total_newly_closed_maverick_ols_cases'] = len(closed_cases[(closed_cases['County'] == 'Maverick') & (closed_cases['Case Type'] == 'OLS')])
         #For Zavala county
-        temp_dict['total_newly_closed_zavala_civil_cases'] = len(closed_cases[closed_cases['County'] == 'Zavala' and closed_cases['Case Type'] == 'Civil'])
-        temp_dict['total_newly_closed_zavala_tax_cases'] = len(closed_cases[closed_cases['County'] == 'Zavala' and closed_cases['Case Type'] == 'Tax'])
-        temp_dict['total_newly_closed_zavala_family_cases'] = len(closed_cases[closed_cases['County'] == 'Zavala' and closed_cases['Case Type'] == 'Family'])
-        temp_dict['total_newly_closed_zavala_juvenile_cases'] = len(closed_cases[closed_cases['County'] == 'Zavala' and closed_cases['Case Type'] == 'Juvenile'])
-        temp_dict['total_newly_closed_zavala_ols_cases'] = len(closed_cases[closed_cases['County'] == 'Zavala' and closed_cases['Case Type'] == 'OLS'])
+        temp_dict['total_newly_closed_zavala_civil_cases'] = len(closed_cases[(closed_cases['County'] == 'Zavala') & (closed_cases['Case Type'] == 'Civil')])
+        temp_dict['total_newly_closed_zavala_tax_cases'] = len(closed_cases[(closed_cases['County'] == 'Zavala') & (closed_cases['Case Type'] == 'Tax')])
+        temp_dict['total_newly_closed_zavala_family_cases'] = len(closed_cases[(closed_cases['County'] == 'Zavala') & (closed_cases['Case Type'] == 'Family')])
+        temp_dict['total_newly_closed_zavala_juvenile_cases'] = len(closed_cases[(closed_cases['County'] == 'Zavala') & (closed_cases['Case Type'] == 'Juvenile')])
+        temp_dict['total_newly_closed_zavala_ols_cases'] = len(closed_cases[(closed_cases['County'] == 'Zavala') & (closed_cases['Case Type'] == 'OLS')])
         
     #Stop here for testing, then add more data
 
@@ -249,6 +249,6 @@ def update_historical_table(current_open_cases, newly_closed_cases):
         if last_load_date == str(date.today()):
             historical_sheet.update(most_recent_row, complete_historical_df.values.tolist())
         else:
-            historical_sheet.update(next_available_row, comoplete_historical_df.values.tolist())
+            historical_sheet.update(next_available_row, complete_historical_df.values.tolist())
 
     return
