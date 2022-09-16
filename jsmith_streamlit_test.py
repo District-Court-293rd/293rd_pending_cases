@@ -181,7 +181,7 @@ if page_choice == "Update Pending Reports":
                 #Drop all entries where closed date does not equal today's date
                 newly_closed_civil_cases = newly_closed_civil_cases[newly_closed_civil_cases['Closed Date'] == str(date.today())]
                 #Get all open civil cases
-                open_civil_cases = get_spreadsheet_data('Civil Cases', credentials)
+                open_civil_cases = get_spreadsheet_data('test_civil_cases', credentials)
                 #Update historical data
                 jsmith_historical.update_historical_table(open_civil_cases, newly_closed_civil_cases)
             
@@ -195,7 +195,7 @@ if page_choice == "Update Pending Reports":
             newly_closed_criminal_cases = get_spreadsheet_data('Closed Criminal Cases', credentials)
             if len(newly_closed_criminal_cases) > 0:
                 #Get all open criminal cases
-                open_criminal_cases = get_spreadsheet_data('Criminal Cases', credentials)
+                open_criminal_cases = get_spreadsheet_data('test_criminal_cases', credentials)
                 #Drop all entries where closed date does not equal today's date
                 newly_closed_criminal_cases = newly_closed_criminal_cases[newly_closed_criminal_cases['Closed Date'] == str(date.today())]
                 #Update historical data
