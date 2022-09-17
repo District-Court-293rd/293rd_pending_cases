@@ -152,8 +152,8 @@ def prepare_closed_cases(closed_cases):
     temp_dict['total_newly_closed_zavala_cases'] = len(closed_cases[closed_cases['County'] == 'Zavala'])
 
     #For testing, print the closed_cases dataframe and the length
-    st.info(len(closed_cases))
-    st.info(closed_cases)
+    st.info(closed_cases[0])
+    st.info(closed_cases['Case Type'][0])
 
     #Get counts of case type per day and per county
     if closed_cases['Case Type'][0] == 'Criminal':

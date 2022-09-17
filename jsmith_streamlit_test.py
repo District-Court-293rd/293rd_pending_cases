@@ -180,9 +180,6 @@ if page_choice == "Update Pending Reports":
             if len(newly_closed_civil_cases ) > 0:
                 #Drop all entries where closed date does not equal today's date
                 newly_closed_civil_cases = newly_closed_civil_cases[newly_closed_civil_cases['Closed Date'] == str(date.today())]
-                #For testing, print the newly_closed_civil_cases df and get the length
-                st.info(len(newly_closed_civil_cases))
-                st.info(newly_closed_civil_cases)
                 #Get all open civil cases
                 open_civil_cases = get_spreadsheet_data('test_civil_cases', credentials)
                 #Update historical data
