@@ -55,7 +55,7 @@ def prepare_open_cases(open_cases):
     temp_dict['total_new_zavala_cases'] = len(open_cases[(open_cases['County'] == 'Zavala') & (open_cases['load_date'] == today)])
 
     #Get counts of case type per day and per county
-    if open_cases['Case Type'][0] == 'Criminal':
+    if open_cases['Case Type'].iloc[0] == 'Criminal':
         #Since all cases are criminal type for criminal PDF uploads, totals will be the same as above
         #For Dimmit county
         temp_dict['total_open_dimmit_crim_cases'] = temp_dict['total_open_dimmit_cases']
@@ -151,9 +151,6 @@ def prepare_closed_cases(closed_cases):
     #Get total number of open cases and number of newly opened cases in Zavala county
     temp_dict['total_newly_closed_zavala_cases'] = len(closed_cases[closed_cases['County'] == 'Zavala'])
 
-    #For testing, print the closed_cases dataframe and the length
-    st.info(closed_cases['Case Type'].iloc[0])
-
     #Get counts of case type per day and per county
     if closed_cases['Case Type'].iloc[0] == 'Criminal':
         #Since all cases are criminal type for criminal PDF uploads, totals will be the same as above
@@ -216,10 +213,6 @@ def update_historical_table(current_open_cases, newly_closed_cases):
 
     #Prepare the closed cases dataframe and turn it into a time series df, resampled for a single day
     prepared_closed_cases = prepare_closed_cases(newly_closed_cases)
-
-    #For testing
-    st.info(prepared_open_cases.columns)
-    st.info(prepared_closed_cases.columns)
 
     #Merge the two prepared time series dataframes on the common datetime index 'load_date'
     complete_historical_df = prepared_open_cases.merge(right = prepared_closed_cases, how = 'inner', on = 'load_date')
