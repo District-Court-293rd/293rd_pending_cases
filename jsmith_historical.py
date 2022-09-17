@@ -153,10 +153,10 @@ def prepare_closed_cases(closed_cases):
 
     #For testing, print the closed_cases dataframe and the length
     st.info(closed_cases[0])
-    st.info(closed_cases['Case Type'][0])
+    st.info(closed_cases['Case Type'].iloc[0])
 
     #Get counts of case type per day and per county
-    if closed_cases['Case Type'][0] == 'Criminal':
+    if closed_cases['Case Type'].iloc[0] == 'Criminal':
         #Since all cases are criminal type for criminal PDF uploads, totals will be the same as above
         #For Dimmit county
         temp_dict['total_newly_closed_dimmit_crim_cases'] = temp_dict['total_newly_closed_dimmit_cases']
