@@ -2,9 +2,9 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import gspread
-#from oauth2client.service_account import ServiceAccountCredentials
 import jsmith_acquire
 import jsmith_prepare
+import jsmith_historical
 
 credentials = {
   "type": st.secrets["type"],
@@ -41,6 +41,24 @@ def convert_to_bool(value):
     else:
         return ''
 
+def find_next_available_row(worksheet):
+    """
+    This function takes in a google spreadsheet and finds the first available row. It will return a string representing the first
+    empty cell in the first column.
+
+    Parameter:
+        - worksheet: The google sheet you wish to find the first available row for
+
+    Returns:
+        - str: The first available cell in the first row. Represented in A1 format
+    """
+    #Count the number of unavailable rows
+    num_unavailable_rows = len(list(worksheet.col_values(1)))
+
+    #Add one and create the string
+    first_available_row = 'A' + str(num_unavailable_rows + 1)
+
+    return first_available_row
 
 def update_spreadsheet(file_name, content):
     """
@@ -58,13 +76,9 @@ def update_spreadsheet(file_name, content):
     if df['Case Type'][0] == 'Criminal':
         #Add to criminal cases tab
         update_criminal_cases_dataframe(df)
-
-    elif df['Case Type'][0] == 'Civil' or df['Case Type'][0] == 'Tax':
+    else:
         #Add to civil cases tab
         update_civil_cases_dataframe(df)
-
-    else:
-        print('Something went wrong in the loop!')
         
 <<<<<<< HEAD
     
@@ -94,20 +108,48 @@ def update_civil_cases_dataframe(new_civil_df):
     #Civil cases go to the 'Civil Cases' tab
     civil_sheet = gsheet.worksheet('test_civil_cases')
 
+    #Closed cases go to the 'Closed Civil Cases' tab
+    closed_sheet = gsheet.worksheet('Closed Civil Cases')
+
     #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
     current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
+
+    #Before appending the new cases, create the closed cases df and udpate the closed cases tab
+    if len(current_civil_df) > 0:
+        #First, Verify that all Cause Numbers are represented as strings
+        new_civil_df['Cause Number'] = new_civil_df['Cause Number'].astype(str).str.strip()
+        current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str).str.strip()
+        #Create closed cases df
+        closed_cases_df = current_civil_df[~(current_civil_df['Cause Number'].isin(new_civil_df['Cause Number']))]
+        #Make sure the closed cases are only cases from the same county as the new_civil_df
+        closed_cases_df = closed_cases_df[closed_cases_df['County'] == new_civil_df['County'][0]]
+        #Remove closed cases from current_civil_df
+        current_civil_df = current_civil_df[~(current_civil_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
+        #Prepare closed cases df
+        closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
+        #Find next available row
+        next_available_row = find_next_available_row(closed_sheet)
+        #If any cases were closed, add the newly closed cases to the 'Closed Civil Cases' tab
+        if len(closed_cases_df) > 0:
+            #If the first available row is the first row in the sheet, include the column names when updating
+            #Otherwise, only send the values
+            if next_available_row == 'A1':
+                closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
+            else:
+                closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
+
 
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
     #Verify that all Cause Numbers are represented as strings
-    current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str)
+    current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str).str.strip()
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
 
-    #Convert the google boolean values for the 'File Has Image' column to python booleans
-    current_civil_df['File Has Image'] = current_civil_df['File Has Image'].apply(convert_to_bool)
+    #Convert the google boolean values for the 'On Track' column to python booleans
+    current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
@@ -117,6 +159,9 @@ def update_civil_cases_dataframe(new_civil_df):
 
     #Now sort by county and then by cause number
     current_civil_df = current_civil_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
+
+    #Update the 'Months Ahead or Behind' column
+    current_civil_df['Months Ahead Or Behind'] = current_civil_df['Docket Date'].apply(jsmith_prepare.get_months_ahead_or_behind)
 
     #Clear what's currently on the Civil Cases worksheet
     civil_sheet.clear()
@@ -149,20 +194,47 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Criminal cases go to the 'Criminal Cases' tab
     crim_sheet = gsheet.worksheet('test_criminal_cases')
 
+    #Closed cases go to the 'Closed Criminal Cases' tab
+    closed_sheet = gsheet.worksheet('Closed Criminal Cases')
+
     #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
+
+    #Before appending the new cases, create the closed cases df and udpate the closed cases tab
+    if len(current_crim_df) > 0:
+        #First, Verify that all Cause Numbers are represented as strings
+        new_crim_df['Cause Number'] = new_crim_df['Cause Number'].astype(str).str.strip()
+        current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
+        #Create closed cases df
+        closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
+        #Make sure the closed cases are only cases from the same county as the new_crim_df
+        closed_cases_df = closed_cases_df[closed_cases_df['County'] == new_crim_df['County'][0]]
+        #Remove closed cases from current_crim_df
+        current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
+        #Prepare closed cases df
+        closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
+        #Find the next available row
+        next_available_row = find_next_available_row(closed_sheet)
+        #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
+        if len(closed_cases_df) > 0:
+            #If the first available row is the first row in the sheet, include the column names when updating
+            #Otherwise, only send the values
+            if next_available_row == 'A1':
+                closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
+            else:
+                closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
 
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
     #Verify that all Cause Numbers are represented as strings
-    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str)
+    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
 
-    #Convert the google boolean values for the 'File Has Image' column to python booleans
-    current_crim_df['File Has Image'] = current_crim_df['File Has Image'].apply(convert_to_bool)
+    #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
+    current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
@@ -172,6 +244,9 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Now sort by county and then by cause number
     current_crim_df = current_crim_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
+
+    #Update the 'Months Ahead or Behind' column
+    current_crim_df['Months Ahead Or Behind'] = current_crim_df['Docket Date'].apply(jsmith_prepare.get_months_ahead_or_behind)
 
     #Clear what's currently on the Criminal Cases worksheet
     crim_sheet.clear()

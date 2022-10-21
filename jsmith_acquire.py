@@ -217,7 +217,7 @@ def extract_civil_pdf_data(text):
     #Remove headers from all subsequent pages
     text = re.sub(r"""COUNTY OF .{6,8} 293RD DISTRICT COURT CIVIL PENDING CASES AS OF .{10}
 
-                                           RAN ON .{20,26} PAGE: \d{1,3}
+\s{43,45}RAN ON .{20,26} PAGE: \d{1,3}
 
         CAUSE #             FILE DATE CAUSE OF ACTION           DOCKT DATE  DOCKET TYPE       ANS FILED  CR CASE #
 

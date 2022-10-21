@@ -12,7 +12,7 @@ def get_case_type(value):
         -value: A string for the cause number
         
     Returns:
-        -type: A string for Civil, Criminal, or Tax
+        -type: A string for Civil, Juvenile, OLS, or Tax
     """
     
     #Check for TX type first
@@ -20,19 +20,20 @@ def get_case_type(value):
         return 'Tax'
     elif value.upper().count('CV') > 0:
         return 'Civil'
-    elif value.upper().count('CR') > 0:
-        return 'Criminal'
+    elif value.upper().count('JU') > 0:
+        return 'Juvenile'
+    elif value.upper().count('OLS') > 0:
+        return 'OLS'
     else:
         #Since there are many civil cases that don't follow the same formatting, 
         #I will assume that anything not matching above is a civil case.
         return 'Civil'
 
-
 #Build a function to calculate the days passed and determine if a case is on track or not
 def check_on_track(value):
     """
     This function takes in a datetime object and calculates the number of days between it and the current date.
-    If that number is greater than 90 days (about 3 months), then this function returns False to indicate that 
+    If that number is greater than 0 days (meaning the docket date is in the past), then this function returns False to indicate that 
     a case is NOT on track. Otherwise, it returns True.
     
     Parameter:
@@ -61,11 +62,82 @@ def check_on_track(value):
     #Convert the datetime object to an integer
     days_passed = days_passed // pd.Timedelta('1d')
     
-    #If days passed > 90, case is not on track
-    if days_passed > 90:
+    #If days passed > 0, case is not on track
+    if days_passed > 0:
         return False
     else:
         return True
+
+def get_months_ahead_or_behind(value):
+    """
+    This function takes in the docket date, converts it to a datetime object, and calculates the number of months between it and the current date.
+    This feature was requested by Lupita so she can filter for cases where the docket date is scheduled some number of months in the future.
+    It will also allow her to filter for results based on how many months late a case is.
+
+    Parameter:
+        -value: This is the case Docket Date
+
+    Returns:
+        -string: This is a categorical label of the number of months between the docket date and the current date. 
+                 Negative numbers represent docket dates in the past.
+    """
+    #Check for docket date. If none, return "No Docket Date"
+    if value == '':
+        return "No Docket Date"
+    
+    #Get today's date
+    today = date.today()
+    
+    #Convert it to datetime object
+    today = pd.to_datetime(today)
+    
+    #Convert current value to datetime object
+    value = pd.to_datetime(value)
+    
+    #Calculate months ahead or behind
+    num_months = ((int(value.strftime("%Y")) - int(today.strftime("%Y"))) * 12) + (int(value.strftime("%m")) - int(today.strftime("%m"))) 
+
+    #Separate into categories based on the number of months ahead or behind
+    if num_months < -12:
+        return "More Than 12 Months Late"
+    elif num_months < -6 and num_months >= -12:
+        return "Between 6 and 12 Months Late"
+    elif num_months < -3 and num_months >= -6:
+        return "Between 3 and 6 Months Late"
+    elif num_months < -1 and num_months >= -3:
+        return "Between 1 and 3 Months Late"
+    elif num_months < 0 and num_months >= -1:
+        return "1 Month Late"
+    elif num_months == 0:
+        return "Current"
+    elif num_months > 0 and num_months <= 1:
+        return "1 Month Ahead"
+    elif num_months > 1 and num_months <= 3:
+        return "Between 1 and 3 Months Ahead"
+    elif num_months > 3 and num_months <= 6:
+        return "Between 3 and 6 Months Ahead"
+    elif num_months > 6 and num_months <= 12:
+        return "Between 6 and 12 Months Ahead"
+    else:
+        return "More Than 12 Months Ahead"
+    
+def check_cause_number_format(value):
+    """
+    This function takes in the cause number and checks the format. If the format is wrong, the function returns true. Otherwise, it returns false.
+
+    Parameter:
+        - value: The cause number of the case
+
+    Returns:
+        -Boolean: True if the cause number is bad, false otherwise
+    """
+    #Check the format using regex search function
+    match = re.search(r'\d{2}-\d{2}-\d{5}-[A-Z]{3,5}', value)
+
+    if match == None:
+        return True
+    else:
+        return False
 
 def convert_name_list_to_string(name_list):
     """
@@ -83,6 +155,43 @@ def convert_name_list_to_string(name_list):
     name_string = '\n'.join(name_list)
 
     return name_string
+
+def prepare_closed_cases(closed_cases_df):
+    """
+    This function takes in a dataframe of newly closed cases and prepares them to be added to the appropriate closed cases tab.
+    It will set the closed date to the current date, set case status to closed, calculate the number of days it took to get a docket date
+    as well as the number of days it took to close, and remove the 'Months ahead or behind' and 'On track' columns since they won't matter once a case
+    is closed.
+
+    Parameter:
+        -closed_cases_df: The dataframe containing the newly closed cases
+
+    Returns:
+        -closed_cases_df: The dataframe containing the newly closed cases with the updated information
+    """
+
+    #Set status to closed
+    closed_cases_df['Status'] = 'Closed'
+
+    #Set the closed date to the current date
+    closed_cases_df['Closed Date'] = str(date.today())
+
+    #Calculate the number of days to the final docket date
+    #file_date = pd.to_datetime(closed_cases_df['File Date'])
+    #docket_date = pd.to_datetime(closed_cases_df['Docket Date'])
+    #closed_date = pd.to_datetime(closed_cases_df['Closed Date'])
+
+    #days_to_docket_date = (docket_date - file_date) // pd.Timedelta('1d')
+    #closed_cases_df['Days To Docket Date'] = days_to_docket_date
+
+    #Calculate the number of days to the final closing date
+    #days_to_close = (closed_date - file_date) // pd.Timedelta('1d')
+    #closed_cases_df['Days To Close'] = days_to_close
+
+    #Drop the 'Months ahead or behind' and 'On track' columns
+    closed_cases_df = closed_cases_df.drop(['On Track', 'Months Ahead Or Behind'], axis = 1)
+
+    return closed_cases_df
 
 def prepare_dataframe(file_name, df):
     """
@@ -106,21 +215,22 @@ def prepare_dataframe(file_name, df):
     
     #Create On Track column
     df['On Track'] = df['Docket Date'].apply(check_on_track)
+
+    #Create Months to Docket Date column. The actual values will be created later since they need to be updated for all
+    #open cases every time a new report is uploaded.
+    df['Months Ahead Or Behind'] = ''
+
+    #Create Bad Cause Number column
+    df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)
     
-    #Create Status column. Defaults to Pending
-    df['Status'] = 'Pending'
+    #Create Status column. Defaults to Open
+    df['Status'] = 'Open'
     
-    #Create File Has Image column
-    df['File Has Image'] = ''
-    
-    #Create Disposed Date column
-    df['Disposed Date'] = ''
-    
-    #Create Finding column
-    df['Finding'] = ''
-    
-    #Create Finding Date column
-    df['Finding Date'] = ''
+    #Create Closed Date column
+    df['Closed Date'] = ''
+
+    #Create Load Date column
+    df['load_date'] = str(date.today())
 
     #Convert the lists of names in the civil cases dataframe to single strings with each name separated by a new line
     if df['Case Type'][0] != 'Criminal':
