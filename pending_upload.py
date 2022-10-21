@@ -1,9 +1,46 @@
+import streamlit as st
 import numpy as np
 import pandas as pd
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+#from oauth2client.service_account import ServiceAccountCredentials
 import jsmith_acquire
 import jsmith_prepare
+
+credentials = {
+  "type": st.secrets["type"],
+  "project_id": st.secrets["project_id"],
+  "private_key_id": st.secrets["private_key_id"],
+  "private_key" : st.secrets["private_key"],
+  "client_email": st.secrets["client_email"],
+  "client_id": st.secrets["client_id"],
+  "auth_uri": st.secrets["auth_uri"],
+  "token_uri": st.secrets["token_uri"],
+  "auth_provider_x509_cert_url": st.secrets["auth_provider_x509_cert_url"],
+  "client_x509_cert_url": st.secrets["client_x509_cert_url"]
+}
+
+def convert_to_bool(value):
+    """
+    This function takes in a string. The string could be "TRUE", "FALSE", or empty. This funciton will replace the given string
+    with the appropriate boolean value. This is necessary because the boolean values read in from the google spreadsheet is 
+    represented as a string. So when that value is uploaded back to the spreadsheet, the data validation doesn't recognize it
+    and flags the value. This should fix that problem.
+
+    Parameter:
+        - value: "TRUE", "FALSE", or nothing
+
+    Returns:
+        - boolean: The appropriate boolean value for the given string. If the given string is empty, it will return an empty string
+    """
+
+    #Use an if else statement to assign the proper boolean values
+    if value == "TRUE" or value == True:
+        return True
+    elif value == "FALSE" or value == False:
+        return False
+    else:
+        return ''
+
 
 def update_spreadsheet(file_name, content):
     """
@@ -16,7 +53,7 @@ def update_spreadsheet(file_name, content):
     #Extract the PDF data
     df = jsmith_acquire.build_dataframe(file_name, content)
     #Prepare the df and add new columns
-    df = jsmith_prepare.prepare_dataframe(df)
+    df = jsmith_prepare.prepare_dataframe(file_name, df)
 
     if df['Case Type'][0] == 'Criminal':
         #Add to criminal cases tab
@@ -29,7 +66,10 @@ def update_spreadsheet(file_name, content):
     else:
         print('Something went wrong in the loop!')
         
+<<<<<<< HEAD
     
+=======
+>>>>>>> 6169e746238dc7409e802d3eac3db0043536ec79
     return
     
 def update_civil_cases_dataframe(new_civil_df):
@@ -46,10 +86,10 @@ def update_civil_cases_dataframe(new_civil_df):
     """
 
     #Set up credentials to interact with Google Sheets
-    gc = gspread.service_account(filename='pending_cases.json')
+    gc = gspread.service_account_from_dict(credentials)
     
     #Open 'Pending Reports' Google Sheet By Name
-    gsheet = gc.open('Pending Reportds')
+    gsheet = gc.open('Pending Reports')
     
     #Civil cases go to the 'Civil Cases' tab
     civil_sheet = gsheet.worksheet('test_civil_cases')
@@ -60,6 +100,15 @@ def update_civil_cases_dataframe(new_civil_df):
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
+    #Verify that all Cause Numbers are represented as strings
+    current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str)
+
+    #Convert the google boolean values for the 'On Track' column to python booleans
+    current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
+
+    #Convert the google boolean values for the 'File Has Image' column to python booleans
+    current_civil_df['File Has Image'] = current_civil_df['File Has Image'].apply(convert_to_bool)
+
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
 
@@ -69,7 +118,10 @@ def update_civil_cases_dataframe(new_civil_df):
     #Now sort by county and then by cause number
     current_civil_df = current_civil_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
 
-    #Now upload to appropriate tabs in 'Pending Reports' spreadsheet and leave a message
+    #Clear what's currently on the Civil Cases worksheet
+    civil_sheet.clear()
+
+    #Now upload to Civil Cases worksheet in 'Pending Reports' spreadsheet and leave a message
     civil_sheet.update([current_civil_df.columns.values.tolist()] + current_civil_df.values.tolist())
     print('Civil Cases Updated!')
 
@@ -89,7 +141,7 @@ def update_criminal_cases_dataframe(new_crim_df):
     """
 
     #Set up credentials to interact with Google Sheets
-    gc = gspread.service_account(filename='pending_cases.json')
+    gc = gspread.service_account_from_dict(credentials)
     
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open("Pending Reports")
@@ -103,6 +155,15 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
+    #Verify that all Cause Numbers are represented as strings
+    current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str)
+
+    #Convert the google boolean values for the 'On Track' column to python booleans
+    current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
+
+    #Convert the google boolean values for the 'File Has Image' column to python booleans
+    current_crim_df['File Has Image'] = current_crim_df['File Has Image'].apply(convert_to_bool)
+
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
 
@@ -112,8 +173,15 @@ def update_criminal_cases_dataframe(new_crim_df):
     #Now sort by county and then by cause number
     current_crim_df = current_crim_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
 
-    #Now upload to appropriate tabs in 'Pending Reports' spreadsheet and leave a message
+    #Clear what's currently on the Criminal Cases worksheet
+    crim_sheet.clear()
+
+    #Now upload to Criminal Cases worksheet in 'Pending Reports' spreadsheet and leave a message
     crim_sheet.update([current_crim_df.columns.values.tolist()] + current_crim_df.values.tolist())
     print('Criminal Cases Updated!')
 
+<<<<<<< HEAD
     return
+=======
+    return
+>>>>>>> 6169e746238dc7409e802d3eac3db0043536ec79
