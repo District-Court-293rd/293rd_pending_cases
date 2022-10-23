@@ -171,9 +171,6 @@ def prepare_dataframe(file_name, df):
     
     #Create Status column. Defaults to Open
     df['Status'] = 'Open'
-    
-    #Create Closed Date column
-    df['Closed Date'] = ''
 
     #Create Load Date column
     df['load_date'] = str(date.today())

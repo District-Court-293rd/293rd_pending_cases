@@ -158,3 +158,6 @@ with page_content.container():
 
         #Update message
         progress_message_container.header("Complete! All Files Processed Successfully!")
+
+        #Clear list of uploaded files
+        file_objects.clear()
