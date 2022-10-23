@@ -97,7 +97,7 @@ with page_content.container():
         file_objects = st.file_uploader("File Names Must Include Either 'CV' or 'CR' for Civil and Criminal Cases, Respectively.", type = 'pdf', accept_multiple_files = True)
         submitted = st.form_submit_button("Upload")
 
-    if submitted and file_objects is not None:
+    if submitted and len(file_objects) > 0:
         #Give message for successful upload and begin processing
         st.write("Files Uploaded!")
 
