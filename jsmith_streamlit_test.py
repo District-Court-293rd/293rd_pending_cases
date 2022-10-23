@@ -8,10 +8,7 @@ from pdfminer3.converter import TextConverter
 import io
 import os
 import pending_upload
-import jsmith_historical
-from datetime import date
 import gspread
-import plotly.express as px
 
 credentials = {
   "type": st.secrets["type"],
@@ -83,352 +80,83 @@ def get_spreadsheet_data(sheet_name, credentials):
 
 st.set_page_config(
      page_title="Pending Reports",
-     initial_sidebar_state="expanded"
  )
-
-#Create sidebar menu
-page_choice = st.sidebar.selectbox(
-    "Select Page:",
-    ("Update Pending Reports", "Civil Dashboard", "Criminal Dashboard", "Case Lookup")
-)
 
 #Create a placeholder for the page content
 page_content = st.empty()
 
 ######################################### Update Pending Reports ##########################################
 
-if page_choice == "Update Pending Reports":
-    #Create container for update page content
-    with page_content.container():
+#Create container for update page content
+with page_content.container():
 
-        #Start with files_uploaded equal to False
-        files_uploaded = False
+    #Start with files_uploaded equal to False
+    files_uploaded = False
 
-        #Title
-        st.title("Update Pending Reports")
+    #Title
+    st.title("Update Pending Reports")
 
-        #Get the file object
-        file_objects = st.file_uploader("File Names Must Include Either 'CR' or 'CV' for Criminal and Civil Cases, Respectively.", type = 'pdf', accept_multiple_files = True)
+    #Get the file object
+    file_objects = st.file_uploader("File Names Must Include Either 'CR' or 'CV' for Criminal and Civil Cases, Respectively.", type = 'pdf', accept_multiple_files = True)
 
-        #Only create and update progress bar if files have been uploaded
-        if len(file_objects) > 0:
-            #Create a container for the progress bar message
-            progress_message_container = st.empty()
+    #Only create and update progress bar if files have been uploaded
+    if len(file_objects) > 0:
+        #Create a container for the progress bar message
+        progress_message_container = st.empty()
 
-            #Create a progress bar for visual verification that something is happening
-            progress_message_container.header("Please Wait, Processing In Progress:")
-            progress_bar = st.progress(0)
+        #Create a progress bar for visual verification that something is happening
+        progress_message_container.header("Please Wait, Processing In Progress:")
+        progress_bar = st.progress(0)
 
-            #Use the remainder of 100 / the number of uploaded files to start the progress bar
-            bar_value = int(100 % (len(file_objects) + 2))
+        #Use the remainder of 100 / the number of uploaded files to start the progress bar
+        bar_value = int(100 % len(file_objects))
 
-            #Update progress bar
-            progress_bar.progress(bar_value)
+        #Update progress bar
+        progress_bar.progress(bar_value)
 
-            #How much progress should be made per file? Will need to show progress when updating historical data as well
-            progress_per_file = int((100 - bar_value) / (len(file_objects) + 2))
+        #How much progress should be made per file? Will need to show progress when updating historical data as well
+        progress_per_file = int((100 - bar_value) / len(file_objects))
 
-            #Also create a container for the info messages
-            info_container = st.empty()
+        #Also create a container for the info messages
+        info_container = st.empty()
 
-        #Use a for loop to iterate through the uploaded files
-        for file_object in file_objects:
+    #Use a for loop to iterate through the uploaded files
+    for file_object in file_objects:
 
-            if file_object is not None:
+        if file_object is not None:
 
-                #Inform the user which file is being processed
-                info_container.info("Began Processing " + file_object.name)
+            #Inform the user which file is being processed
+            info_container.info("Began Processing " + file_object.name)
 
-                #Save the file. Will be deleted after data is uploaded
-                with open(file_object.name, 'wb') as f:
-                    f.write(file_object.getbuffer())
+            #Save the file. Will be deleted after data is uploaded
+            with open(file_object.name, 'wb') as f:
+                f.write(file_object.getbuffer())
 
-                #Create content container
-                content = get_file_content(file_object.name)
+            #Create content container
+            content = get_file_content(file_object.name)
 
-                #Build and prepare the dataframe, then update the spreadsheet
-                pending_upload.update_spreadsheet(file_object.name, content)
+            #Build and prepare the dataframe, then update the spreadsheet
+            pending_upload.update_spreadsheet(file_object.name, content)
 
-                #Delete the saved file. Leave messages for success or failure
-                if os.path.exists(file_object.name):
-                    os.remove(file_object.name)
+            #Delete the saved file. Leave messages for success or failure
+            if os.path.exists(file_object.name):
+                os.remove(file_object.name)
 
-                    #Leave a success message
-                    st.success("Pending Reports was successfully updated with " + file_object.name)
+                #Leave a success message
+                st.success("Pending Reports was successfully updated with " + file_object.name)
                 
-                else:
-                    st.error("Could Not Delete File " + file_object.name)
-
-                #Clear container
-                info_container.empty()
-
             else:
-                #Print an error message
-                st.error("A File Was Not Uploaded Correctly. Please Try Again")
+                st.error("Could Not Delete File " + file_object.name)
 
-            #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
-            #Add a files_uploaded flag for use in the next section
-            bar_value += progress_per_file
-            progress_bar.progress(bar_value)
-            files_uploaded = True
+            #Clear container
+            info_container.empty()
 
-        #If files were uploaded, processing is complete at this point. Now update historical data
-        if files_uploaded == True:
-            progress_message_container.header("Updating Civil Case Historical Data...")
-            #Get all closed civil cases. Eventually, I'd like to be able to only select the necessary columns instead of loading all closed cases ever
-            newly_closed_civil_cases = get_spreadsheet_data('Closed Civil Cases', credentials)
-            if len(newly_closed_civil_cases ) > 0:
-                #Drop all entries where closed date does not equal today's date
-                newly_closed_civil_cases = newly_closed_civil_cases[newly_closed_civil_cases['Closed Date'] == str(date.today())]
-                #Get all open civil cases
-                open_civil_cases = get_spreadsheet_data('test_civil_cases', credentials)
-                #Update historical data
-                jsmith_historical.update_historical_table(open_civil_cases, newly_closed_civil_cases)
-            
-            #Update progress bar and message
-            bar_value += progress_per_file
-            progress_bar.progress(bar_value)
-            progress_message_container.header("Updating Criminal Case Historical Data...")
-
-            #Now update criminal historical data
-            #Get all closed criminal cases. Eventually, I'd like to be able to only select the necessary columns instead of loading all closed cases ever
-            newly_closed_criminal_cases = get_spreadsheet_data('Closed Criminal Cases', credentials)
-            if len(newly_closed_criminal_cases) > 0:
-                #Get all open criminal cases
-                open_criminal_cases = get_spreadsheet_data('test_criminal_cases', credentials)
-                #Drop all entries where closed date does not equal today's date
-                newly_closed_criminal_cases = newly_closed_criminal_cases[newly_closed_criminal_cases['Closed Date'] == str(date.today())]
-                #Update historical data
-                jsmith_historical.update_historical_table(open_criminal_cases, newly_closed_criminal_cases)
-            
-            #Update progress bar and message
-            bar_value += progress_per_file
-            progress_bar.progress(bar_value)
-            progress_message_container.header("Complete! All Files Processed and Historical Data Updated!")
-            files_uploaded = False
-        
-################################################### Civil Dashboard ###################################################
-
-elif page_choice == 'Civil Dashboard':
-    #Create container for civil dashboard content
-    with page_content.container():
-
-        #Add county select box in the sidebar
-        county_choice = st.sidebar.selectbox(
-        "Select County:",
-        ("All", "Dimmit", "Maverick", "Zavala")
-        )
-
-        #Load the data for the civil dashboard
-        df = get_spreadsheet_data('test_civil_cases', credentials)
-
-        #Title
-        st.title("Civil Dashboard")
-
-        #Apply the county selection
-        if county_choice == 'Dimmit':
-            df = df[df['County'] == 'Dimmit']
-            st.subheader('Dimmit County')
-        elif county_choice == 'Maverick':
-            df = df[df['County'] == 'Maverick']
-            st.subheader('Maverick County')
-        elif county_choice == 'Zavala':
-            df = df[df['County'] == 'Zavala']
-            st.subheader('Zavala County')
         else:
-            st.subheader('All Counties')
+            #Print an error message
+            st.error("A File Was Not Uploaded Correctly. Please Try Again")
 
-        #Add horizontal line
-        st.markdown("***")
-
-        #Create first row of columns for general counts
-        col1, col2, col3 = st.columns(3)
-
-        col1.metric("Total Pending Cases", len(df[df['Status'] != 'Disposed']))
-        col2.metric("Total Civl Cases", len(df[ (df['Case Type'] == 'Civil') & (df['Status'] != 'Disposed') ]))
-        col3.metric("Total Tax Cases", len(df[ (df['Case Type'] == 'Tax') & (df['Status'] != 'Disposed') ]))
-
-        #Add horizontal line
-        st.markdown('***')
-
-        #Create second row of columns
-        col4, col5 = st.columns(2)
-
-        with col4:
-            #Create the dataframe
-            status_counts = df['Status'].value_counts()
-
-            #Add a title
-            st.write("Status Counts")
-
-            #Create a pie chart
-            status_chart = px.pie(status_counts, values = 'Status', 
-                                                 names = status_counts.index, 
-                                                 color = status_counts.index, 
-                                                 labels = {'index':'Status', 'Status':'Count'},
-                                                 hole = .65)
-            #Display the chart
-            st.plotly_chart(status_chart, use_container_width = True)
-
-        with col5:
-            #Create the dataframe
-            on_track_count = df['On Track'].value_counts()
-
-            #add a title
-            st.write("On Track")
-
-            #Create a pie chart
-            on_track_chart = px.pie(on_track_count, values = 'On Track', 
-                                                  names = on_track_count.index, 
-                                                  color = on_track_count.index, 
-                                                  labels = {'index':'On Track', 'On Track':'Count'},
-                                                  color_discrete_map = {'TRUE':'00CC96', 'FALSE':'royalblue'},
-                                                  hole = .65)
-            #Display the chart
-            st.plotly_chart(on_track_chart, use_container_width = True)
-        
-        #Add a horizontal line
-        st.markdown('***')
-
-        #Find the 10 most common Causes of Action
-        coa_df = df['Cause of Action'].value_counts().head(10)
-
-        #Build a bar chart
-        coa_chart = px.bar(coa_df,
-                             x = coa_df.index,
-                             y = 'Cause of Action',
-                             text_auto = True, 
-                             title = 'Top 10 Causes of Action',
-                             labels = {'index':'Cause of Action', 'Cause of Action':'Count'})
-        st.plotly_chart(coa_chart, use_container_width = True)
-
-        #Add a horizontal bar
-        st.markdown("***")
-
-        #Find the 10 most common docket types
-        d_type_df = df[df['Docket Type'] != '']['Docket Type'].value_counts().head(10)
-
-        #Build a bar chart
-        d_type_chart = px.bar(d_type_df,
-                                x = d_type_df.index,
-                                y = 'Docket Type',
-                                text_auto = True,
-                                title = 'Top 10 Docket Types',
-                                labels = {'index':'Docket Type', 'Docket Type':'Count'})
-        st.plotly_chart(d_type_chart, use_container_width = True)
-
-################################################### Criminal Dashboard ###################################################
-
-elif page_choice == 'Criminal Dashboard':
-    #Create container for criminal dashboard content
-    with page_content.container():
-
-        #Add county select box in the sidebar
-        county_choice = st.sidebar.selectbox(
-        "Select County:",
-        ("All", "Dimmit", "Maverick", "Zavala")
-        )
-
-        #Load the data for the civil dashboard
-        df = get_spreadsheet_data('test_criminal_cases', credentials)
-
-        #Title
-        st.title("Criminal Dashboard")
-
-        #Apply the county selection
-        if county_choice == 'Dimmit':
-            df = df[df['County'] == 'Dimmit']
-            st.subheader('Dimmit County')
-        elif county_choice == 'Maverick':
-            df = df[df['County'] == 'Maverick']
-            st.subheader('Maverick County')
-        elif county_choice == 'Zavala':
-            df = df[df['County'] == 'Zavala']
-            st.subheader('Zavala County')
-        else:
-            st.subheader('All Counties')
-
-        #Add horizontal line
-        st.markdown("***")
-
-        st.metric("Total Pending Cases", len(df[df['Status'] != 'Disposed']))
-
-        #Add horizontal line
-        st.markdown('***')
-
-        #Create second row of columns
-        crim_col1, crim_col2 = st.columns(2)
-
-        with crim_col1:
-            #Create the dataframe
-            status_counts = df['Status'].value_counts()
-
-            #Add a title
-            st.write("Status Counts")
-
-            #Create a pie chart
-            status_chart = px.pie(status_counts, values = 'Status', 
-                                                 names = status_counts.index, 
-                                                 color = status_counts.index, 
-                                                 labels = {'index':'Status', 'Status':'Count'},
-                                                 hole = .65)
-            #Display the chart
-            st.plotly_chart(status_chart, use_container_width = True)
-
-        with crim_col2:
-            #Create the dataframe
-            on_track_count = df['On Track'].value_counts()
-
-            #add a title
-            st.write("On Track")
-
-            #Create a pie chart
-            on_track_chart = px.pie(on_track_count, values = 'On Track', 
-                                                  names = on_track_count.index, 
-                                                  color = on_track_count.index, 
-                                                  labels = {'index':'On Track', 'On Track':'Count'},
-                                                  color_discrete_map = {'TRUE':'00CC96', 'FALSE':'royalblue'},
-                                                  hole = .65)
-            #Display the chart
-            st.plotly_chart(on_track_chart, use_container_width = True)
-        
-        #Add a horizontal line
-        st.markdown('***')
-
-        #Find the 10 most common Offenses
-        offense_df = df['Offense'].value_counts().head(10)
-
-        #Build a bar chart
-        offense_chart = px.bar(offense_df,
-                             x = offense_df.index,
-                             y = 'Offense',
-                             text_auto = True, 
-                             title = 'Top 10 Offenses',
-                             labels = {'index':'Offense', 'Offense':'Count'})
-        st.plotly_chart(offense_chart, use_container_width = True)
-
-        #Add a horizontal bar
-        st.markdown("***")
-
-        #Find the 10 most common Bondsman Names
-        bondsman_df = df[df['Bondsman Name'] != '']['Bondsman Name'].value_counts().head(10)
-
-        #Build a bar chart
-        bondsman_chart = px.bar(bondsman_df,
-                                x = bondsman_df.index,
-                                y = 'Bondsman Name',
-                                text_auto = True,
-                                title = 'Top 10 Bondsman Names',
-                                labels = {'index':'Bondsman Name', 'Bondsman Name':'Count'})
-        st.plotly_chart(bondsman_chart, use_container_width = True)
-
-################################################### Case Lookup ###################################################
-
-elif page_choice == 'Case Lookup':
-    #Create container for case lookup content
-    with page_content.container():
-
-        #Title
-        st.title("Case Lookup")
-
-        st.write("Under Construction")
+        #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
+        #Add a files_uploaded flag for use in the next section
+        bar_value += progress_per_file
+        progress_bar.progress(bar_value)
+        progress_message_container.header("Complete! All Files Processed Successfully!")

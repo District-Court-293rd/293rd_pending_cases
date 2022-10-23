@@ -1,13 +1,5 @@
-import numpy as np
 import pandas as pd
 import re
-from pdfminer3.layout import LAParams, LTTextBox
-from pdfminer3.pdfpage import PDFPage
-from pdfminer3.pdfinterp import PDFResourceManager
-from pdfminer3.pdfinterp import PDFPageInterpreter
-from pdfminer3.converter import PDFPageAggregator
-from pdfminer3.converter import TextConverter
-import io
 
 
 def build_dataframe(file_name, content):
@@ -35,7 +27,6 @@ def build_dataframe(file_name, content):
 
     return df
 
-
 #Create a function to identify combined cases in the civil cases PDF
 def check_for_combined_case(string):
     """
@@ -57,7 +48,7 @@ def check_for_combined_case(string):
         return False
 
 #Create a function that collects data from combined cases
-def collect_civil_case_data(case_info, county):
+def extract_civil_case_data(case_info, county):
     """
     This function takes in a list of strings that represent a single case. Each string may contain relevant information
     that will need to be collected, and added to a dictionary. That dictionary will then be added to a list 
@@ -127,7 +118,7 @@ def collect_civil_case_data(case_info, county):
                 combined_case_text.append(case_info[index])
 
             #Collect combined case data
-            combined_case = collect_civil_case_data(combined_case_text, county)
+            combined_case = extract_civil_case_data(combined_case_text, county)
 
             #Add the temp dictionary to the overall container dict
             case_list.extend(combined_case)
@@ -188,7 +179,7 @@ def collect_civil_case_data(case_info, county):
     
     return case_list
     
-def extract_civil_pdf_data(text):
+def build_civil_cases_dataframe(text):
     """
     This function takes in a page of text from a pdf file. It will extract all available information for each case on
     the page, put it all into dictionaries, and then return a list containing the other dictionaries for each
@@ -252,43 +243,25 @@ PLAINTIFF NAME                PLAINTIFF ATTORNEY        DEFENDANT NAME          
         case_info = case.split('\n')
         
         #Gather the case data
-        case_list = collect_civil_case_data(case_info, county)
+        case_list = extract_civil_case_data(case_info, county)
         
         #Finally, append this dictionary to the container dict
         case_dicts.extend(case_list)
-        
-    return case_dicts
-        
-def build_civil_cases_dataframe(content):
-    """
-    This function takes in the text content of the uploaded PDF, passes it to the extraction function, 
-    and builds a dataframe.
-    
-    Parameter:
-        - content: The text content of the uploaded PDF file.
-        
-    Returns:
-        - df: A dataframe of the resulting case information
-    """
 
-    #Extract info from current page
-    case_dicts = extract_civil_pdf_data(content)
-    
     #How many cases were collected?
     print(f"Collected Data From {len(case_dicts)} Cases.")
-    
-    #Build dataframe
+
+    #Create df
     df = pd.DataFrame(case_dicts)
-    
+        
     return df
 
 
-
-    ###################################### FOR CRIMINAL CASE PDFS #########################################
-
+###################################### FOR CRIMINAL CASE PDFS #########################################
 
 
-def extract_criminal_pdf_data(text):
+
+def build_criminal_cases_dataframe(text):
     """
     This function takes in the entire PDF document as a string of text. It will gather the info for each case
     and add the info to a dictionary. The dictionary for each case will be added to a list which will be turned into
@@ -414,23 +387,5 @@ NUMBER OF MTR/MTA CASES: \d{1,4}
     
     #Create dataframe
     df = pd.DataFrame(case_list)
-    
-    return df
-
-
-def build_criminal_cases_dataframe(content):
-    """
-    This function takes in the text content of the uploaded PDF, passes it to the extraction function, 
-    and builds a dataframe.
-    
-    Parameter:
-        - content: The text content of the uploaded PDF file.
-        
-    Returns:
-        - df: A dataframe of the resulting case information
-    """
-    
-    #Collect criminal case info and get the df
-    df = extract_criminal_pdf_data(content)
     
     return df

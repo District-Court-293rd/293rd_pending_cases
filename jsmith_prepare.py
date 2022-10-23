@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import re
 from datetime import date
@@ -67,59 +66,6 @@ def check_on_track(value):
         return False
     else:
         return True
-
-def get_months_ahead_or_behind(value):
-    """
-    This function takes in the docket date, converts it to a datetime object, and calculates the number of months between it and the current date.
-    This feature was requested by Lupita so she can filter for cases where the docket date is scheduled some number of months in the future.
-    It will also allow her to filter for results based on how many months late a case is.
-
-    Parameter:
-        -value: This is the case Docket Date
-
-    Returns:
-        -string: This is a categorical label of the number of months between the docket date and the current date. 
-                 Negative numbers represent docket dates in the past.
-    """
-    #Check for docket date. If none, return "No Docket Date"
-    if value == '':
-        return "No Docket Date"
-    
-    #Get today's date
-    today = date.today()
-    
-    #Convert it to datetime object
-    today = pd.to_datetime(today)
-    
-    #Convert current value to datetime object
-    value = pd.to_datetime(value)
-    
-    #Calculate months ahead or behind
-    num_months = ((int(value.strftime("%Y")) - int(today.strftime("%Y"))) * 12) + (int(value.strftime("%m")) - int(today.strftime("%m"))) 
-
-    #Separate into categories based on the number of months ahead or behind
-    if num_months < -12:
-        return "More Than 12 Months Late"
-    elif num_months < -6 and num_months >= -12:
-        return "Between 6 and 12 Months Late"
-    elif num_months < -3 and num_months >= -6:
-        return "Between 3 and 6 Months Late"
-    elif num_months < -1 and num_months >= -3:
-        return "Between 1 and 3 Months Late"
-    elif num_months < 0 and num_months >= -1:
-        return "1 Month Late"
-    elif num_months == 0:
-        return "Current"
-    elif num_months > 0 and num_months <= 1:
-        return "1 Month Ahead"
-    elif num_months > 1 and num_months <= 3:
-        return "Between 1 and 3 Months Ahead"
-    elif num_months > 3 and num_months <= 6:
-        return "Between 3 and 6 Months Ahead"
-    elif num_months > 6 and num_months <= 12:
-        return "Between 6 and 12 Months Ahead"
-    else:
-        return "More Than 12 Months Ahead"
     
 def check_cause_number_format(value):
     """
@@ -188,8 +134,8 @@ def prepare_closed_cases(closed_cases_df):
     #days_to_close = (closed_date - file_date) // pd.Timedelta('1d')
     #closed_cases_df['Days To Close'] = days_to_close
 
-    #Drop the 'Months ahead or behind' and 'On track' columns
-    closed_cases_df = closed_cases_df.drop(['On Track', 'Months Ahead Or Behind'], axis = 1)
+    #Drop the 'On track' column
+    closed_cases_df = closed_cases_df.drop(['On Track'], axis = 1)
 
     return closed_cases_df
 
@@ -218,7 +164,7 @@ def prepare_dataframe(file_name, df):
 
     #Create Months to Docket Date column. The actual values will be created later since they need to be updated for all
     #open cases every time a new report is uploaded.
-    df['Months Ahead Or Behind'] = ''
+    #df['Months Ahead Or Behind'] = ''
 
     #Create Bad Cause Number column
     df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)

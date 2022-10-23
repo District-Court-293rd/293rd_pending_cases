@@ -1,10 +1,8 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
 import gspread
 import jsmith_acquire
 import jsmith_prepare
-import jsmith_historical
 
 credentials = {
   "type": st.secrets["type"],
@@ -75,14 +73,14 @@ def update_spreadsheet(file_name, content):
 
     if df['Case Type'][0] == 'Criminal':
         #Add to criminal cases tab
-        update_criminal_cases_dataframe(df)
+        update_criminal_cases(df)
     else:
         #Add to civil cases tab
-        update_civil_cases_dataframe(df)
+        update_civil_cases(df)
     
     return
     
-def update_civil_cases_dataframe(new_civil_df):
+def update_civil_cases(new_civil_df):
     """
     This function takes in the newly created civil cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
     It will connect to the Google Sheet, load the current data, append the new data to the current data, and drop duplicates without 
@@ -102,7 +100,7 @@ def update_civil_cases_dataframe(new_civil_df):
     gsheet = gc.open('Pending Reports')
     
     #Civil cases go to the 'Civil Cases' tab
-    civil_sheet = gsheet.worksheet('test_civil_cases')
+    civil_sheet = gsheet.worksheet('Civil Cases')
 
     #Closed cases go to the 'Closed Civil Cases' tab
     closed_sheet = gsheet.worksheet('Closed Civil Cases')
@@ -134,7 +132,6 @@ def update_civil_cases_dataframe(new_civil_df):
             else:
                 closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
 
-
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
@@ -156,9 +153,6 @@ def update_civil_cases_dataframe(new_civil_df):
     #Now sort by county and then by cause number
     current_civil_df = current_civil_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
 
-    #Update the 'Months Ahead or Behind' column
-    current_civil_df['Months Ahead Or Behind'] = current_civil_df['Docket Date'].apply(jsmith_prepare.get_months_ahead_or_behind)
-
     #Clear what's currently on the Civil Cases worksheet
     civil_sheet.clear()
 
@@ -168,7 +162,7 @@ def update_civil_cases_dataframe(new_civil_df):
 
     return
 
-def update_criminal_cases_dataframe(new_crim_df):
+def update_criminal_cases(new_crim_df):
     """
     This function takes in the newly created criminal cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
     It will connect to the Google Sheet, load the current data, append the new data to the current data, and drop duplicates without 
@@ -188,7 +182,7 @@ def update_criminal_cases_dataframe(new_crim_df):
     gsheet = gc.open("Pending Reports")
 
     #Criminal cases go to the 'Criminal Cases' tab
-    crim_sheet = gsheet.worksheet('test_criminal_cases')
+    crim_sheet = gsheet.worksheet('Criminal Cases')
 
     #Closed cases go to the 'Closed Criminal Cases' tab
     closed_sheet = gsheet.worksheet('Closed Criminal Cases')
@@ -240,9 +234,6 @@ def update_criminal_cases_dataframe(new_crim_df):
 
     #Now sort by county and then by cause number
     current_crim_df = current_crim_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
-
-    #Update the 'Months Ahead or Behind' column
-    current_crim_df['Months Ahead Or Behind'] = current_crim_df['Docket Date'].apply(jsmith_prepare.get_months_ahead_or_behind)
 
     #Clear what's currently on the Criminal Cases worksheet
     crim_sheet.clear()
