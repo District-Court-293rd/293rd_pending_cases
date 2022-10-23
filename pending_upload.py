@@ -79,11 +79,7 @@ def update_spreadsheet(file_name, content):
     else:
         #Add to civil cases tab
         update_civil_cases_dataframe(df)
-        
-<<<<<<< HEAD
     
-=======
->>>>>>> 6169e746238dc7409e802d3eac3db0043536ec79
     return
     
 def update_civil_cases_dataframe(new_civil_df):
@@ -255,8 +251,4 @@ def update_criminal_cases_dataframe(new_crim_df):
     crim_sheet.update([current_crim_df.columns.values.tolist()] + current_crim_df.values.tolist())
     print('Criminal Cases Updated!')
 
-<<<<<<< HEAD
     return
-=======
-    return
->>>>>>> 6169e746238dc7409e802d3eac3db0043536ec79
