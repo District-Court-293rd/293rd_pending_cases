@@ -159,4 +159,6 @@ with page_content.container():
         #Add a files_uploaded flag for use in the next section
         bar_value += progress_per_file
         progress_bar.progress(bar_value)
-        progress_message_container.header("Complete! All Files Processed Successfully!")
+
+    #Update message
+    progress_message_container.header("Complete! All Files Processed Successfully!")
