@@ -172,11 +172,11 @@ with tab2:
     criminal_df = get_spreadsheet_data("Criminal Cases", credentials)
 
     #Get count of civil cases without future docket dates, regardless of case type. Provide dataframe for all of the following
-    st.metric(label = "Total Civil Cases Without Future Docket Dates", value = (str) civil_df[civil_df["Docket Date"] == ""].count())
+    st.metric(label = "Total Civil Cases Without Future Docket Dates", value = str(civil_df[civil_df["Docket Date"] == ""].count()))
     st.dataframe(civil_df)
 
     #Get count of general civil cases without future docket dates,
-    st.metric(label = "General Civil Cases Without Future Docket Dates", value = (int) civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Civil"].count())
+    st.metric(label = "General Civil Cases Without Future Docket Dates", value = int(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Civil"].count()))
     st.dataframe(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Civil"])
 
     #Get count of tax cases without future docket dates,
