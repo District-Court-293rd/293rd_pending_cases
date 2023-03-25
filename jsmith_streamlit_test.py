@@ -168,9 +168,31 @@ with tab1:
 with tab2:
     st.header("View Data")
 
-    #Display a df for testing
-    df = get_spreadsheet_data("Civil Cases", credentials)
-    st.dataframe(df)
+    civil_df = get_spreadsheet_data("Civil Cases", credentials)
+    criminal_df = get_spreadsheet_data("Criminal Cases", credentials)
 
-    #Get count of cases without future docket dates, regardless of docket type
-    st.metric(label = "Civil Cases Without Future Docket Dates", value = df["Docket Date"].isna().sum())
+    #Get count of civil cases without future docket dates, regardless of case type. Provide dataframe for all of the following
+    st.metric(label = "Total Civil Cases Without Future Docket Dates", value = civil_df[civil_df["Docket Date"] == ""].count())
+    st.dataframe(civil_df)
+
+    #Get count of general civil cases without future docket dates,
+    st.metric(label = "General Civil Cases Without Future Docket Dates", value = civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Civil"].count())
+    st.dataframe(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Civil"])
+
+    #Get count of tax cases without future docket dates,
+    st.metric(label = "Tax Cases Without Future Docket Dates", value = civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Tax"].count())
+    st.dataframe(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Tax"])
+
+    #Get count of OLS cases without future docket dates,
+    st.metric(label = "OLS Cases Without Future Docket Dates", value = civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "OLS"].count())
+    st.dataframe(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "OLS"])
+
+    #Get count of juvenile cases without future docket dates,
+    st.metric(label = "Juvenile Cases Without Future Docket Dates", value = civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Juvenile"].count())
+    st.dataframe(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Juvenile"])
+
+    #Get count of criminal cases without future docket dates, regardless of case type
+    st.metric(label = "Criminal Cases Without Future Docket Dates", value = criminal_df[criminal_df["Docket Date"] == ""].count())
+    st.dataframe(criminal_df[criminal_df["Docket Date"] == ""])
+
+    
