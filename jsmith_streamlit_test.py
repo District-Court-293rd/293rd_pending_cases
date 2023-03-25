@@ -177,19 +177,19 @@ with tab2:
 
     #Get count of general civil cases without future docket dates,
     st.metric(label = "General Civil Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Civil")]))
-    st.dataframe(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Civil"])
+    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Civil")])
 
     #Get count of tax cases without future docket dates,
     st.metric(label = "Tax Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Tax")]))
-    st.dataframe(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Tax"])
+    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Tax")])
 
     #Get count of OLS cases without future docket dates,
     st.metric(label = "OLS Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "OLS")]))
-    st.dataframe(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "OLS"])
+    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "OLS")])
 
     #Get count of juvenile cases without future docket dates,
     st.metric(label = "Juvenile Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Juvenile")]))
-    st.dataframe(civil_df[civil_df["Docket Date"] == "" & civil_df["Case Type"] == "Juvenile"])
+    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Juvenile")])
 
     #Get count of criminal cases without future docket dates, regardless of case type
     st.metric(label = "Criminal Cases Without Future Docket Dates", value = len(criminal_df[criminal_df["Docket Date"] == ""]))
