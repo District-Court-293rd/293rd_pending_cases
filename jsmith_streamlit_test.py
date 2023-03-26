@@ -174,40 +174,40 @@ with tab2:
 
     #Get count of civil cases without future docket dates, regardless of case type. Provide dataframe for all of the following
     st.metric(label = "Total Civil Cases Without Future Docket Dates", value = len(civil_df[civil_df["Docket Date"] == ""]))
-    st.dataframe(civil_df[civil_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"]))
+    st.dataframe(civil_df[civil_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
     #Provide an option to download the basic dataframe as a csv
     st.download_button(
         label="Download as CSV",
-        data= civil_df[civil_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"]).to_csv().encode('utf-8'),
+        data= civil_df[civil_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1).to_csv().encode('utf-8'),
         file_name='Civil_Cases_Without_Future_Docket_Dates_' + str(date.today()) + '.csv',
         mime='text/csv',
     )
 
     #Get count of general civil cases without future docket dates,
     st.metric(label = "General Civil Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Civil")]))
-    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Civil")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"]))
+    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Civil")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
 
     #Get count of tax cases without future docket dates,
     st.metric(label = "Tax Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Tax")]))
-    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Tax")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"]))
+    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Tax")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
 
     #Get count of OLS cases without future docket dates,
     st.metric(label = "OLS Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "OLS")]))
-    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "OLS")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"]))
+    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "OLS")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
 
     #Get count of juvenile cases without future docket dates,
     st.metric(label = "Juvenile Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Juvenile")]))
-    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Juvenile")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"]))
+    st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Juvenile")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
 
     st.header("Criminal Cases")
 
     #Get count of criminal cases without future docket dates, regardless of case type
     st.metric(label = "Criminal Cases Without Future Docket Dates", value = len(criminal_df[criminal_df["Docket Date"] == ""]))
-    st.dataframe(criminal_df[criminal_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"]))
+    st.dataframe(criminal_df[criminal_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
     #Provide an option to download the basic dataframe as a csv
     st.download_button(
         label="Download as CSV",
-        data= criminal_df[criminal_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"]).to_csv().encode('utf-8'),
+        data= criminal_df[criminal_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1).to_csv().encode('utf-8'),
         file_name='Criminal_Cases_Without_Future_Docket_Dates_' + str(date.today()) + '.csv',
         mime='text/csv',
     )
