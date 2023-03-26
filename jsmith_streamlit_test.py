@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit_authenticator as stauth
 import pandas as pd
 from pdfminer3.layout import LAParams
 from pdfminer3.pdfpage import PDFPage
@@ -11,6 +10,7 @@ import io
 import os
 import pending_upload
 import gspread
+import streamlit_authenticator as stauth
 import pickle
 from pathlib import Path
 
