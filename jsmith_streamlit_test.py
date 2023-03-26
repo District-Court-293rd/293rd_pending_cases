@@ -86,10 +86,7 @@ st.set_page_config(
      page_title="Pending Reports",
  )
 
-##########################################  User Authentication #########################################
-
-names = [st.secrets["user1"], st.secrets["user2"]]
-usernames = [st.secrets["username1"], st.secrets["username2"]]
+########################################## User Authentication #########################################
 
 # load hashed passwords
 file_path = Path(__file__).parent / "hashed_pw.pkl"
@@ -98,12 +95,12 @@ with file_path.open("rb") as file:
 
 auth_credentials = {
     "usernames":{
-        usernames[0]:{
-            "name":names[0],
+        st.secrets["username1"]:{
+            "name":st.secrets["user1"],
             "password":hashed_passwords[0]
             },
-        usernames[1]:{
-            "name":names[1],
+        st.secrets["username2"]:{
+            "name":st.secrets["user2"],
             "password":hashed_passwords[1]
             }            
         }
