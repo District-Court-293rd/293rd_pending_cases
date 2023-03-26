@@ -5,6 +5,7 @@ from pdfminer3.pdfpage import PDFPage
 from pdfminer3.pdfinterp import PDFResourceManager
 from pdfminer3.pdfinterp import PDFPageInterpreter
 from pdfminer3.converter import TextConverter
+from datetime import date
 import io
 import os
 import pending_upload
@@ -166,7 +167,7 @@ with tab1:
             progress_message_container.header("Complete! All Files Processed Successfully!")
 
 with tab2:
-    st.header("View Data")
+    st.header("Civil Cases")
 
     civil_df = get_spreadsheet_data("Civil Cases", credentials)
     criminal_df = get_spreadsheet_data("Criminal Cases", credentials)
@@ -174,6 +175,13 @@ with tab2:
     #Get count of civil cases without future docket dates, regardless of case type. Provide dataframe for all of the following
     st.metric(label = "Total Civil Cases Without Future Docket Dates", value = len(civil_df[civil_df["Docket Date"] == ""]))
     st.dataframe(civil_df)
+    #Provide an option to download the basic dataframe as a csv
+    st.download_button(
+        label="Download as CSV",
+        data= civil_df[civil_df["Docket Date"] == ""].to_csv().encode('utf-8'),
+        file_name='Civil_Cases_Without_Future_Docket_Dates_' + str(date.today()) + '.csv',
+        mime='text/csv',
+    )
 
     #Get count of general civil cases without future docket dates,
     st.metric(label = "General Civil Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Civil")]))
@@ -191,8 +199,17 @@ with tab2:
     st.metric(label = "Juvenile Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Juvenile")]))
     st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Juvenile")])
 
+    st.header("Criminal Cases")
+
     #Get count of criminal cases without future docket dates, regardless of case type
     st.metric(label = "Criminal Cases Without Future Docket Dates", value = len(criminal_df[criminal_df["Docket Date"] == ""]))
     st.dataframe(criminal_df[criminal_df["Docket Date"] == ""])
+    #Provide an option to download the basic dataframe as a csv
+    st.download_button(
+        label="Download as CSV",
+        data= criminal_df[criminal_df["Docket Date"] == ""].to_csv().encode('utf-8'),
+        file_name='Criminal_Cases_Without_Future_Docket_Dates_' + str(date.today()) + '.csv',
+        mime='text/csv',
+    )
 
     
