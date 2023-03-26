@@ -178,7 +178,7 @@ with tab2:
     #Provide an option to download the basic dataframe as a csv
     st.download_button(
         label="Download as CSV",
-        data= civil_df[civil_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1).to_csv().encode('utf-8'),
+        data= civil_df[civil_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1).to_csv(index = False).encode('utf-8'),
         file_name='Civil_Cases_Without_Future_Docket_Dates_' + str(date.today()) + '.csv',
         mime='text/csv',
     )
@@ -207,7 +207,7 @@ with tab2:
     #Provide an option to download the basic dataframe as a csv
     st.download_button(
         label="Download as CSV",
-        data= criminal_df[criminal_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1).to_csv().encode('utf-8'),
+        data= criminal_df[criminal_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1).to_csv(index = False).encode('utf-8'),
         file_name='Criminal_Cases_Without_Future_Docket_Dates_' + str(date.today()) + '.csv',
         mime='text/csv',
     )
