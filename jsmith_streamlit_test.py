@@ -86,168 +86,80 @@ st.set_page_config(
      page_title="Pending Reports",
  )
 
-########################################## User Authentication #########################################
 
-# load hashed passwords
-file_path = Path(__file__).parent / "hashed_pw.pkl"
-with file_path.open("rb") as file:
-    hashed_passwords = pickle.load(file)
+#Create a placeholder for the page content
+page_content = st.empty()
 
-auth_credentials = {
-    "usernames":{
-        st.secrets["username1"]:{
-            "name":st.secrets["user1"],
-            "password":hashed_passwords[0]
-            },
-        st.secrets["username2"]:{
-            "name":st.secrets["user2"],
-            "password":hashed_passwords[1]
-            }            
-        }
-    }
+#Create container for update page content
+with page_content.container():
 
-authenticator = stauth.Authenticate(
-    auth_credentials,
-    st.secrets["cookie_name"], 
-    st.secrets["cookie_key"], 
-    cookie_expiry_days = 0)
+    #Title
+    st.title("Update Pending Reports")
 
-name, authentication_status, username = authenticator.login("Login", "main")
+    with st.form("my-form", clear_on_submit = True):
+        file_objects = st.file_uploader("File Names Must Include Either 'CV' or 'CR' for Civil and Criminal Cases, Respectively.", type = 'pdf', accept_multiple_files = True)
+        submitted = st.form_submit_button("Upload")
 
-if authentication_status == False:
-    st.error("Username/password is incorrect")
+    if submitted and len(file_objects) > 0:
+        #Give message for successful upload and begin processing
+        st.write("Files Uploaded!")
 
-if authentication_status == None:
-    st.warning("Please enter your username and password")
+        #Create a container for the progress bar message
+        progress_message_container = st.empty()
+        #Create a progress bar for visual verification that something is happening
+        progress_message_container.header("Please Wait, Processing In Progress:")
+        progress_bar = st.progress(0)
 
-if authentication_status:
-    ########################################## Create Tabs ############################################
+        #Use the remainder of 100 / the number of uploaded files to start the progress bar
+        bar_value = int(100 % len(file_objects))
 
-    tab1, tab2 = st.tabs(["Upload Reports", "View Data"])
+        #Update progress bar
+        progress_bar.progress(bar_value)
 
-    ######################################### Upload Reports ##########################################
-    with tab1:
-        #Create a placeholder for the page content
-        page_content = st.empty()
+        #How much progress should be made per file?
+        progress_per_file = int((100 - bar_value) / len(file_objects))
 
-        #Create container for update page content
-        with page_content.container():
+        #Also create a container for the info messages
+        info_container = st.empty()
 
-            #Title
-            st.title("Update Pending Reports")
+        #Use a for loop to iterate through the uploaded files
+        for file_object in file_objects:
 
-            with st.form("my-form", clear_on_submit = True):
-                file_objects = st.file_uploader("File Names Must Include Either 'CV' or 'CR' for Civil and Criminal Cases, Respectively.", type = 'pdf', accept_multiple_files = True)
-                submitted = st.form_submit_button("Upload")
+            if file_object is not None:
 
-            if submitted and len(file_objects) > 0:
-                #Give message for successful upload and begin processing
-                st.write("Files Uploaded!")
+                #Inform the user which file is being processed
+                info_container.info("Began Processing " + file_object.name)
 
-                #Create a container for the progress bar message
-                progress_message_container = st.empty()
-                #Create a progress bar for visual verification that something is happening
-                progress_message_container.header("Please Wait, Processing In Progress:")
-                progress_bar = st.progress(0)
+                #Save the file. Will be deleted after data is uploaded
+                with open(file_object.name, 'wb') as f:
+                    f.write(file_object.getbuffer())
 
-                #Use the remainder of 100 / the number of uploaded files to start the progress bar
-                bar_value = int(100 % len(file_objects))
+                #Create content container
+                content = get_file_content(file_object.name)
 
-                #Update progress bar
-                progress_bar.progress(bar_value)
+                #Build and prepare the dataframe, then update the spreadsheet
+                pending_upload.update_spreadsheet(file_object.name, content)
 
-                #How much progress should be made per file?
-                progress_per_file = int((100 - bar_value) / len(file_objects))
+                #Delete the saved file. Leave messages for success or failure
+                if os.path.exists(file_object.name):
+                    os.remove(file_object.name)
 
-                #Also create a container for the info messages
-                info_container = st.empty()
+                    #Leave a success message
+                    st.success("Pending Reports was successfully updated with " + file_object.name)
+                
+                else:
+                    st.error("Could Not Delete File " + file_object.name)
 
-                #Use a for loop to iterate through the uploaded files
-                for file_object in file_objects:
+                #Clear container
+                info_container.empty()
 
-                    if file_object is not None:
+            else:
+                #Print an error message
+                st.error("A File Was Not Uploaded Correctly. Please Try Again")
 
-                        #Inform the user which file is being processed
-                        info_container.info("Began Processing " + file_object.name)
+            #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
+            bar_value += progress_per_file
+            progress_bar.progress(bar_value)
 
-                        #Save the file. Will be deleted after data is uploaded
-                        with open(file_object.name, 'wb') as f:
-                            f.write(file_object.getbuffer())
-
-                        #Create content container
-                        content = get_file_content(file_object.name)
-
-                        #Build and prepare the dataframe, then update the spreadsheet
-                        pending_upload.update_spreadsheet(file_object.name, content)
-
-                        #Delete the saved file. Leave messages for success or failure
-                        if os.path.exists(file_object.name):
-                            os.remove(file_object.name)
-
-                            #Leave a success message
-                            st.success("Pending Reports was successfully updated with " + file_object.name)
-                        
-                        else:
-                            st.error("Could Not Delete File " + file_object.name)
-
-                        #Clear container
-                        info_container.empty()
-
-                    else:
-                        #Print an error message
-                        st.error("A File Was Not Uploaded Correctly. Please Try Again")
-
-                    #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
-                    bar_value += progress_per_file
-                    progress_bar.progress(bar_value)
-
-                #Update message
-                progress_message_container.header("Complete! All Files Processed Successfully!")
-
-    with tab2:
-        st.header("Civil Cases")
-
-        civil_df = get_spreadsheet_data("Civil Cases", credentials)
-        criminal_df = get_spreadsheet_data("Criminal Cases", credentials)
-
-        #Get count of civil cases without future docket dates, regardless of case type. Provide dataframe for all of the following
-        st.metric(label = "Total Civil Cases Without Future Docket Dates", value = len(civil_df[civil_df["Docket Date"] == ""]))
-        st.dataframe(civil_df[civil_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
-        #Provide an option to download the basic dataframe as a csv
-        st.download_button(
-            label="Download as CSV",
-            data= civil_df[civil_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1).to_csv(index = False).encode('utf-8'),
-            file_name='Civil_Cases_Without_Future_Docket_Dates_' + str(date.today()) + '.csv',
-            mime='text/csv',
-        )
-
-        #Get count of general civil cases without future docket dates,
-        st.metric(label = "General Civil Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Civil")]))
-        st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Civil")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
-
-        #Get count of tax cases without future docket dates,
-        st.metric(label = "Tax Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Tax")]))
-        st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Tax")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
-
-        #Get count of OLS cases without future docket dates,
-        st.metric(label = "OLS Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "OLS")]))
-        st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "OLS")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
-
-        #Get count of juvenile cases without future docket dates,
-        st.metric(label = "Juvenile Cases Without Future Docket Dates", value = len(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Juvenile")]))
-        st.dataframe(civil_df[(civil_df["Docket Date"] == "") & (civil_df["Case Type"] == "Juvenile")].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
-
-        st.header("Criminal Cases")
-
-        #Get count of criminal cases without future docket dates, regardless of case type
-        st.metric(label = "Criminal Cases Without Future Docket Dates", value = len(criminal_df[criminal_df["Docket Date"] == ""]))
-        st.dataframe(criminal_df[criminal_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1))
-        #Provide an option to download the basic dataframe as a csv
-        st.download_button(
-            label="Download as CSV",
-            data= criminal_df[criminal_df["Docket Date"] == ""].drop(["Case Type", "On Track", "Bad Cause Number", "Status", "load_date"], axis = 1).to_csv(index = False).encode('utf-8'),
-            file_name='Criminal_Cases_Without_Future_Docket_Dates_' + str(date.today()) + '.csv',
-            mime='text/csv',
-        )
-
-        
+        #Update message
+        progress_message_container.header("Complete! All Files Processed Successfully!")
