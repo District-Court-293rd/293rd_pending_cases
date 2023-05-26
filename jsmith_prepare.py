@@ -151,6 +151,9 @@ def prepare_dataframe(file_name, df):
         - df: The same dataframe, but with new columns added.
     """
 
+    #Verify Cause Numbers are represented as strings
+    df['Cause Number'] = df['Cause Number'].astype(str)
+
     #Now check if it is criminal or civil
     if file_name.upper().count('CR') > 0:
         #Assign as Criminal case type
