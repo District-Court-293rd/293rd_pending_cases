@@ -18,7 +18,7 @@ def build_dataframe(file_name, content):
     #Check if it is criminal or civil and then call the associated functions
     if file_name.upper().count('CR') > 0:
         df = build_criminal_cases_dataframe(content)
-    elif file_name.upper().count('CV') > 0:
+    elif file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0:
         df = build_civil_cases_dataframe(content)
     else:
         #Leave a message
