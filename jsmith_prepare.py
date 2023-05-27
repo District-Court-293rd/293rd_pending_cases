@@ -134,8 +134,9 @@ def prepare_closed_cases(closed_cases_df):
     #days_to_close = (closed_date - file_date) // pd.Timedelta('1d')
     #closed_cases_df['Days To Close'] = days_to_close
 
+    #Removed on 05-27-2023
     #Drop the 'On track' column
-    closed_cases_df = closed_cases_df.drop(['On Track'], axis = 1)
+    #closed_cases_df = closed_cases_df.drop(['On Track'], axis = 1)
 
     return closed_cases_df
 

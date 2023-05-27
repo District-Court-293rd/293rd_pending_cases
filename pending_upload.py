@@ -138,8 +138,9 @@ def update_civil_cases(new_civil_df):
     #Verify that all Cause Numbers are represented as strings
     current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str).str.strip()
 
+    #Removed on 05-27-2023
     #Convert the google boolean values for the 'On Track' column to python booleans
-    current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
+    #current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
 
     #Convert the google boolean values for the 'On Track' column to python booleans
     current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
@@ -220,8 +221,9 @@ def update_criminal_cases(new_crim_df):
     #Verify that all Cause Numbers are represented as strings
     current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
 
+    #Removed on 05-27-2023
     #Convert the google boolean values for the 'On Track' column to python booleans
-    current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
+    #current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
 
     #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
     current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
