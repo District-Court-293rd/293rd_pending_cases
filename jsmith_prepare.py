@@ -162,8 +162,9 @@ def prepare_dataframe(file_name, df):
         #Check if any civil cases are tax cases and update accordingly
         df['Case Type'] = df['Cause Number'].apply(get_case_type)
     
+    #Removed on 05-27-2023
     #Create On Track column
-    df['On Track'] = df['Docket Date'].apply(check_on_track)
+    #df['On Track'] = df['Docket Date'].apply(check_on_track)
 
     #Create Months to Docket Date column. The actual values will be created later since they need to be updated for all
     #open cases every time a new report is uploaded.
