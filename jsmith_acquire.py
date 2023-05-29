@@ -311,11 +311,7 @@ CAUSE #           FILE DATE  DEFENDANT NAME             ATTORNEY         BONDSMA
     
     #########################################################################################################
     #Set up regex to remove the MTR/MTA separation
-    body = re.sub("""TOTAL FILED CASES: \d{1,4}
-
-MTR/MTA CASES FILED
-
-""", '', body)
+    body = re.sub("""TOTAL FILED CASES: \d{1,4}\n\nMTR/MTA CASES FILED\n{0,2}""", '', body)
     
     
     #########################################################################################################
