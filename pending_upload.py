@@ -142,8 +142,9 @@ def update_civil_cases(new_civil_df):
     #Convert the google boolean values for the 'On Track' column to python booleans
     #current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
 
-    #Convert the google boolean values for the 'On Track' column to python booleans
-    current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
+    #Removed on 05/30/2023
+    #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
+    #current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
@@ -225,8 +226,9 @@ def update_criminal_cases(new_crim_df):
     #Convert the google boolean values for the 'On Track' column to python booleans
     #current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
 
+    #Removed on 05/30/2023
     #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
-    current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
+    #current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
