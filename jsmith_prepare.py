@@ -171,14 +171,16 @@ def prepare_dataframe(file_name, df):
     #open cases every time a new report is uploaded.
     #df['Months Ahead Or Behind'] = ''
 
+    #Removed on 05/30/2023
     #Create Bad Cause Number column
-    df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)
+    #df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)
     
     #Create Status column. Defaults to Open
     df['Status'] = 'Open'
 
+    #Removed on 05/30/2023
     #Create Load Date column
-    df['load_date'] = str(date.today())
+    #df['load_date'] = str(date.today())
 
     #Convert the lists of names in the civil cases dataframe to single strings with each name separated by a new line
     if df['Case Type'][0] != 'Criminal':
