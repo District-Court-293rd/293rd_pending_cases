@@ -89,7 +89,7 @@ def extract_civil_case_data(case_info, county):
     docket_type = case_info[0][68:86].strip()
 
     #Get the ANS File
-    ans_date = case_info[0][86:].strip()
+    ans_date = case_info[0][86:96].strip()
 
     #Get the CR Number
     cr_num = case_info[0][96:].strip()
