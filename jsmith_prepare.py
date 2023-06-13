@@ -189,5 +189,8 @@ def prepare_dataframe(file_name, df):
     #    df['Plaintiff Attorney'] = df['Plaintiff Attorney'].apply(convert_name_list_to_string)
     #    df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
     #    df['Defendant Attorney'] = df['Defendant Attorney'].apply(convert_name_list_to_string)
+    if df['Case Type'][0] == 'Criminal':
+        df['First Offense'] = df['First Offense'].apply(convert_name_list_to_string)
+        df['ST RPT Column'] = df['ST RPT Column'].apply(convert_name_list_to_string)
     
     return df
