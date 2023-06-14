@@ -307,11 +307,11 @@ def build_criminal_cases_dataframe(text):
     
     #########################################################################################################
     #Now remove the last divider sections using regex
-    body = re.sub(r"""\nTOTAL NUMBER OF CASES FILED: [0-9\n-]*[A-Z-\n ]*""", '', body)
+    body = re.sub(r"""\nTOTAL NUMBER OF CASES FILED: [0-9\n-]*MTR-A[A-Z\n ]*[-]*""", '', body)
     
     body = re.sub(r"""\nTOTAL NUMBER OF MTR-A FILINGS: [0-9\n-]*ALL OTHER CASES ADDED/APPEALED[\n-]*""", '', body)
     
-    body = re.sub(r"""\nTOTAL NUMBER OF CASES ADDED/APPEALED: [0-9]*""", '', body)
+    body = re.sub(r"""\nTOTAL NUMBER OF CASES ADDED/APPEALED: [0-9- a-zA-Z\.#;,:'=\n]*""", '', body)
     
     #########################################################################################################
     
