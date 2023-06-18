@@ -205,7 +205,7 @@ def build_civil_cases_dataframe(text):
     header = text[:389]
     
     #Remove headers from all pages
-    text = re.sub(r"""[A-Z0-9 /]*\n\n\s*[A-Za-z0-9 #,:\n]*DEFENDANT ATTORNEY""",'', text)
+    text = re.sub(r"""[A-Z0-9 ()/]*\n\n\s*[A-Za-z0-9 #,:\n]*DEFENDANT ATTORNEY""",'', text)
     
     #Use if statement to check for county names inside the header info
     if header.count('MAVERICK') >= 1:
