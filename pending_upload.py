@@ -71,7 +71,8 @@ def update_spreadsheet(file_name, content):
     #Prepare the df and add new columns
     df = jsmith_prepare.prepare_dataframe(file_name, df)
 
-    if df['Case Type'][0] == 'Criminal':
+    #If case type is 'Criminal' or 'Criminal OLS', send to criminal function
+    if df['Case Type'][0].count('Criminal') > 0:
         #Add to criminal cases tab
         update_criminal_cases(df)
     else:
@@ -99,11 +100,16 @@ def update_civil_cases(new_civil_df):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open('Pending Reports')
     
-    #Civil cases go to the 'Civil Cases' tab
-    civil_sheet = gsheet.worksheet('Civil Cases')
-
-    #Closed cases go to the 'Closed Civil Cases' tab
-    closed_sheet = gsheet.worksheet('Closed Civil Cases')
+    if new_civil_df['Case Type'].count('OLS') > 0:
+        #Send OLS data to the 'Civil OLS Cases' tab
+        civil_sheet = gsheet.worksheet('OLS Civil Cases')
+        #Send closed OLS cases to the 'Closed Civil OLS Cases' tab
+        closed_sheet = gsheet.worksheet('Closed OLS Civil Cases')
+    else:
+        #Civil cases go to the 'Civil Cases' tab
+        civil_sheet = gsheet.worksheet('Civil Cases')
+        #Closed cases go to the 'Closed Civil Cases' tab
+        closed_sheet = gsheet.worksheet('Closed Civil Cases')
 
     #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
     current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
@@ -183,11 +189,16 @@ def update_criminal_cases(new_crim_df):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open("Pending Reports")
 
-    #Criminal cases go to the 'Criminal Cases' tab
-    crim_sheet = gsheet.worksheet('Criminal Cases')
-
-    #Closed cases go to the 'Closed Criminal Cases' tab
-    closed_sheet = gsheet.worksheet('Closed Criminal Cases')
+    if new_crim_df['Case Type'].count('OLS') > 0:
+        #Send OLS data to the 'Civil OLS Cases' tab
+        crim_sheet = gsheet.worksheet('OLS Criminal Cases')
+        #Send closed OLS cases to the 'Closed Civil OLS Cases' tab
+        closed_sheet = gsheet.worksheet('Closed OLS Criminal Cases')
+    else:
+        #Civil cases go to the 'Civil Cases' tab
+        crim_sheet = gsheet.worksheet('Criminal Cases')
+        #Closed cases go to the 'Closed Civil Cases' tab
+        closed_sheet = gsheet.worksheet('Closed Criminal Cases')
 
     #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())

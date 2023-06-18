@@ -201,21 +201,11 @@ def build_civil_cases_dataframe(text):
     #First, strip leading and trailing whitespaces
     text = text.strip()
     
-    #Separate header and body text data
-    #For header
+    #For header. Doesn't have to be perfect, we only need the county name included here
     header = text[:389]
     
-    #For body
-    text = text[389:]
-    
-    #Remove headers from all subsequent pages
-    text = re.sub(r"""COUNTY OF .{6,8} 293RD DISTRICT COURT CIVIL PENDING CASES AS OF .{10}
-
-\s{43,45}RAN ON .{20,26} PAGE: \d{1,3}
-
-        CAUSE #             FILE DATE CAUSE OF ACTION           DOCKT DATE  DOCKET TYPE       ANS FILED  CR CASE #
-
-PLAINTIFF NAME                PLAINTIFF ATTORNEY        DEFENDANT NAME                DEFENDANT ATTORNEY""", '', text)
+    #Remove headers from all pages
+    text = re.sub(r"""[A-Z0-9 /]*\n\n\s*[A-Za-z0-9 #,:\n]*DEFENDANT ATTORNEY""",'', text)
     
     #Use if statement to check for county names inside the header info
     if header.count('MAVERICK') >= 1:
@@ -283,10 +273,10 @@ def build_criminal_cases_dataframe(text):
     
     #Separate the first header from the body
     #We'll use this to identify the county later
-    header = text[:517]
+    header = text[:500]
     
     #Body
-    body = text[517:]
+    body = text[500:]
     
     #Remove leading and trailing whitespaces from the body text
     body = body.strip()

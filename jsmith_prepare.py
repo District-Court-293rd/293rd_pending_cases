@@ -21,8 +21,6 @@ def get_case_type(value):
         return 'Civil'
     elif value.upper().count('JU') > 0:
         return 'Juvenile'
-    elif value.upper().count('OLS') > 0:
-        return 'OLS'
     else:
         #Since there are many civil cases that don't follow the same formatting, 
         #I will assume that anything not matching above is a civil case.
@@ -155,8 +153,14 @@ def prepare_dataframe(file_name, df):
     #Verify Cause Numbers are represented as strings
     #df['Cause Number'] = df['Cause Number'].astype(str)
 
-    #Now check if it is criminal or civil
-    if file_name.upper().count('CR') > 0:
+    #Now check if it is criminal, civil, or OLS
+    if file_name.upper().count('OLS') > 0 and file_name.upper().count('CR') > 0:
+        #Assign as OLS case type
+        df['Case Type'] = 'Criminal OLS'
+    elif file_name.upper().count('OLS') > 0 and ( file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0 ):
+        #Assign as OLS case type
+        df['Case Type'] = 'Civil OLS'
+    elif file_name.upper().count('CR') > 0:
         #Assign as Criminal case type
         df['Case Type'] = 'Criminal'
     else:
@@ -189,7 +193,7 @@ def prepare_dataframe(file_name, df):
     #    df['Plaintiff Attorney'] = df['Plaintiff Attorney'].apply(convert_name_list_to_string)
     #    df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
     #    df['Defendant Attorney'] = df['Defendant Attorney'].apply(convert_name_list_to_string)
-    if df['Case Type'][0] == 'Criminal':
+    if df['Case Type'][0] == 'Criminal' or df['Case Type'][0] == 'Criminal OLS':
         df['First Offense'] = df['First Offense'].apply(convert_name_list_to_string)
         df['ST RPT Column'] = df['ST RPT Column'].apply(convert_name_list_to_string)
     
