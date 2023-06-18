@@ -100,7 +100,7 @@ def update_civil_cases(new_civil_df):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open('Pending Reports')
     
-    if new_civil_df['Case Type'].count('OLS') > 0:
+    if new_civil_df['Case Type'][0].count('OLS') > 0:
         #Send OLS data to the 'Civil OLS Cases' tab
         civil_sheet = gsheet.worksheet('OLS Civil Cases')
         #Send closed OLS cases to the 'Closed Civil OLS Cases' tab
@@ -189,7 +189,7 @@ def update_criminal_cases(new_crim_df):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open("Pending Reports")
 
-    if new_crim_df['Case Type'].count('OLS') > 0:
+    if new_crim_df['Case Type'][0].count('OLS') > 0:
         #Send OLS data to the 'Civil OLS Cases' tab
         crim_sheet = gsheet.worksheet('OLS Criminal Cases')
         #Send closed OLS cases to the 'Closed Civil OLS Cases' tab
