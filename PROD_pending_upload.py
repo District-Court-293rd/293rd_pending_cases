@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import gspread
-import jsmith_acquire
-import jsmith_prepare
+import PROD_acquire
+import PROD_prepare
 
 credentials = {
   "type": st.secrets["type"],
@@ -67,9 +67,9 @@ def update_spreadsheet(file_name, content):
     """
     
     #Extract the PDF data
-    df = jsmith_acquire.build_dataframe(file_name, content)
+    df = PROD_acquire.build_dataframe(file_name, content)
     #Prepare the df and add new columns
-    df = jsmith_prepare.prepare_dataframe(file_name, df)
+    df = PROD_prepare.prepare_dataframe(file_name, df)
 
     #If case type is 'Criminal' or 'Criminal OLS', send to criminal function
     if df['Case Type'][0].count('Criminal') > 0:
@@ -126,7 +126,7 @@ def update_civil_cases(new_civil_df):
         #Remove closed cases from current_civil_df
         current_civil_df = current_civil_df[~(current_civil_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
-        closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
+        closed_cases_df = PROD_prepare.prepare_closed_cases(closed_cases_df)
         #Find next available row
         next_available_row = find_next_available_row(closed_sheet)
         #If any cases were closed, add the newly closed cases to the 'Closed Civil Cases' tab
@@ -215,7 +215,7 @@ def update_criminal_cases(new_crim_df):
         #Remove closed cases from current_crim_df
         current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
-        closed_cases_df = jsmith_prepare.prepare_closed_cases(closed_cases_df)
+        closed_cases_df = PROD_prepare.prepare_closed_cases(closed_cases_df)
         #Find the next available row
         next_available_row = find_next_available_row(closed_sheet)
         #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab

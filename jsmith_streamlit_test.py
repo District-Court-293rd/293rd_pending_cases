@@ -8,10 +8,9 @@ from pdfminer3.converter import TextConverter
 from datetime import date
 import io
 import os
-import pending_upload
+import PROD_pending_upload
 import gspread
 import streamlit_authenticator as stauth
-import pickle
 from pathlib import Path
 
 credentials = {
@@ -138,7 +137,7 @@ with page_content.container():
                 content = get_file_content(file_object.name)
 
                 #Build and prepare the dataframe, then update the spreadsheet
-                pending_upload.update_spreadsheet(file_object.name, content)
+                PROD_pending_upload.update_spreadsheet(file_object.name, content)
 
                 #Delete the saved file. Leave messages for success or failure
                 if os.path.exists(file_object.name):
