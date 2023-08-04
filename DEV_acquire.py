@@ -299,9 +299,9 @@ def build_criminal_cases_dataframe(text):
     #Now remove the last divider sections using regex
     body = re.sub(r"""\nTOTAL NUMBER OF CASES FILED: [0-9\n-]*MTR-A[A-Z\n ]*[-]*""", '', body)
     
-    body = re.sub(r"""\n*TOTAL NUMBER OF MTR-A FILINGS: [0-9\n-]*ALL OTHER CASES ADDED/APPEALED[\n-]*""", '', body)
+    body = re.sub(r"""\n{0,1}TOTAL NUMBER OF MTR-A FILINGS: [0-9\n-]*ALL OTHER CASES ADDED/APPEALED[\n-]*""", '', body)
     
-    body = re.sub(r"""\n*TOTAL NUMBER OF CASES ADDED/APPEALED: [0-9- a-zA-Z\.#;,:'=\n]*""", '', body)
+    body = re.sub(r"""\n{0,1}TOTAL NUMBER OF CASES ADDED/APPEALED: [0-9- a-zA-Z\.#;,:'=\n]*""", '', body)
     
     #########################################################################################################
     
