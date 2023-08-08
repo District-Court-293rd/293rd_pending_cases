@@ -1,6 +1,6 @@
 import pandas as pd
 import re
-from datetime import date
+from datetime import date, datetime
 
 def get_case_type(value):
     """
@@ -182,9 +182,11 @@ def prepare_dataframe(file_name, df):
     #Create Status column. Defaults to Open
     df['Status'] = 'Open'
 
-    #Removed on 05/30/2023
     #Create Load Date column
     #df['load_date'] = str(date.today())
+
+    #Create Load DateTime column
+    df['Load DateTime'] = str(datetime.now())
 
     #As of 13 June 2023, we are no longer collecting names
     #Convert the lists of names in the civil cases dataframe to single strings with each name separated by a new line
