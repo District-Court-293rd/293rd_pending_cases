@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 from datetime import date, datetime
+import pytz
 
 def get_case_type(value):
     """
@@ -186,7 +187,8 @@ def prepare_dataframe(file_name, df):
     #df['load_date'] = str(date.today())
 
     #Create Load DateTime column
-    df['Load DateTime'] = str(datetime.now())
+    america_central_tz = pytz.timezone('America/Chicago')
+    df['Load DateTime'] = str(datetime.now(tz = america_central_tz))
 
     #As of 13 June 2023, we are no longer collecting names
     #Convert the lists of names in the civil cases dataframe to single strings with each name separated by a new line
