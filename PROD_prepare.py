@@ -118,8 +118,9 @@ def prepare_closed_cases(closed_cases_df):
     #Set status to closed
     closed_cases_df['Status'] = 'Closed'
 
-    #Set the closed date to the current date
-    closed_cases_df['Closed Date'] = str(date.today())
+    #Set the closed datetime column to the current date and time
+    america_central_tz = pytz.timezone('America/Chicago')
+    closed_cases_df['Closed DateTime'] = str(datetime.now(tz = america_central_tz))
 
     #Calculate the number of days to the final docket date
     #file_date = pd.to_datetime(closed_cases_df['File Date'])
