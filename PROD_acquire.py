@@ -203,6 +203,13 @@ def build_civil_cases_dataframe(text):
     
     #For header. Doesn't have to be perfect, we only need the county name included here
     header = text[:389]
+
+    #Use regex to find the 'AS OF' and 'RAN ON' dates
+    #For 'RAN ON' date:
+    report_generated_date = re.findall(r"[A-Z]{3,9}\s[0-9]{2},\s[0-9]{4}", header)[0]
+
+    #For 'AS OF' date:
+    report_as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[0]
     
     #Remove headers from all pages
     text = re.sub(r"""[A-Z0-9 ()/]*\n\n\s*[A-Za-z0-9 #,:\n]*DEFENDANT ATTORNEY""",'', text)
@@ -243,6 +250,11 @@ def build_civil_cases_dataframe(text):
 
     #Create df
     df = pd.DataFrame(case_dicts)
+
+    #Add 'Report Generated Date' and 'Report As Of Date' columns
+    df["Report Generated Date"] = report_generated_date
+
+    df["Report As Of Date"] = report_as_of_date
         
     return df
 
@@ -274,6 +286,14 @@ def build_criminal_cases_dataframe(text):
     #Separate the first header from the body
     #We'll use this to identify the county later
     header = text[:500]
+
+    #Use regex to find the 'AS OF' and 'RAN ON' dates
+    dates = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)
+    #For 'RAN ON' date:
+    report_generated_date = dates[0]
+
+    #For 'AS OF' date:
+    report_as_of_date = dates[1]
     
     #Body
     body = text[500:]
@@ -403,5 +423,10 @@ def build_criminal_cases_dataframe(text):
     
     #Create dataframe
     df = pd.DataFrame(case_list)
+
+    #Add 'Report Generated Date' and 'Report As Of Date' columns
+    df["Report Generated Date"] = report_generated_date
+
+    df["Report As Of Date"] = report_as_of_date
     
     return df
