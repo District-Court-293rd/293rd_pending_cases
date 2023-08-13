@@ -97,7 +97,7 @@ def update_open_cases_common_table(new_cases, common_sheet):
     #Some portion of the criminal and civil cases will be the same. Update those columns first
     df['County'] = new_cases['County']
     df['Cause Number'] = new_cases['Cause Number']
-    df['File Date'] = new_cases['Cause Number']
+    df['File Date'] = new_cases['File Date']
     df['Docket Date'] = new_cases['Docket Date']
     df['Court'] = '293' #Hard Coded for now, but may need to change later
     df['Case Type'] = new_cases['Case Type']
@@ -125,7 +125,7 @@ def update_open_cases_common_table(new_cases, common_sheet):
         df['ANS File'] = ''
         df['CR Number'] = ''
     
-    #Now update the 'DEV_All_Cases' spreadsheet on google sheets
+    #Now update the 'DEV_Common_Table' spreadsheet on google sheets
 
     #First, find next available row
     next_available_row = find_next_available_row(common_sheet)
@@ -293,6 +293,9 @@ def update_civil_cases(new_civil_df):
                 closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
             else:
                 closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
+    else:
+        #Instanciate closed_cases_df
+        closed_cases_df = pd.DataFrame()
 
     #Find the new cases
     if len(current_civil_df) > 0:
@@ -413,6 +416,9 @@ def update_criminal_cases(new_crim_df):
                 closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
             else:
                 closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
+    else:
+        #Instanciate closed_cases_df
+        closed_cases_df = pd.DataFrame()
 
     #Find the new cases
     if len(current_crim_df) > 0:
