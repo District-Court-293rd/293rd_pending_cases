@@ -295,7 +295,10 @@ def update_civil_cases(new_civil_df):
                 closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
 
     #Find the new cases
-    new_cases = new_civil_df[~(new_civil_df['Cause Number'].isin(current_civil_df['Cause Number']))]
+    if len(current_civil_df) > 0:
+        new_cases = new_civil_df[~(new_civil_df['Cause Number'].isin(current_civil_df['Cause Number']))]
+    else:
+        new_cases = new_civil_df
 
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
@@ -348,7 +351,7 @@ def update_civil_cases(new_civil_df):
         update_closed_cases_common_table(closed_cases_df, common_sheet)
 
     print('Civil Cases Updated!')
-    
+
     return
 
 def update_criminal_cases(new_crim_df):
@@ -412,7 +415,10 @@ def update_criminal_cases(new_crim_df):
                 closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
 
     #Find the new cases
-    new_cases = new_crim_df[~(new_crim_df['Cause Number'].isin(current_crim_df['Cause Number']))]
+    if len(current_crim_df) > 0:
+        new_cases = new_crim_df[~(new_crim_df['Cause Number'].isin(current_crim_df['Cause Number']))]
+    else:
+        new_cases = new_crim_df
 
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
