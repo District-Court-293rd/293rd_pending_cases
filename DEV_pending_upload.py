@@ -327,6 +327,7 @@ def update_civil_cases(new_civil_df):
     #this gives me a list of cause numbers where the docket date has been updated and I'll be able to update them
     #specifically in the common table
     new_docket_dates = current_civil_df[current_civil_df.duplicated(['Cause Number'], keep = 'first')]
+    new_docket_dates.reset_index(inplace = True)
 
     #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
     #At this point, duplicates of cause number indicate that the 'Docket Date' has been updated since last upload
@@ -449,6 +450,7 @@ def update_criminal_cases(new_crim_df):
     #this gives me a list of cause numbers where the docket date has been updated and I'll be able to update them
     #specifically in the common table
     new_docket_dates = current_crim_df[current_crim_df.duplicated(['Cause Number'], keep = 'first')]
+    new_docket_dates.reset_index(inplace = True)
 
     #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
