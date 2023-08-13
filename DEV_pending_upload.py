@@ -428,10 +428,6 @@ def update_criminal_cases(new_crim_df):
     else:
         new_cases = new_crim_df
 
-    #Troubleshooting
-    st.write(len(new_cases))
-    st.write(new_cases)
-
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
