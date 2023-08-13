@@ -108,7 +108,7 @@ def update_open_cases_common_table(new_cases, common_sheet):
     df['Closed DateTime'] = '' #These are open cases, so none will have a closed date yet
 
     #Determine if cases are criminal or civil. They will have different logic
-    if new_cases["Case Type"][0].count('Civil') > 0:
+    if new_cases['Case Type'][0].count('Criminal') == 0:
         df['Cause'] = new_cases['Cause of Action']
         df['Docket Type'] = new_cases['Docket Type']
         df['ANS File'] = new_cases['ANS File']
@@ -167,7 +167,7 @@ def update_docket_dates_common_table(new_docket_dates, common_sheet):
     load_datetime_col = common_sheet.find('Load DateTime').col
 
     #Iterate through each item of the df and update appropriate columns
-    if new_docket_dates['Caset Type'][0].count('Criminal') > 0:
+    if new_docket_dates['Case Type'][0].count('Criminal') > 0:
         for i in new_docket_dates.index:
             cell_row = common_sheet.find(new_docket_dates['Cause Number'][i]).row
             common_sheet.update_cell(cell_row, docket_date_col, new_docket_dates['Docket Date'][i])
