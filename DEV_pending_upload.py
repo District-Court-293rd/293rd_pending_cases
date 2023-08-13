@@ -300,6 +300,7 @@ def update_civil_cases(new_civil_df):
     #Find the new cases
     if len(current_civil_df) > 0:
         new_cases = new_civil_df[~(new_civil_df['Cause Number'].isin(current_civil_df['Cause Number']))]
+        new_cases.reset_index(inplace = True)
     else:
         new_cases = new_civil_df
 
@@ -423,6 +424,7 @@ def update_criminal_cases(new_crim_df):
     #Find the new cases
     if len(current_crim_df) > 0:
         new_cases = new_crim_df[~(new_crim_df['Cause Number'].isin(current_crim_df['Cause Number']))]
+        new_cases.reset_index(inplace = True)
     else:
         new_cases = new_crim_df
 
