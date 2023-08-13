@@ -108,7 +108,7 @@ def update_open_cases_common_table(new_cases, common_sheet):
     df['Closed DateTime'] = '' #These are open cases, so none will have a closed date yet
 
     #Determine if cases are criminal or civil. They will have different logic
-    if new_cases['Case Type'][0].count('Criminal') == 0:
+    if df['Case Type'].count('Criminal') == 0:
         df['Cause'] = new_cases['Cause of Action']
         df['Docket Type'] = new_cases['Docket Type']
         df['ANS File'] = new_cases['ANS File']
