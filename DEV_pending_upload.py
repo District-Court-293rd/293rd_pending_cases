@@ -58,6 +58,159 @@ def find_next_available_row(worksheet):
 
     return first_available_row
 
+def update_open_cases_common_table(new_cases, common_sheet):
+    """
+    This function takes in a df of the newly added open cases from the uploaded PDF report. It will take their info 
+    and put it in a common dataframe that will then be updated on google sheets.
+
+    Parameters:
+        - new_cases: The dataframe of new, open cases
+        - common_sheet: The connection to the 'DEV_Common_Table' google sheet
+
+    Returns:
+        - Nothing
+    """
+
+    #Set up the common df
+    dict = {
+        "County":[],
+        "Cause Number": [],
+        "File Date": [],
+        "Docket Date": [],
+        "Court": [],
+        "Cause": [],
+        "Docket Type": [],
+        "ANS File": [],
+        "CR Number": [],
+        "Case Type": [],
+        "Status": [],
+        "Outstanding Warrants": [],
+        "ST RPT Column": [],
+        "Report Generated Date": [],
+        "Report As Of Date": [],
+        "Load DateTime": [],
+        "Closed DateTime": []
+    }
+
+    df = pd.DataFrame(dict)
+
+    #Some portion of the criminal and civil cases will be the same. Update those columns first
+    df['County'] = new_cases['County']
+    df['Cause Number'] = new_cases['Cause Number']
+    df['File Date'] = new_cases['Cause Number']
+    df['Docket Date'] = new_cases['Docket Date']
+    df['Court'] = '293' #Hard Coded for now, but may need to change later
+    df['Case Type'] = new_cases['Case Type']
+    df['Status'] = new_cases['Status']
+    df['Report Generated Date'] = new_cases['Report Generated Date']
+    df['Report As Of Date'] = new_cases['Report As Of Date']
+    df['Load DateTime'] = new_cases['Load DateTime']
+    df['Closed DateTime'] = '' #These are open cases, so none will have a closed date yet
+
+    #Determine if cases are criminal or civil. They will have different logic
+    if new_cases["Case Type"][0].count('Civil') > 0:
+        df['Cause'] = new_cases['Cause of Action']
+        df['Docket Type'] = new_cases['Docket Type']
+        df['ANS File'] = new_cases['ANS File']
+        df['CR Number'] = new_cases['CR Number']
+        #The following columns are only available in Criminal reports, so set them to empty strings
+        df['Outstanding Warrants'] = ''
+        df['ST RPT Column'] = ''
+    else:
+        df['Cause'] = new_cases['First Offense']
+        df['Outstanding Warrants'] = new_cases['Outstanding Warrants']
+        df['ST RPT Column'] = new_cases['ST RPT Column']
+        #The following columns are only available in Civil Reports, so set them to empty strings
+        df['Docket Type'] = ''
+        df['ANS File'] = ''
+        df['CR Number'] = ''
+    
+    #Now update the 'DEV_All_Cases' spreadsheet on google sheets
+
+    #First, find next available row
+    next_available_row = find_next_available_row(common_sheet)
+
+    #If the first available row is the first row in the sheet, include the column names when updating
+    #Otherwise, only send the values
+    if next_available_row == 'A1':
+        common_sheet.update([df.columns.values.tolist()] + df.values.tolist())
+    else:
+        common_sheet.update(next_available_row, df.values.tolist())
+
+    return
+
+def update_docket_dates_common_table(new_docket_dates, common_sheet):
+    """
+    This function takes in the df of cases with an updated docket date and locates each one of them in the common table.
+    It then updates only the docket date in the common table for these cases.
+
+    Parameter:
+        - new_docket_dates: The dataframe containing the cases with newly updated docket dates
+        - common_sheet: The connection to the 'DEV_Common_Table' spreadsheet on google sheets
+
+    Returns:
+        Nothing
+    """
+
+    #Get the column values for all columns that may need to be updated
+    #Docket Date
+    docket_date_col = common_sheet.find('Docket Date').col
+    #Docket Type
+    docket_type_col = common_sheet.find('Docket Type').col
+    #ANS File
+    ans_file_col = common_sheet.find('ANS File').col
+    #CR Number
+    cr_number_col = common_sheet.find('CR Number').col
+    #Report As Of Date
+    as_of_date_col = common_sheet.find('Report As Of Date').col
+    #Load DateTime
+    load_datetime_col = common_sheet.find('Load DateTime').col
+
+    #Iterate through each item of the df and update appropriate columns
+    if new_docket_dates['Caset Type'][0].count('Criminal') > 0:
+        for i in new_docket_dates.index:
+            cell_row = common_sheet.find(new_docket_dates['Cause Number'][i]).row
+            common_sheet.update_cell(cell_row, docket_date_col, new_docket_dates['Docket Date'][i])
+            common_sheet.update_cell(cell_row, as_of_date_col, new_docket_dates['Report As Of Date'][i])
+            common_sheet.update_cell(cell_row, load_datetime_col, new_docket_dates['Load DateTime'][i])
+    else:
+        for i in new_docket_dates.index:
+            cell_row = common_sheet.find(new_docket_dates['Cause Number'][i]).row
+            common_sheet.update_cell(cell_row, docket_date_col, new_docket_dates['Docket Date'][i])
+            common_sheet.update_cell(cell_row, as_of_date_col, new_docket_dates['Report As Of Date'][i])
+            common_sheet.update_cell(cell_row, load_datetime_col, new_docket_dates['Load DateTime'][i])
+            common_sheet.update_cell(cell_row, docket_type_col, new_docket_dates['Docket Type'][i])
+            common_sheet.update_cell(cell_row, ans_file_col, new_docket_dates['ANS File'][i])
+            common_sheet.update_cell(cell_row, cr_number_col, new_docket_dates['CR Number'][i])
+
+    return
+
+def update_closed_cases_common_table(closed_cases, common_sheet):
+    """
+    This function takes in the newly closed cases dataframe and updates the 'Status' and 'Closed DateTime' columns of the common table.
+
+    Parameters:
+        - closed_cases: The dataframe containing the newly closed cases
+        - common_sheet: The connection to the 'DEV_Common_Table' spreadsheet in google sheets
+
+    Returns:
+        Nothing
+    """
+
+    #Get the column values for all columns that may need to be updated
+    #Closed DateTime
+    closed_date_col = common_sheet.find('Closed DateTime').col
+    #Status
+    status_col = common_sheet.find('Status').col
+
+    #Iterate through each item of the df and update appropriate columns
+    for i in closed_cases.index:
+        cell_row = common_sheet.find(closed_cases['Cause Number'][i]).row
+        common_sheet.update_cell(cell_row, closed_date_col, closed_cases['Closed DateTime'][i])
+        common_sheet.update_cell(cell_row, status_col, closed_cases['Status'][i])
+
+    return
+
 def update_spreadsheet(file_name, content):
     """
     This function takes in a list containing the file paths of the PDFs that need to be extracted. It'll loop
@@ -99,6 +252,9 @@ def update_civil_cases(new_civil_df):
     
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open('Pending Reports')
+
+    #Make connection to 'DEV_Common_Table'
+    common_sheet = gsheet.worksheet('DEV_Common_Table')
     
     if new_civil_df['Case Type'][0].count('OLS') > 0:
         #Send OLS data to the 'Civil OLS Cases' tab
@@ -138,6 +294,9 @@ def update_civil_cases(new_civil_df):
             else:
                 closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
 
+    #Find the new cases
+    new_cases = new_civil_df[~(new_civil_df['Cause Number'].isin(current_civil_df['Cause Number']))]
+
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
@@ -153,9 +312,18 @@ def update_civil_cases(new_civil_df):
     #current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
 
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
+    #If cause number and docket date are the same, then the case hasn't changed and is still open.
+    #So we'll keep the original entry
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
 
+    #For updating the common table, create a df of duplicated cause numbers.
+    #this gives me a list of cause numbers where the docket date has been updated and I'll be able to update them
+    #specifically in the common table
+    new_docket_dates = current_civil_df[current_civil_df.duplicated(['Cause Number'], keep = 'first')]
+
     #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
+    #At this point, duplicates of cause number indicate that the 'Docket Date' has been updated since last upload
+    #So keep the most recent version
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
 
     #Now sort by county and then by cause number
@@ -166,8 +334,21 @@ def update_civil_cases(new_civil_df):
 
     #Now upload to Civil Cases worksheet in 'Pending Reports' spreadsheet and leave a message
     civil_sheet.update([current_civil_df.columns.values.tolist()] + current_civil_df.values.tolist())
-    print('Civil Cases Updated!')
 
+    #Now update the common table with the newly opened cases
+    if len(new_cases) > 0:
+        update_open_cases_common_table(new_cases, common_sheet)
+
+    #Now update the common table with the new docket dates
+    if len(new_docket_dates) > 0:
+        update_docket_dates_common_table(new_docket_dates, common_sheet)
+
+    #Finally update the common table with the newly closed cases
+    if len(closed_cases_df) > 0:
+        update_closed_cases_common_table(closed_cases_df, common_sheet)
+
+    print('Civil Cases Updated!')
+    
     return
 
 def update_criminal_cases(new_crim_df):
@@ -188,6 +369,9 @@ def update_criminal_cases(new_crim_df):
     
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open("Pending Reports")
+
+    #Make connection to 'DEV_Common_Table'
+    common_sheet = gsheet.worksheet('DEV_Common_Table')
 
     if new_crim_df['Case Type'][0].count('OLS') > 0:
         #Send OLS data to the 'Civil OLS Cases' tab
@@ -227,6 +411,9 @@ def update_criminal_cases(new_crim_df):
             else:
                 closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
 
+    #Find the new cases
+    new_cases = new_crim_df[~(new_crim_df['Cause Number'].isin(current_crim_df['Cause Number']))]
+
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
@@ -244,6 +431,11 @@ def update_criminal_cases(new_crim_df):
     #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
 
+    #For updating the common table, create a df of duplicated cause numbers.
+    #this gives me a list of cause numbers where the docket date has been updated and I'll be able to update them
+    #specifically in the common table
+    new_docket_dates = current_crim_df[current_crim_df.duplicated(['Cause Number'], keep = 'first')]
+
     #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
 
@@ -255,6 +447,19 @@ def update_criminal_cases(new_crim_df):
 
     #Now upload to Criminal Cases worksheet in 'Pending Reports' spreadsheet and leave a message
     crim_sheet.update([current_crim_df.columns.values.tolist()] + current_crim_df.values.tolist())
+
+    #Now update the common table with the newly opened cases
+    if len(new_cases) > 0:
+        update_open_cases_common_table(new_cases, common_sheet)
+
+    #Now update the common table with the new docket dates
+    if len(new_docket_dates) > 0:
+        update_docket_dates_common_table(new_docket_dates, common_sheet)
+
+    #Finally update the common table with the newly closed cases
+    if len(closed_cases_df) > 0:
+        update_closed_cases_common_table(closed_cases_df, common_sheet)
+    
     print('Criminal Cases Updated!')
 
     return
