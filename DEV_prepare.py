@@ -124,7 +124,7 @@ def prepare_closed_cases(closed_cases_df, new_cases_df):
     time = '00:00:00'
     datetime_str = date + ' ' + time
 
-    datetime_object = datetime.strptime(datetime_str, '%m/%d/%y %H:%M:%S')
+    datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
     closed_cases_df['Closed DateTime'] = str(datetime_object)
 
     #Calculate the number of days to the final docket date
