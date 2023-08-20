@@ -120,7 +120,7 @@ def prepare_closed_cases(closed_cases_df, new_cases_df):
     closed_cases_df['Status'] = 'Closed'
 
     #Set the closed datetime column to the uploaded report's 'As Of' date
-    date = new_cases_df['Report As Of Date'][0].astype(str).str.strip()
+    date = new_cases_df['Report As Of Date'][0].str.strip()
     time = '00:00:00'
     datetime_str = date + ' ' + time
 
