@@ -101,7 +101,7 @@ def convert_name_list_to_string(name_list):
 
     return name_string
 
-def prepare_closed_cases(closed_cases_df):
+def prepare_closed_cases(closed_cases_df, new_cases_df):
     """
     This function takes in a dataframe of newly closed cases and prepares them to be added to the appropriate closed cases tab.
     It will set the closed date to the current date, set case status to closed, calculate the number of days it took to get a docket date
@@ -110,6 +110,7 @@ def prepare_closed_cases(closed_cases_df):
 
     Parameter:
         -closed_cases_df: The dataframe containing the newly closed cases
+        -new_cases_df: The dataframe containing the newly uploaded cases - Needed to get the report's 'As Of' date
 
     Returns:
         -closed_cases_df: The dataframe containing the newly closed cases with the updated information
@@ -118,9 +119,13 @@ def prepare_closed_cases(closed_cases_df):
     #Set status to closed
     closed_cases_df['Status'] = 'Closed'
 
-    #Set the closed datetime column to the current date and time
-    america_central_tz = pytz.timezone('America/Chicago')
-    closed_cases_df['Closed DateTime'] = str(datetime.now(tz = america_central_tz))
+    #Set the closed datetime column to the uploaded report's 'As Of' date
+    date = new_cases_df['Report As Of Date'][0].astype(str).str.strip()
+    time = '00:00:00'
+    datetime_str = date + ' ' + time
+
+    datetime_object = datetime.strptime(datetime_str, '%m/%d/%y %H:%M:%S')
+    closed_cases_df['Closed DateTime'] = str(datetime_object)
 
     #Calculate the number of days to the final docket date
     #file_date = pd.to_datetime(closed_cases_df['File Date'])
