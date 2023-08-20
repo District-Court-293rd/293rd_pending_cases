@@ -126,7 +126,7 @@ def update_civil_cases(new_civil_df):
         #Remove closed cases from current_civil_df
         current_civil_df = current_civil_df[~(current_civil_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
-        closed_cases_df = PROD_prepare.prepare_closed_cases(closed_cases_df)
+        closed_cases_df = PROD_prepare.prepare_closed_cases(closed_cases_df, new_civil_df)
         #Find next available row
         next_available_row = find_next_available_row(closed_sheet)
         #If any cases were closed, add the newly closed cases to the 'Closed Civil Cases' tab
@@ -215,7 +215,7 @@ def update_criminal_cases(new_crim_df):
         #Remove closed cases from current_crim_df
         current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
-        closed_cases_df = PROD_prepare.prepare_closed_cases(closed_cases_df)
+        closed_cases_df = PROD_prepare.prepare_closed_cases(closed_cases_df, new_crim_df)
         #Find the next available row
         next_available_row = find_next_available_row(closed_sheet)
         #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
