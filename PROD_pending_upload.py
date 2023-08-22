@@ -152,8 +152,9 @@ def update_civil_cases(new_civil_df):
     #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
     #current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
 
-    #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
-    current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
+    #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping last
+    #The case may have changed since last upload, so keep the newest version
+    current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'last')
 
     #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
@@ -241,8 +242,9 @@ def update_criminal_cases(new_crim_df):
     #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
     #current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
 
-    #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping first
-    current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'first')
+    #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping last
+    #This allows us to keep the most recent version of the case, so if any info changes, it will be updated here
+    current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'last')
 
     #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
