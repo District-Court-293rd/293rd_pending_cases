@@ -441,6 +441,10 @@ def update_criminal_cases(new_crim_df):
     else:
         new_cases = new_crim_df
 
+    #Some cause numbers will be duplicated due to the MTR-A section of the criminal report. Remove duplicated cause numbers, while keeping last.
+    #This should ensure that only the cause number with the most recent file date is kept
+    new_cases = new_cases.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
+
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
