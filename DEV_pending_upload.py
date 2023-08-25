@@ -139,7 +139,7 @@ def update_open_cases_common_table(new_cases, common_sheet):
 
     return
 
-def update_docket_dates_common_table(new_docket_dates, common_sheet):
+def update_changed_cases_common_table(changed_cases, common_sheet):
     """
     This function takes in the df of cases with an updated docket date and locates each one of them in the common table.
     It then updates only the docket date in the common table for these cases.
@@ -155,33 +155,47 @@ def update_docket_dates_common_table(new_docket_dates, common_sheet):
     #Get the column values for all columns that may need to be updated
     #Docket Date
     docket_date_col = common_sheet.find('Docket Date').col
+    #Cause
+    cause_col = common_sheet.find('Cause').col
     #Docket Type
     docket_type_col = common_sheet.find('Docket Type').col
     #ANS File
     ans_file_col = common_sheet.find('ANS File').col
     #CR Number
     cr_number_col = common_sheet.find('CR Number').col
+    #Outstanding Warrants
+    warrants_col = common_sheet.find('Outstanding Warrants').col
+    #ST RPT Col
+    st_rpt_col = common_sheet.find('ST RPT Column').col
+    #Report Generated Date
+    generated_date_col = common_sheet.find('Report Generated Date').col
     #Report As Of Date
     as_of_date_col = common_sheet.find('Report As Of Date').col
     #Load DateTime
     load_datetime_col = common_sheet.find('Load DateTime').col
 
     #Iterate through each item of the df and update appropriate columns
-    if new_docket_dates['Case Type'][0].count('Criminal') > 0:
-        for i in new_docket_dates.index:
-            cell_row = common_sheet.find(new_docket_dates['Cause Number'][i]).row
-            common_sheet.update_cell(cell_row, docket_date_col, new_docket_dates['Docket Date'][i])
-            common_sheet.update_cell(cell_row, as_of_date_col, new_docket_dates['Report As Of Date'][i])
-            common_sheet.update_cell(cell_row, load_datetime_col, new_docket_dates['Load DateTime'][i])
+    if changed_cases['Case Type'][0].count('Criminal') > 0:
+        for i in changed_cases.index:
+            cell_row = common_sheet.find(changed_cases['Cause Number'][i]).row
+            common_sheet.update_cell(cell_row, cause_col, changed_cases['First Offense'][i])
+            common_sheet.update_cell(cell_row, docket_date_col, changed_cases['Docket Date'][i])
+            common_sheet.update_cell(cell_row, warrants_col, changed_cases['Outstanding Warrants'][i])
+            common_sheet.update_cell(cell_row, st_rpt_col, changed_cases['ST RPT Column'][i])
+            common_sheet.update_cell(cell_row, generated_date_col, changed_cases['Report Generated Date'][i])
+            common_sheet.update_cell(cell_row, as_of_date_col, changed_cases['Report As Of Date'][i])
+            common_sheet.update_cell(cell_row, load_datetime_col, changed_cases['Load DateTime'][i])
     else:
-        for i in new_docket_dates.index:
-            cell_row = common_sheet.find(new_docket_dates['Cause Number'][i]).row
-            common_sheet.update_cell(cell_row, docket_date_col, new_docket_dates['Docket Date'][i])
-            common_sheet.update_cell(cell_row, as_of_date_col, new_docket_dates['Report As Of Date'][i])
-            common_sheet.update_cell(cell_row, load_datetime_col, new_docket_dates['Load DateTime'][i])
-            common_sheet.update_cell(cell_row, docket_type_col, new_docket_dates['Docket Type'][i])
-            common_sheet.update_cell(cell_row, ans_file_col, new_docket_dates['ANS File'][i])
-            common_sheet.update_cell(cell_row, cr_number_col, new_docket_dates['CR Number'][i])
+        for i in changed_cases.index:
+            cell_row = common_sheet.find(changed_cases['Cause Number'][i]).row
+            common_sheet.update_cell(cell_row, cause_col, changed_cases['Cause of Action'][i])
+            common_sheet.update_cell(cell_row, docket_date_col, changed_cases['Docket Date'][i])
+            common_sheet.update_cell(cell_row, docket_type_col, changed_cases['Docket Type'][i])
+            common_sheet.update_cell(cell_row, ans_file_col, changed_cases['ANS File'][i])
+            common_sheet.update_cell(cell_row, cr_number_col, changed_cases['CR Number'][i])
+            common_sheet.update_cell(cell_row, generated_date_col, changed_cases['Report Generated Date'][i])
+            common_sheet.update_cell(cell_row, as_of_date_col, changed_cases['Report As Of Date'][i])
+            common_sheet.update_cell(cell_row, load_datetime_col, changed_cases['Load DateTime'][i])
 
     return
 
@@ -318,15 +332,14 @@ def update_civil_cases(new_civil_df):
     #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
     #current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
 
-    #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping last
-    #The case may have changed since last upload, so keep the newest version
-    current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'last')
+    #Stage 1 - Drop Duplicates for cases that haven't changed while keeping the most recent version
+    current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'File Date', 'Cause of Action', 'Docket Date', 'Docket Type', 'ANS File', 'CR Number', 'Docket Date'], ignore_index = True, keep = 'last')
 
     #For updating the common table, create a df of duplicated cause numbers.
-    #this gives me a list of cause numbers where the docket date has been updated and I'll be able to update them
-    #specifically in the common table
-    new_docket_dates = current_civil_df[current_civil_df.duplicated(['Cause Number'], keep = 'first')]
-    new_docket_dates.reset_index(inplace = True)
+    #this gives me a list of cause numbers where at least one of the other fields for the case has been changed since the last upload
+    #This allows me to update those columns in the common table
+    changed_cases = current_civil_df[current_civil_df.duplicated(['Cause Number'], keep = 'first')]
+    changed_cases.reset_index(inplace = True)
 
     #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
     #At this point, duplicates of cause number indicate that the 'Docket Date' has been updated since last upload
@@ -346,9 +359,9 @@ def update_civil_cases(new_civil_df):
     if len(new_cases) > 0:
         update_open_cases_common_table(new_cases, common_sheet)
 
-    #Now update the common table with the new docket dates
-    if len(new_docket_dates) > 0:
-        update_docket_dates_common_table(new_docket_dates, common_sheet)
+    #Now update the common table with the changed cases info
+    if len(changed_cases) > 0:
+        update_changed_cases_common_table(changed_cases, common_sheet)
 
     #Finally update the common table with the newly closed cases
     if len(closed_cases_df) > 0:
@@ -442,15 +455,14 @@ def update_criminal_cases(new_crim_df):
     #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
     #current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
 
-    #Stage 1 - Drop Duplicates for subset ['Cause Number', 'Docket Date'] while keeping last
-    #This allows us to keep the most recent version of the case, so if any info changes, it will be updated here
-    current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'Docket Date'], ignore_index = True, keep = 'last')
+    #Stage 1 - Drop Duplicates for cases that haven't changed since the last upload. Keep the most recent versions
+    current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'File Date', 'Docket Date', 'Outstanding Warrants', 'First Offense', 'ST RPT Column'], ignore_index = True, keep = 'last')
 
     #For updating the common table, create a df of duplicated cause numbers.
-    #this gives me a list of cause numbers where the docket date has been updated and I'll be able to update them
-    #specifically in the common table
-    new_docket_dates = current_crim_df[current_crim_df.duplicated(['Cause Number'], keep = 'first')]
-    new_docket_dates.reset_index(inplace = True)
+    #this gives me a list of cause numbers for cases that have had any field change since the last upload
+    #This allows me to update them in the common table
+    changed_cases = current_crim_df[current_crim_df.duplicated(['Cause Number'], keep = 'first')]
+    changed_cases.reset_index(inplace = True)
 
     #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
@@ -469,8 +481,8 @@ def update_criminal_cases(new_crim_df):
         update_open_cases_common_table(new_cases, common_sheet)
 
     #Now update the common table with the new docket dates
-    if len(new_docket_dates) > 0:
-        update_docket_dates_common_table(new_docket_dates, common_sheet)
+    if len(changed_cases) > 0:
+        update_changed_cases_common_table(changed_cases, common_sheet)
 
     #Finally update the common table with the newly closed cases
     if len(closed_cases_df) > 0:
