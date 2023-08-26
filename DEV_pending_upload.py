@@ -142,7 +142,8 @@ def update_open_cases_common_table(new_cases, common_sheet):
 def update_changed_cases_common_table(changed_cases, col_name, common_sheet):
     """
     This function takes in the df of cases with a changed value and locates each one of them in the common table.
-    It then updates only the changed value in the common table for these cases.
+    It then updates only the changed value in the common table for these cases. It will also have to update the
+    report generated, report as of, and load date columns.
 
     Parameter:
         - new_docket_dates: The dataframe containing the cases with newly updated docket dates
@@ -155,6 +156,11 @@ def update_changed_cases_common_table(changed_cases, col_name, common_sheet):
 
     #Get the column value for the changed column
     changed_col = common_sheet.find(col_name).col
+    
+    #Get the column value for the following
+    generated_date_col = common_sheet.find('Report Generated Date').col
+    as_of_date_col = common_sheet.find('Report As Of Date').col
+    load_date_col = common_sheet.find('Load DateTime').col
 
     #Iterate through each item of the df and update appropriate columns
     #Since the associated column for 'Cause' is different between civil and criminal cases, we must specify those columns
@@ -162,14 +168,23 @@ def update_changed_cases_common_table(changed_cases, col_name, common_sheet):
         for i in changed_cases.index:
             cell_row = common_sheet.find(changed_cases['Cause Number'][i]).row
             common_sheet.update_cell(cell_row, changed_col, changed_cases['First Offense'][i])
+            common_sheet.update_cell(cell_row, generated_date_col, changed_cases['Report Generated Date'][i])
+            common_sheet.update_cell(cell_row, as_of_date_col, changed_cases['Report As Of Date'][i])
+            common_sheet.update_cell(cell_row, load_date_col, changed_cases['Load DateTime'][i])
     elif col_name == 'Cause':
         for i in changed_cases.index:
             cell_row = common_sheet.find(changed_cases['Cause Number'][i]).row
             common_sheet.update_cell(cell_row, changed_col, changed_cases['Cause of Action'][i])
+            common_sheet.update_cell(cell_row, generated_date_col, changed_cases['Report Generated Date'][i])
+            common_sheet.update_cell(cell_row, as_of_date_col, changed_cases['Report As Of Date'][i])
+            common_sheet.update_cell(cell_row, load_date_col, changed_cases['Load DateTime'][i])
     else:
         for i in changed_cases.index:
             cell_row = common_sheet.find(changed_cases['Cause Number'][i]).row
             common_sheet.update_cell(cell_row, changed_col, changed_cases[col_name][i])
+            common_sheet.update_cell(cell_row, generated_date_col, changed_cases['Report Generated Date'][i])
+            common_sheet.update_cell(cell_row, as_of_date_col, changed_cases['Report As Of Date'][i])
+            common_sheet.update_cell(cell_row, load_date_col, changed_cases['Load DateTime'][i])
 
     return
 
