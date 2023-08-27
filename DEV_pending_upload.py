@@ -239,11 +239,11 @@ def update_civil_cases(new_civil_df):
     if len(closed_cases_df) > 0:
         #Reset index
         closed_cases_df.reset_index(inplace = True)
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report As Of Date'] = closed_cases_df['Report As Of Date'][0]
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Load DateTime'] = closed_cases_df['Load DateTime'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Status']] = closed_cases_df['Status'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Closed DateTime']] = closed_cases_df['Closed DateTime'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report Generated Date']] = closed_cases_df['Report Generated Date'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report As Of Date']] = closed_cases_df['Report As Of Date'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Load DateTime']] = closed_cases_df['Load DateTime'][0]
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
@@ -344,11 +344,11 @@ def update_criminal_cases(new_crim_df):
     if len(closed_cases_df) > 0:
         #Reset index
         closed_cases_df.reset_index(inplace = True)
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report As Of Date'] = closed_cases_df['Report As Of Date'][0]
-        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Load DateTime'] = closed_cases_df['Load DateTime'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Status']] = closed_cases_df['Status'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Closed DateTime']] = closed_cases_df['Closed DateTime'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report Generated Date']] = closed_cases_df['Report Generated Date'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report As Of Date']] = closed_cases_df['Report As Of Date'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Load DateTime']] = closed_cases_df['Load DateTime'][0]
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
