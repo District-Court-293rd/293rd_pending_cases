@@ -235,11 +235,13 @@ def update_civil_cases(new_civil_df):
     #Now append the current_civil_df to the common_table_df, remove duplicates, and update the closed cases
     common_table_df = common_table_df.append(convert_to_common_table_df(current_civil_df), ignore_index = True)
     common_table_df = common_table_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report As Of Date'] = closed_cases_df['Report As Of Date'][0]
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Load DateTime'] = closed_cases_df['Load DateTime'][0]
+
+    if len(closed_cases_df) > 0:
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report As Of Date'] = closed_cases_df['Report As Of Date'][0]
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Load DateTime'] = closed_cases_df['Load DateTime'][0]
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
@@ -336,11 +338,13 @@ def update_criminal_cases(new_crim_df):
     #Now append the current_civil_df to the common_table_df, remove duplicates, and update the closed cases
     common_table_df = common_table_df.append(convert_to_common_table_df(current_crim_df), ignore_index = True)
     common_table_df = common_table_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report As Of Date'] = closed_cases_df['Report As Of Date'][0]
-    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Load DateTime'] = closed_cases_df['Load DateTime'][0]
+    
+    if len(closed_cases_df) > 0:
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report As Of Date'] = closed_cases_df['Report As Of Date'][0]
+        common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Load DateTime'] = closed_cases_df['Load DateTime'][0]
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
