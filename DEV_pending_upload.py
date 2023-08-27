@@ -3,7 +3,6 @@ import pandas as pd
 import gspread
 import DEV_acquire
 import DEV_prepare
-import time
 
 credentials = {
   "type": st.secrets["type"],
@@ -126,90 +125,6 @@ def convert_to_common_table_df(case_df):
 
     return df
 
-def update_open_cases_common_table(new_cases, common_sheet):
-    """
-    This function takes in a df of the newly added open cases from the uploaded PDF report. This dataframe should already be in common table format. 
-    It will add these cases to the common table in google sheets.
-
-    Parameters:
-        - new_cases: The dataframe of new, open cases (already in common table format)
-        - common_sheet: The connection to the 'DEV_Common_Table' google sheet
-
-    Returns:
-        - Nothing
-    """
-
-    #First, find next available row
-    next_available_row = find_next_available_row(common_sheet)
-
-    #If the first available row is the first row in the sheet, include the column names when updating
-    #Otherwise, only send the values
-    if next_available_row == 'A1':
-        common_sheet.update([new_cases.columns.values.tolist()] + new_cases.values.tolist())
-    else:
-        common_sheet.update(next_available_row, new_cases.values.tolist())
-
-    return
-
-def update_changed_cases_common_table(changed_cases, common_sheet):
-    """
-    This function takes in the df of cases with a changed value and locates each one of them in the common table.
-    This dataframe will already be in common_table format.
-    The function will find each cause number, and delete the associated row in the common table.
-    Then, it will add all of the changed case information to the end of the table in one API call.
-
-    Parameter:
-        - changed_cases: The dataframe containing the cases with changed info (already in common_table format)
-        - common_sheet: The connection to the 'DEV_Common_Table' spreadsheet on google sheets
-
-    Returns:
-        Nothing
-    """
-    
-    #Iterate through each case in the df and delete their associated row in the common table
-    for i in changed_cases.index:
-        case_row = common_sheet.find(changed_cases['Cause Number'][i]).row
-        common_sheet.delete_rows(case_row)
-    
-    #Now add the entire changed_cases df to the end of the common table
-    #First, find next available row
-    next_available_row = find_next_available_row(common_sheet)
-
-    #If the first available row is the first row in the sheet, include the column names when updating
-    #Otherwise, only send the values
-    if next_available_row == 'A1':
-        common_sheet.update([changed_cases.columns.values.tolist()] + changed_cases.values.tolist())
-    else:
-        common_sheet.update(next_available_row, changed_cases.values.tolist())
-
-    return
-
-def update_closed_cases_common_table(closed_cases, common_sheet):
-    """
-    This function takes in the newly closed cases dataframe and updates the 'Status' and 'Closed DateTime' columns of the common table.
-
-    Parameters:
-        - closed_cases: The dataframe containing the newly closed cases
-        - common_sheet: The connection to the 'DEV_Common_Table' spreadsheet in google sheets
-
-    Returns:
-        Nothing
-    """
-
-    #Get the column values for all columns that may need to be updated
-    #Closed DateTime
-    closed_date_col = common_sheet.find('Closed DateTime').col
-    #Status
-    status_col = common_sheet.find('Status').col
-
-    #Iterate through each item of the df and update appropriate columns
-    for i in closed_cases.index:
-        cell_row = common_sheet.find(closed_cases['Cause Number'][i]).row
-        common_sheet.update_cell(cell_row, closed_date_col, closed_cases['Closed DateTime'][i])
-        common_sheet.update_cell(cell_row, status_col, closed_cases['Status'][i])
-
-    return
-
 def update_spreadsheet(file_name, content):
     """
     This function takes in a list containing the file paths of the PDFs that need to be extracted. It'll loop
@@ -269,6 +184,9 @@ def update_civil_cases(new_civil_df):
     #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
     current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
 
+    #Load the data currently on the common table in the 'Pending Reports' spreadsheet
+    common_table_df = pd.DataFrame(common_sheet.get_all_records())
+
     #Before appending the new cases, create the closed cases df and udpate the closed cases tab
     if len(current_civil_df) > 0:
         #First, Verify that all Cause Numbers are represented as strings
@@ -296,41 +214,17 @@ def update_civil_cases(new_civil_df):
         #Instanciate closed_cases_df
         closed_cases_df = pd.DataFrame()
 
-    #Find the new cases
-    if len(current_civil_df) > 0:
-        new_cases = new_civil_df[~(new_civil_df['Cause Number'].isin(current_civil_df['Cause Number']))]
-        new_cases.reset_index(inplace = True)
-    else:
-        new_cases = new_civil_df
-
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
     #Verify that all Cause Numbers are represented as strings
     current_civil_df['Cause Number'] = current_civil_df['Cause Number'].astype(str).str.strip()
+    
+    if len(common_table_df) > 0:
+        common_table_df['Cause Number'] = common_table_df['Cause Number'].astype(str).str.strip()
 
-    #Removed on 05-27-2023
-    #Convert the google boolean values for the 'On Track' column to python booleans
-    #current_civil_df['On Track'] = current_civil_df['On Track'].apply(convert_to_bool)
-
-    #Removed on 05/30/2023
-    #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
-    #current_civil_df['Bad Cause Number'] = current_civil_df['Bad Cause Number'].apply(convert_to_bool)
-
-    #Stage 1 - Drop Duplicates for cases that haven't changed while keeping the most recent version
-    current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number', 'File Date', 'Cause of Action', 'Docket Date', 'Docket Type', 'ANS File', 'CR Number'], ignore_index = True, keep = 'last')
-
-    #Check for changed cases
-    changed_cases = current_civil_df[current_civil_df.duplicated(['Cause Number'], keep = 'first')]
-    changed_cases.reset_index(inplace = True)
-
-    #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
-    #At this point, duplicates of cause number indicate that the 'Docket Date' has been updated since last upload
-    #So keep the most recent version
+    #Drop duplicate cases while keeping the most recent version
     current_civil_df = current_civil_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
-
-    #Now sort by county and then by cause number
-    current_civil_df = current_civil_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
 
     #Clear what's currently on the Civil Cases worksheet
     civil_sheet.clear()
@@ -338,22 +232,19 @@ def update_civil_cases(new_civil_df):
     #Now upload to Civil Cases worksheet in 'Pending Reports' spreadsheet and leave a message
     civil_sheet.update([current_civil_df.columns.values.tolist()] + current_civil_df.values.tolist())
 
-    #Now update the common table with the newly opened cases
-    if len(new_cases) > 0:
-        update_open_cases_common_table(convert_to_common_table_df(new_cases), common_sheet)
-        #Wait two seconds before continuing to allow google sheets enough time to update
-        time.sleep(2)
+    #Now append the current_civil_df to the common_table_df, remove duplicates, and update the closed cases
+    common_table_df = common_table_df.append(convert_to_common_table_df(current_civil_df), ignore_index = True)
+    common_table_df = common_table_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report As Of Date'] = closed_cases_df['Report As Of Date'][0]
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Load DateTime'] = closed_cases_df['Load DateTime'][0]
 
-    #Now update the common table with changed case info
-    if len(changed_cases) > 0:
-        update_changed_cases_common_table(convert_to_common_table_df(changed_cases), common_sheet)
-        #Wait two seconds before continuing to allow google sheets enough time to update
-        time.sleep(2)
-
-    #Finally update the common table with the newly closed cases
-    if len(closed_cases_df) > 0:
-        update_closed_cases_common_table(closed_cases_df, common_sheet)
-
+    #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
+    common_sheet.clear()
+    common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
+    
     print('Civil Cases Updated!')
 
     return
@@ -394,6 +285,9 @@ def update_criminal_cases(new_crim_df):
     #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
 
+    #Load the data currently on the common table in the 'Pending Reports' spreadsheet
+    common_table_df = pd.DataFrame(common_sheet.get_all_records())
+
     #Before appending the new cases, create the closed cases df and udpate the closed cases tab
     if len(current_crim_df) > 0:
         #First, Verify that all Cause Numbers are represented as strings
@@ -421,65 +315,36 @@ def update_criminal_cases(new_crim_df):
         #Instanciate closed_cases_df
         closed_cases_df = pd.DataFrame()
 
-    #Find the new cases
-    if len(current_crim_df) > 0:
-        new_cases = new_crim_df[~(new_crim_df['Cause Number'].isin(current_crim_df['Cause Number']))]
-        new_cases.reset_index(inplace = True)
-    else:
-        new_cases = new_crim_df
-
-    #Some cause numbers will be duplicated due to the MTR-A section of the criminal report. Remove duplicated cause numbers, while keeping last.
-    #This should ensure that only the cause number with the most recent file date is kept
-    new_cases = new_cases.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
-
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
     #Verify that all Cause Numbers are represented as strings
     current_crim_df['Cause Number'] = current_crim_df['Cause Number'].astype(str).str.strip()
 
-    #Removed on 05-27-2023
-    #Convert the google boolean values for the 'On Track' column to python booleans
-    #current_crim_df['On Track'] = current_crim_df['On Track'].apply(convert_to_bool)
+    if len(common_table_df) > 0:
+        common_table_df['Cause Number'] = common_table_df['Cause Number'].astype(str).str.strip()
 
-    #Removed on 05/30/2023
-    #Convert the google boolean values for the 'Bad Cause Number' column to python booleans
-    #current_crim_df['Bad Cause Number'] = current_crim_df['Bad Cause Number'].apply(convert_to_bool)
-
-    #Stage 1 - Drop Duplicates for cases that haven't changed since the last upload. Keep the most recent versions
-    current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number', 'File Date', 'Docket Date', 'Outstanding Warrants', 'First Offense', 'ST RPT Column'], ignore_index = True, keep = 'last')
-
-    #Check for changed cases
-    changed_cases = current_crim_df[current_crim_df.duplicated(['Cause Number'], keep = 'first')]
-    changed_cases.reset_index(inplace = True)
-
-    #Stage 2 - Drop Duplicates for subset ['Cause Number'] while keeping last
+    #Drop duplicate cases while keeping the most recent version
     current_crim_df = current_crim_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
 
-    #Now sort by county and then by cause number
-    current_crim_df = current_crim_df.sort_values(by = ['County', 'Cause Number'], ignore_index = True)
-
-    #Clear what's currently on the Criminal Cases worksheet
+    #Clear what's currently on the Civil Cases worksheet
     crim_sheet.clear()
 
-    #Now upload to Criminal Cases worksheet in 'Pending Reports' spreadsheet and leave a message
+    #Now upload to Civil Cases worksheet in 'Pending Reports' spreadsheet and leave a message
     crim_sheet.update([current_crim_df.columns.values.tolist()] + current_crim_df.values.tolist())
 
-    #Now update the common table with the newly opened cases
-    if len(new_cases) > 0:
-        update_open_cases_common_table(convert_to_common_table_df(new_cases), common_sheet)
-        #Wait two seconds before continuing to allow google sheets enough time to update
-        time.sleep(2)
+    #Now append the current_civil_df to the common_table_df, remove duplicates, and update the closed cases
+    common_table_df = common_table_df.append(convert_to_common_table_df(current_crim_df), ignore_index = True)
+    common_table_df = common_table_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report As Of Date'] = closed_cases_df['Report As Of Date'][0]
+    common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Load DateTime'] = closed_cases_df['Load DateTime'][0]
 
-    #Now update the common table with the changed case info
-    if len(changed_cases) > 0:
-        update_changed_cases_common_table(convert_to_common_table_df(changed_cases), common_sheet)
-        #Wait two seconds before continuing to allow google sheets enough time to update
-        time.sleep(2)
-
-    #Finally update the common table with the newly closed cases
-    if len(closed_cases_df) > 0:
-        update_closed_cases_common_table(closed_cases_df, common_sheet)
+    #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
+    common_sheet.clear()
+    common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
     
     print('Criminal Cases Updated!')
 
