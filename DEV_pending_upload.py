@@ -237,6 +237,8 @@ def update_civil_cases(new_civil_df):
     common_table_df = common_table_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
 
     if len(closed_cases_df) > 0:
+        #Reset index
+        closed_cases_df.reset_index(inplace = True)
         common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
         common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
         common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
@@ -340,6 +342,8 @@ def update_criminal_cases(new_crim_df):
     common_table_df = common_table_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
     
     if len(closed_cases_df) > 0:
+        #Reset index
+        closed_cases_df.reset_index(inplace = True)
         common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Status'] = closed_cases_df['Status'][0]
         common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Closed DateTime'] = closed_cases_df['Closed DateTime'][0]
         common_table_df[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])]['Report Generated Date'] = closed_cases_df['Report Generated Date'][0]
