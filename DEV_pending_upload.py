@@ -3,6 +3,7 @@ import pandas as pd
 import gspread
 import DEV_acquire
 import DEV_prepare
+import time
 
 credentials = {
   "type": st.secrets["type"],
@@ -340,10 +341,14 @@ def update_civil_cases(new_civil_df):
     #Now update the common table with the newly opened cases
     if len(new_cases) > 0:
         update_open_cases_common_table(convert_to_common_table_df(new_cases), common_sheet)
+        #Wait two seconds before continuing to allow google sheets enough time to update
+        time.sleep(2)
 
     #Now update the common table with changed case info
     if len(changed_cases) > 0:
         update_changed_cases_common_table(convert_to_common_table_df(changed_cases), common_sheet)
+        #Wait two seconds before continuing to allow google sheets enough time to update
+        time.sleep(2)
 
     #Finally update the common table with the newly closed cases
     if len(closed_cases_df) > 0:
@@ -463,10 +468,14 @@ def update_criminal_cases(new_crim_df):
     #Now update the common table with the newly opened cases
     if len(new_cases) > 0:
         update_open_cases_common_table(convert_to_common_table_df(new_cases), common_sheet)
+        #Wait two seconds before continuing to allow google sheets enough time to update
+        time.sleep(2)
 
     #Now update the common table with the changed case info
     if len(changed_cases) > 0:
         update_changed_cases_common_table(convert_to_common_table_df(changed_cases), common_sheet)
+        #Wait two seconds before continuing to allow google sheets enough time to update
+        time.sleep(2)
 
     #Finally update the common table with the newly closed cases
     if len(closed_cases_df) > 0:
