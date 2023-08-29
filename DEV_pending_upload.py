@@ -219,8 +219,7 @@ def update_civil_cases(new_civil_df):
     #Update the 'Original As Of Date' for the new cases df
     if len(current_civil_df) > 0:
         current_civil_df.sort_values(by = 'Cause Number', inplace = True)
-
-        new_civil_df.loc[new_civil_df['Cause Number'].isin(current_civil_df['Cause Number'])].sort_values(by = 'Cause Number')['Original As Of Date'] = current_civil_df['Original As Of Date']
+        new_civil_df.sort_values(by = 'Cause Number').loc[new_civil_df['Cause Number'].isin(current_civil_df['Cause Number']), ['Original As Of Date']] = current_civil_df['Original As Of Date']
 
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
