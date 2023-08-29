@@ -105,7 +105,7 @@ def convert_datetime_format(datetime):
         meridiem = 'AM'
     elif hour == '12':
         meridiem = 'PM'
-    elif hour.astype(int) > 12:
+    elif int(hour) > 12:
         hour = str(int(hour) - 12)
         meridiem = 'PM'
     else:
