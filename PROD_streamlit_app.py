@@ -124,20 +124,21 @@ st.set_page_config(
  )
 
 #Gather the most recent 'As Of' and 'Load' dates for each section
-common_df = get_spreadsheet_data("DEV_Common_Table", credentials)
+civil_df = get_spreadsheet_data("Civil Cases", credentials)
+criminal_df = get_spreadsheet_data("Criminal Cases", credentials)
 
-dimmit_civil_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Report As Of Date'].max()
-dimmit_civil_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
-dimmit_criminal_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Report As Of Date'].max()
-dimmit_criminal_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
-maverick_civil_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal')]['Report As Of Date'].max()
-maverick_civil_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
-maverick_criminal_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Report As Of Date'].max()
-maverick_criminal_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
-zavala_civil_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal')]['Report As Of Date'].max()
-zavala_civil_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
-zavala_criminal_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Report As Of Date'].max()
-zavala_criminal_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+dimmit_civil_last_as_of_date = civil_df[(civil_df['County'] == 'Dimmit') & (civil_df['Case Type'] != 'Criminal')]['Report As Of Date'].max()
+dimmit_civil_last_load_date = civil_df[(civil_df['County'] == 'Dimmit') & (civil_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
+dimmit_criminal_last_as_of_date = criminal_df[(criminal_df['County'] == 'Dimmit') & (criminal_df['Case Type'] == 'Criminal')]['Report As Of Date'].max()
+dimmit_criminal_last_load_date = criminal_df[(criminal_df['County'] == 'Dimmit') & (criminal_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+maverick_civil_last_as_of_date = civil_df[(civil_df['County'] == 'Maverick') & (civil_df['Case Type'] != 'Criminal')]['Report As Of Date'].max()
+maverick_civil_last_load_date = civil_df[(civil_df['County'] == 'Maverick') & (civil_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
+maverick_criminal_last_as_of_date = criminal_df[(criminal_df['County'] == 'Maverick') & (criminal_df['Case Type'] == 'Criminal')]['Report As Of Date'].max()
+maverick_criminal_last_load_date = criminal_df[(criminal_df['County'] == 'Maverick') & (criminal_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+zavala_civil_last_as_of_date = civil_df[(civil_df['County'] == 'Zavala') & (civil_df['Case Type'] != 'Criminal')]['Report As Of Date'].max()
+zavala_civil_last_load_date = civil_df[(civil_df['County'] == 'Zavala') & (civil_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
+zavala_criminal_last_as_of_date = criminal_df[(criminal_df['County'] == 'Zavala') & (criminal_df['Case Type'] == 'Criminal')]['Report As Of Date'].max()
+zavala_criminal_last_load_date = criminal_df[(criminal_df['County'] == 'Zavala') & (criminal_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
 
 #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
 with st.sidebar:
