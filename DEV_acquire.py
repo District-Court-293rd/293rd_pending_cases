@@ -426,6 +426,6 @@ def build_criminal_cases_dataframe(text):
     #Add 'Report Generated Date', 'Original As Of Date', and 'Last As Of Date' columns
     df["Report Generated Date"] = report_generated_date
     df["Original As Of Date"] = report_as_of_date
-    df["Report As Of Date"] = report_as_of_date
+    df["Last As Of Date"] = report_as_of_date
     
     return df
