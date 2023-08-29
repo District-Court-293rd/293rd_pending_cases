@@ -218,8 +218,12 @@ def update_civil_cases(new_civil_df):
 
     #Update the 'Original As Of Date' for the new cases df
     if len(current_civil_df) > 0:
-        current_civil_df.sort_values(by = 'Cause Number', inplace = True)
-        new_civil_df.sort_values(by = 'Cause Number').loc[new_civil_df['Cause Number'].isin(current_civil_df['Cause Number']), ['Original As Of Date']] = current_civil_df['Original As Of Date']
+        #Create a df that consists only of pending cases in the county for the current report
+        current_county_pending_cases = current_civil_df[current_civil_df['County'] == new_civil_df['County'][0]]
+        current_county_pending_cases.reset_index(inplace = True)
+        #Iterate through each of those cases and update the corresponding version in new_civil_df
+        for i in current_county_pending_cases.index:
+            new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'][i]
 
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
