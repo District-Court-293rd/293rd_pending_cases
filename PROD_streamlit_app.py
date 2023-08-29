@@ -120,7 +120,7 @@ def convert_datetime_format(datetime):
 ############################################## Begin App ##################################################
 
 st.set_page_config(
-     page_title="DEV Pending Reports",
+     page_title="Pending Reports",
  )
 
 #Gather the most recent 'As Of' and 'Load' dates for each section
