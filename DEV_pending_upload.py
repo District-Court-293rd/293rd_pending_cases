@@ -85,7 +85,8 @@ def convert_to_common_table_df(case_df):
         "Outstanding Warrants": [],
         "ST RPT Column": [],
         "Report Generated Date": [],
-        "Report As Of Date": [],
+        "Original As Of Date": [],
+        "Last As Of Date": [],
         "Load DateTime": [],
         "Closed DateTime": []
     }
@@ -101,7 +102,8 @@ def convert_to_common_table_df(case_df):
     df['Case Type'] = case_df['Case Type']
     df['Status'] = case_df['Status']
     df['Report Generated Date'] = case_df['Report Generated Date']
-    df['Report As Of Date'] = case_df['Report As Of Date']
+    df['Original As Of Date'] = case_df['Original As Of Date']
+    df['Last As Of Date'] = case_df['Last As Of Date']
     df['Load DateTime'] = case_df['Load DateTime']
     df['Closed DateTime'] = '' #These are open cases, so none will have a closed date yet
 
@@ -214,6 +216,12 @@ def update_civil_cases(new_civil_df):
         #Instanciate closed_cases_df
         closed_cases_df = pd.DataFrame()
 
+    #Update the 'Original As Of Date' for the new cases df
+    if len(current_civil_df) > 0:
+        current_civil_df.sort_values(by = 'Cause Number', inplace = True)
+
+        new_civil_df.loc[new_civil_df['Cause Number'].isin(current_civil_df['Cause Number'])].sort_values(by = 'Cause Number')['Original As Of Date'] = current_civil_df['Original As Of Date']
+
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
@@ -242,7 +250,7 @@ def update_civil_cases(new_civil_df):
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Status']] = closed_cases_df['Status'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Closed DateTime']] = closed_cases_df['Closed DateTime'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report Generated Date']] = closed_cases_df['Report Generated Date'][0]
-        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report As Of Date']] = closed_cases_df['Report As Of Date'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Last As Of Date']] = closed_cases_df['Last As Of Date'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Load DateTime']] = closed_cases_df['Load DateTime'][0]
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
@@ -319,6 +327,12 @@ def update_criminal_cases(new_crim_df):
         #Instanciate closed_cases_df
         closed_cases_df = pd.DataFrame()
 
+    #Update the 'Original As Of Date' for the new cases df
+    if len(current_crim_df) > 0:
+        current_crim_df.sort_values(by = 'Cause Number', inplace = True)
+
+        new_crim_df.loc[new_crim_df['Cause Number'].isin(current_crim_df['Cause Number'])].sort_values(by = 'Cause Number')['Original As Of Date'] = current_crim_df['Original As Of Date']
+
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
 
@@ -347,7 +361,7 @@ def update_criminal_cases(new_crim_df):
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Status']] = closed_cases_df['Status'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Closed DateTime']] = closed_cases_df['Closed DateTime'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report Generated Date']] = closed_cases_df['Report Generated Date'][0]
-        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report As Of Date']] = closed_cases_df['Report As Of Date'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Last As Of Date']] = closed_cases_df['Last As Of Date'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Load DateTime']] = closed_cases_df['Load DateTime'][0]
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet

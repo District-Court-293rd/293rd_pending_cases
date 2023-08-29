@@ -251,10 +251,10 @@ def build_civil_cases_dataframe(text):
     #Create df
     df = pd.DataFrame(case_dicts)
 
-    #Add 'Report Generated Date' and 'Report As Of Date' columns
+    #Add 'Report Generated Date', 'Original As Of Date', and 'Last As Of Date' columns
     df["Report Generated Date"] = report_generated_date
-
-    df["Report As Of Date"] = report_as_of_date
+    df["Original As Of Date"] = report_as_of_date
+    df["Last As Of Date"] = report_as_of_date
         
     return df
 
@@ -423,9 +423,9 @@ def build_criminal_cases_dataframe(text):
     #Create dataframe
     df = pd.DataFrame(case_list)
 
-    #Add 'Report Generated Date' and 'Report As Of Date' columns
+    #Add 'Report Generated Date', 'Original As Of Date', and 'Last As Of Date' columns
     df["Report Generated Date"] = report_generated_date
-    
+    df["Original As Of Date"] = report_as_of_date
     df["Report As Of Date"] = report_as_of_date
     
     return df
