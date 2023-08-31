@@ -453,6 +453,7 @@ def update_disposed_cases(disposed_cases):
         old_disposed_cases['Original As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Last As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Dropped DateTime'] = ''
+        st.write(old_disposed_cases.columns)
         #Correct the order of the columns
         old_disposed_cases = old_disposed_cases[[
             'County',
@@ -473,7 +474,7 @@ def update_disposed_cases(disposed_cases):
             'Disposed Dates',
             'Dispositions',
             'Disposed As Of Date',
-            'Number of Dispositions'
+            'Number Of Dispositions'
         ]]
 
         #Now append to dropped cases df
