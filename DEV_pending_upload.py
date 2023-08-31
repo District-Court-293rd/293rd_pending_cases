@@ -270,7 +270,7 @@ def update_civil_cases(new_civil_df):
         #Reset index
         closed_cases_df.reset_index(inplace = True)
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Status']] = closed_cases_df['Status'][0]
-        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Closed DateTime']] = closed_cases_df['Closed DateTime'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Dropped DateTime']] = closed_cases_df['Dropped DateTime'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report Generated Date']] = closed_cases_df['Report Generated Date'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Last As Of Date']] = closed_cases_df['Last As Of Date'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Load DateTime']] = closed_cases_df['Load DateTime'][0]
@@ -384,7 +384,7 @@ def update_criminal_cases(new_crim_df):
         #Reset index
         closed_cases_df.reset_index(inplace = True)
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Status']] = closed_cases_df['Status'][0]
-        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Closed DateTime']] = closed_cases_df['Closed DateTime'][0]
+        common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Dropped DateTime']] = closed_cases_df['Dropped DateTime'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Report Generated Date']] = closed_cases_df['Report Generated Date'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Last As Of Date']] = closed_cases_df['Last As Of Date'][0]
         common_table_df.loc[common_table_df['Cause Number'].isin(closed_cases_df['Cause Number']), ['Load DateTime']] = closed_cases_df['Load DateTime'][0]
