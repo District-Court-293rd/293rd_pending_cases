@@ -111,10 +111,16 @@ def convert_to_common_table_df(case_df):
     df['Last As Of Date'] = case_df['Last As Of Date']
     df['Load DateTime'] = case_df['Load DateTime']
     df['Dropped DateTime'] = '' #These are open cases, so none will have a closed date yet
-    df['Disposed Dates'] = ''
-    df['Dispositions'] = ''
-    df['Disposed As Of Date'] = ''
-    df['Number Of Dispositions'] = 0
+    if case_df['Status'][0] != 'Disposed':
+        df['Disposed Dates'] = ''
+        df['Dispositions'] = ''
+        df['Disposed As Of Date'] = ''
+        df['Number Of Dispositions'] = 0
+    else:
+        df['Disposed Dates'] = case_df['Disposed Dates']
+        df['Dispositions'] = case_df['Dispositions']
+        df['Disposed As Of Date'] = case_df['Disposed As Of Date']
+        df['Number Of Dispositions'] = case_df['Number Of Dispositons']
 
     #Determine if cases are criminal or civil. They will have different logic
     if case_df['Case Type'][0].count('Criminal') == 0:
