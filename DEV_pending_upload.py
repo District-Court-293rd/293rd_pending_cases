@@ -522,10 +522,11 @@ def update_disposed_cases(disposed_cases):
         dropped_cases = dropped_cases.append(old_disposed_cases, ignore_index = True)
 
     #Now append the old cases df to the common_table_df
-    if len(common_table_df) > 0:
-        common_table_df = common_table_df.append(convert_to_common_table_df(old_disposed_cases), ignore_index = True)
-    else:
-        common_table_df = convert_to_common_table_df(old_disposed_cases)
+    if len(old_disposed_cases) > 0:
+        if len(common_table_df) > 0:
+            common_table_df = common_table_df.append(convert_to_common_table_df(old_disposed_cases), ignore_index = True)
+        else:
+            common_table_df = convert_to_common_table_df(old_disposed_cases)
 
     #Iterate through each of the newly disposed cases and update the corresponding version in dropped_cases
     if len(new_disposed_cases) > 0:
