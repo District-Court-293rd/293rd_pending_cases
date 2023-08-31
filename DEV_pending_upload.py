@@ -444,6 +444,7 @@ def update_disposed_cases(disposed_cases):
 
     #Iterate through each of those cases and update the corresponding version
     if is_crim:
+        old_disposed_cases['File Date'] = ''
         old_disposed_cases['Court'] = '293'
         old_disposed_cases['Docket Date'] = ''
         old_disposed_cases['Outstanding Warrants'] = ''
@@ -453,7 +454,6 @@ def update_disposed_cases(disposed_cases):
         old_disposed_cases['Original As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Last As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Dropped DateTime'] = ''
-        st.write(old_disposed_cases.columns)
         #Correct the order of the columns
         old_disposed_cases = old_disposed_cases[[
             'County',
