@@ -530,6 +530,7 @@ def update_disposed_cases(disposed_cases):
     #Iterate through each of the newly disposed cases and update the corresponding version in dropped_cases
     if len(new_disposed_cases) > 0:
         for i in new_disposed_cases.index:
+            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Status']] = new_disposed_cases['Status'][i]
             dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed Dates']] = new_disposed_cases['Disposed Dates'][i]
             dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Dispositions']] = new_disposed_cases['Dispositions'][i]
             dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed As Of Date']] = new_disposed_cases['Disposed As Of Date'][i]
@@ -538,6 +539,7 @@ def update_disposed_cases(disposed_cases):
     #Iterate through each of the newly disposed cases and update the corresponding version in the common table
     if len(common_table_df) > 0:
         for i in new_disposed_cases.index:
+            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Status']] = new_disposed_cases['Status'][i]
             common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed Dates']] = new_disposed_cases['Disposed Dates'][i]
             common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Dispositions']] = new_disposed_cases['Dispositions'][i]
             common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed As Of Date']] = new_disposed_cases['Disposed As Of Date'][i]
