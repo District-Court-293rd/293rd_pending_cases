@@ -120,7 +120,7 @@ def convert_to_common_table_df(case_df):
         df['Disposed Dates'] = case_df['Disposed Dates']
         df['Dispositions'] = case_df['Dispositions']
         df['Disposed As Of Date'] = case_df['Disposed As Of Date']
-        df['Number Of Dispositions'] = case_df['Number Of Dispositons']
+        df['Number Of Dispositions'] = case_df['Number Of Dispositions']
 
     #Determine if cases are criminal or civil. They will have different logic
     if case_df['Case Type'][0].count('Criminal') == 0:
