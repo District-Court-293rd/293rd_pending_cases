@@ -126,45 +126,46 @@ st.set_page_config(
 #Gather the most recent 'As Of' and 'Load' dates for each section
 common_df = get_spreadsheet_data("DEV_Common_Table", credentials)
 
-dimmit_civil_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
-dimmit_civil_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
-dimmit_criminal_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
-dimmit_criminal_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
-maverick_civil_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
-maverick_civil_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
-maverick_criminal_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
-maverick_criminal_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
-zavala_civil_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
-zavala_civil_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
-zavala_criminal_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
-zavala_criminal_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+if len(common_df) > 0:
+    dimmit_civil_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
+    dimmit_civil_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
+    dimmit_criminal_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
+    dimmit_criminal_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+    maverick_civil_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
+    maverick_civil_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
+    maverick_criminal_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
+    maverick_criminal_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+    zavala_civil_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
+    zavala_civil_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
+    zavala_criminal_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
+    zavala_criminal_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
 
-#Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
-with st.sidebar:
-    st.subheader("Dimmit Civil Cases")
-    st.write("Latest As Of Date: " + dimmit_civil_last_as_of_date)
-    st.write("Latest Load Date: " + convert_datetime_format(dimmit_civil_last_load_date))
-    st.divider()
-    st.subheader("Dimmit Criminal Cases")
-    st.write("Latest As Of Date: " + dimmit_criminal_last_as_of_date)
-    st.write("Latest Load Date: " + convert_datetime_format(dimmit_criminal_last_load_date))
-    st.divider()
-    st.subheader("Maverick Civil Cases")
-    st.write("Latest As Of Date: " + maverick_civil_last_as_of_date)
-    st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
-    st.divider()
-    st.subheader("Maverick Criminal Cases")
-    st.write("Latest As Of Date: " + maverick_criminal_last_as_of_date)
-    st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
-    st.divider()
-    st.subheader("Zavala Civil Cases")
-    st.write("Latest As Of Date: " + zavala_civil_last_as_of_date)
-    st.write("Latest Load Date: " + convert_datetime_format(zavala_civil_last_load_date))
-    st.divider()
-    st.subheader("Zavala Criminal Cases")
-    st.write("Latest As Of Date: " + zavala_criminal_last_as_of_date)
-    st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_last_load_date))
-    st.divider()
+    #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
+    with st.sidebar:
+        st.subheader("Dimmit Civil Cases")
+        st.write("Latest As Of Date: " + dimmit_civil_last_as_of_date)
+        st.write("Latest Load Date: " + convert_datetime_format(dimmit_civil_last_load_date))
+        st.divider()
+        st.subheader("Dimmit Criminal Cases")
+        st.write("Latest As Of Date: " + dimmit_criminal_last_as_of_date)
+        st.write("Latest Load Date: " + convert_datetime_format(dimmit_criminal_last_load_date))
+        st.divider()
+        st.subheader("Maverick Civil Cases")
+        st.write("Latest As Of Date: " + maverick_civil_last_as_of_date)
+        st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
+        st.divider()
+        st.subheader("Maverick Criminal Cases")
+        st.write("Latest As Of Date: " + maverick_criminal_last_as_of_date)
+        st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
+        st.divider()
+        st.subheader("Zavala Civil Cases")
+        st.write("Latest As Of Date: " + zavala_civil_last_as_of_date)
+        st.write("Latest Load Date: " + convert_datetime_format(zavala_civil_last_load_date))
+        st.divider()
+        st.subheader("Zavala Criminal Cases")
+        st.write("Latest As Of Date: " + zavala_criminal_last_as_of_date)
+        st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_last_load_date))
+        st.divider()
 
 
 #Create a placeholder for the page content
