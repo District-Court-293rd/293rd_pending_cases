@@ -16,10 +16,14 @@ def build_dataframe(file_name, content):
         - df: A dataframe of the information extracted from the uploaded PDF.
     """
     #Check if it is criminal or civil and then call the associated functions
-    if file_name.upper().count('CR') > 0:
-        df = build_criminal_cases_dataframe(content)
+    if file_name.upper().count('CR') > 0 and file_name.upper().count('DISPOSED') > 0:
+        df = build_criminal_disposed_cases_dataframe(content)
+    elif (file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0) and file_name.upper().count('DISPOSED') > 0:
+        df = build_civil_disposed_cases_dataframe(content)
     elif file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0:
         df = build_civil_cases_dataframe(content)
+    elif file_name.upper().count('CR') > 0:
+        df = build_criminal_cases_dataframe(content)
     else:
         #Leave a message
         print("Something Went Wrong! Could not identify the PDF as Criminal or Civil.")
@@ -258,6 +262,183 @@ def build_civil_cases_dataframe(text):
         
     return df
 
+def build_civil_disposed_cases_dataframe(text):
+    """
+    This function takes in the entire PDF document as a string of text. It will gather the info for each case
+    and add the info to a dictionary. The dictionary for each case will be added to a list which will be turned into
+    a dataframe.
+    
+    Parameter:
+        -text: A string consisting of the text of the entire disposed cases PDF document.
+        
+    Returns:
+        -df: A dataframe of the newly gathered disposed case info
+    """
+    
+    #Initialize containers
+    #Establish a container list for the dictionaries
+    case_list = []
+    dispo_dates_list = []
+    disposition_list = []
+    #coa_list = []
+    temp_dict = {}
+    
+    #Create a var to count the number of disposed dates
+    dispo_count = 0
+    
+    #Get the header and remove surrounding whitespace
+    header = text[:420].strip()
+
+    #Get the body and remove surrounding whitespace
+    body = text[420:].strip()
+    
+    #Get the report 'AS OF' date:
+    report_as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", header)[1]
+    
+    #Use if statement to check for county names inside the header info
+    if header.count('MAVERICK') >= 1:
+        county = 'Maverick'
+    elif header.count('DIMMIT') >= 1:
+        county = 'Dimmit'
+    elif header.count('ZAVALA') >= 1:
+        county = 'Zavala'
+    else:
+        county = 'Something went wrong!'
+        
+    #Set up regex to remove all subsequent headers
+    #This regex should identify the headers even if some of the info changes later on
+    #Can't include the page break in this regex because the formatting is awful
+    body = re.sub(r"""\s*[A-Z]{3,9}\s[0-9]{1,2},\s[0-9]{4}\s[a-zA-Z0-9 \n/-]*:[a-zA-Z0-9 \n/-]*:[A-Za-z0-9 \n\./-]*DEFENDANT\s{1,23}\n""", '', body)
+    
+    #Since the formatting is awful, manually remove the page break symbol '\n\x0c'
+    body = body.replace('\n\x0c','')
+    
+    #Split the text on the \n to isolate each case
+    cases = body.split('\n')
+    
+    #Drop the last two case. They're just the total case counts from the report
+    cases.pop()
+    cases.pop()
+    
+    #Remove cases that happen to be empty or consist of whitespace only
+    cases = [case for case in cases if case.isspace() == False and len(case) > 0]
+    
+    for line in cases:
+        #Check if line is the start of a new case
+        if not line[0].isspace():
+            #Check if the temp_dict is empty.
+            #If not, add temp_dict data to case_list
+            if bool(temp_dict) == True:
+                #Save the last date as the case file date
+                temp_dict['File Date'] = dispo_dates_list[-1]
+
+                #Now get the length of the list and remove the last date from the dispo dates list
+                file_date_starting_line = len(dispo_dates_list)
+                dispo_dates_list.pop()
+                dispo_count += len(dispo_dates_list)
+                
+                #Add disposed dates to temp_dict
+                temp_dict['Disposed Dates'] = dispo_dates_list
+
+                temp_dict['Dispositions'] = disposition_list[:file_date_starting_line - 1]
+
+                #temp_dict['Causes of Action'] = coa_list[:file_date_starting_line - 1]
+
+                #temp_dict['Plaintiffs'] = disposition_list[file_date_starting_line - 1:]
+
+                #temp_dict['Defendants'] = coa_list[file_date_starting_line - 1:]
+
+                #Add temp dict data to case_list
+                case_list.append(temp_dict)
+
+            #Reset temp_dict
+            temp_dict = {}
+
+            #Reset lists
+            dispo_dates_list = []
+            disposition_list = []
+            #coa_list = []
+            
+            temp_dict['County'] = county
+
+            #Gather the cause number
+            temp_dict['Cause Number'] = line[:17].strip()
+
+            #Get the first dispo date
+            dispo_dates_list.append(line[17:29].strip())
+
+            #Get first disposition
+            disposition_list.append(line[29:64].strip())
+
+            #Get first coa
+            #coa_list.append(line[64:].strip())
+
+            #End of line, so move to next one
+
+        else:
+            #Get additional dispo date
+            dispo_date = line[17:29].strip()
+
+            #Check if dispo_date is all whitesapace. If not, strip it and add to list
+            #Also check that the string is not empty
+            if dispo_date.isspace() == False and len(dispo_date) > 0:
+                dispo_dates_list.append(dispo_date.strip())
+
+            #Get additional disposition
+            disposition = line[29:64].strip()
+
+            #Check if disposition is all whitesapace. If not, strip it and add to list
+            #Also check that the string is not empty
+            if disposition.isspace() == False and len(disposition) > 0:
+                disposition_list.append(disposition.strip())
+
+            #Get additional coa
+            #coa = line[64:].strip()
+
+            #Check if coa is all whitesapace. If not, strip it and add to list
+            #Also check that the string is not empty
+            #if coa.isspace() == False and len(coa) > 0:
+                #coa_list.append(coa.strip())
+
+            #End of line
+
+    #Check that the last case was added to the list
+    #If not, add it
+    #Save the last date as the case file date
+    temp_dict['File Date'] = dispo_dates_list[-1]
+
+    #Now get the length of the list and remove the last date from the dispo dates list
+    file_date_starting_line = len(dispo_dates_list)
+    dispo_dates_list.pop()
+    dispo_count += len(dispo_dates_list)
+    
+    #Add disposed dates to temp_dict
+    temp_dict['Disposed Dates'] = dispo_dates_list
+
+    temp_dict['Dispositions'] = disposition_list[:file_date_starting_line - 1]
+
+    #temp_dict['Causes of Action'] = coa_list[:file_date_starting_line - 1]
+
+    #temp_dict['Plaintiffs'] = disposition_list[file_date_starting_line - 1:]
+
+    #temp_dict['Defendants'] = coa_list[file_date_starting_line - 1:]
+
+    #Add temp dict data to case_list
+    case_list.append(temp_dict)
+    
+    #How many?
+    print(f'Collected Data From {len(case_list)} Cases.')
+    
+    print(f'There were {dispo_count} dispositions.')
+    
+    #Create dataframe
+    df = pd.DataFrame(case_list)
+    
+    #Add the as of date
+    df['Disposed As Of Date'] = report_as_of_date
+    
+    return df
+
 
 ###################################### FOR CRIMINAL CASE PDFS #########################################
 
@@ -427,5 +608,148 @@ def build_criminal_cases_dataframe(text):
     df["Report Generated Date"] = report_generated_date
     df["Original As Of Date"] = report_as_of_date
     df["Last As Of Date"] = report_as_of_date
+    
+    return df
+
+def build_criminal_disposed_cases_dataframe(text):
+    """
+    This function takes in the entire PDF document as a string of text. It will gather the info for each case
+    and add the info to a dictionary. The dictionary for each case will be added to a list which will be turned into
+    a dataframe.
+    
+    Parameter:
+        -text: A string consisting of the text of the entire disposed cases PDF document.
+        
+    Returns:
+        -df: A dataframe of the newly gathered disposed case info
+    """
+    
+    #Initialize containers
+    #Establish a container list for the dictionaries
+    case_list = []
+    dispo_dates_list = []
+    disposition_list = []
+    temp_dict = {}
+    
+    #Add a var to count the number of dispositions
+    dispo_count = 0
+    
+    #Get the header and remove surrounding whitespace
+    header = text[:420].strip()
+
+    #Get the body and remove surrounding whitespace
+    body = text[420:].strip()
+    
+    #Get the 'AS OF' date:
+    report_as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[1]
+    
+    #Use if statement to check for county names inside the header info
+    if header.count('MAVERICK') >= 1:
+        county = 'Maverick'
+    elif header.count('DIMMIT') >= 1:
+        county = 'Dimmit'
+    elif header.count('ZAVALA') >= 1:
+        county = 'Zavala'
+    else:
+        county = 'Something went wrong!'
+        
+    #Set up regex to remove all subsequent headers
+    #This regex should identify the headers even if some of the info changes later on
+    body = re.sub(r"""\n\x0c\s*[A-Z]{3,9}\s[0-9]{1,2},\s[0-9]{4}\s[a-zA-Z0-9 \n:/-]*#\s*[A-Z /]*\n\n""", '', body)
+    
+    #Split the text on the \n to isolate each case
+    cases = body.split('\n')
+    
+    #Drop the last case. It's just the total case count from the report
+    cases.pop()
+    
+    #Remove cases that happen to be empty or consist of whitespace only
+    cases = [case for case in cases if case.isspace() == False and len(case) > 0]
+    
+    #Loop through each line. Add case info to temp dict, and then add that to the case list
+    #Most fields are commented out because we don't need that info yet.
+    for line in cases:
+        #Check if line is the start of a new case
+        if not line[0].isspace():
+            #Check if the temp_dict is empty.
+            #If not, add temp_dict data to case_list
+            if bool(temp_dict) == True:
+                #Add list info to temp_dict
+                temp_dict['Disposed Dates'] = dispo_dates_list
+                temp_dict['Dispositions'] = disposition_list
+                dispo_count += len(dispo_dates_list)
+                
+                #Add temp dict data to case_list
+                case_list.append(temp_dict)
+
+            #Reset temp_dict
+            temp_dict = {}
+
+            #Reset lists
+            dispo_dates_list = []
+            disposition_list = []
+            
+            #Assign the county name
+            temp_dict['County'] = county
+
+            #Gather the cause number
+            temp_dict['Cause Number'] = line[:17].strip()
+
+            #Gather the defendant name
+            #temp_dict['Defendant'] = line[17:45].strip()
+
+            #Get first dispo date
+            dispo_dates_list.append(line[45:55].strip())
+
+            #Get first disposition
+            disposition_list.append(line[55:78].strip())
+
+            #Get complainant
+            #temp_dict['Complainant'] = line[78:110].strip()
+
+            #Get bondsman
+            #temp_dict['Bondsman'] = line[110:].strip()
+
+            #End of line, so move to next one
+
+        else:
+            #Get additional dispo date
+            dispo_date = line[45:55].strip()
+
+            #Check if dispo_date is all whitesapace. If not, strip it and add to list
+            #Also check that the string is not empty
+            if dispo_date.isspace() == False and len(dispo_date) > 0:
+                dispo_dates_list.append(dispo_date.strip())
+
+            #Get additional disposition
+            disposition = line[55:78].strip()
+
+            #Check if disposition is all whitesapace. If not, strip it and add to list
+            #Also check that the string is not empty
+            if disposition.isspace() == False and len(disposition) > 0:
+                disposition_list.append(disposition.strip())
+
+            #End of line
+
+    #Check that the last case was added to the list
+    #If not, add it
+    #Add list info to temp_dict
+    temp_dict['Disposed Dates'] = dispo_dates_list
+    temp_dict['Dispositions'] = disposition_list
+    dispo_count += len(dispo_dates_list)
+    
+    #Add temp dict data to case_list
+    case_list.append(temp_dict)
+    
+    #How many?
+    print(f'Collected Data From {len(case_list)} Cases.')
+    
+    print(f'There were {dispo_count} disposed cases.')
+    
+    #Create dataframe
+    df = pd.DataFrame(case_list)
+    
+    #Add report as of date
+    df['Disposed As Of Date'] = report_as_of_date
     
     return df

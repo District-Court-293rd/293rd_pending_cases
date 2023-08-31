@@ -1,3 +1,4 @@
+from codecs import ignore_errors
 import streamlit as st
 import pandas as pd
 import gspread
@@ -88,7 +89,11 @@ def convert_to_common_table_df(case_df):
         "Original As Of Date": [],
         "Last As Of Date": [],
         "Load DateTime": [],
-        "Closed DateTime": []
+        "Dropped DateTime": [],
+        "Disposed Dates": [],
+        "Dispositions": [],
+        "Disposed As Of Date": [],
+        "Number Of Dispositions": []
     }
 
     df = pd.DataFrame(dict)
@@ -105,7 +110,11 @@ def convert_to_common_table_df(case_df):
     df['Original As Of Date'] = case_df['Original As Of Date']
     df['Last As Of Date'] = case_df['Last As Of Date']
     df['Load DateTime'] = case_df['Load DateTime']
-    df['Closed DateTime'] = '' #These are open cases, so none will have a closed date yet
+    df['Dropped DateTime'] = '' #These are open cases, so none will have a closed date yet
+    df['Disposed Dates'] = ''
+    df['Dispositions'] = ''
+    df['Disposed As Of Date'] = ''
+    df['Number Of Dispositions'] = 0
 
     #Determine if cases are criminal or civil. They will have different logic
     if case_df['Case Type'][0].count('Criminal') == 0:
@@ -141,7 +150,11 @@ def update_spreadsheet(file_name, content):
     df = DEV_prepare.prepare_dataframe(file_name, df)
 
     #If case type is 'Criminal' or 'Criminal OLS', send to criminal function
-    if df['Case Type'][0].count('Criminal') > 0:
+    #If report is for disposed cases, send them to disposed case function
+    if df['Status'][0].count('Disposed') > 0:
+        #Send to disposed cases
+        update_disposed_cases(df)
+    elif df['Case Type'][0].count('Criminal') > 0:
         #Add to criminal cases tab
         update_criminal_cases(df)
     else:
@@ -377,3 +390,150 @@ def update_criminal_cases(new_crim_df):
     print('Criminal Cases Updated!')
 
     return
+
+def update_disposed_cases(disposed_cases):
+    """
+    This function takes in the disposed cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
+    It will update the appropriate dropped cases tables as well as the common table.
+    
+    Parameter:
+        - disposed_cases_df: The newly created dataframe from the most recent disposed cases PDF report
+
+    Returns:
+        - Nothing.
+    """
+
+    #Set up credentials to interact with Google Sheets
+    gc = gspread.service_account_from_dict(credentials)
+    
+    #Open 'Pending Reports' Google Sheet By Name
+    gsheet = gc.open("Pending Reports")
+
+    #Make connection to 'DEV_Common_Table'
+    common_sheet = gsheet.worksheet('DEV_Common_Table')
+
+    #Open the associated dropped table
+    if disposed_cases['Case Type'][0].count('Criminal') > 0:
+        dropped_sheet = gsheet.worksheet('DEV_Closed_Criminal_Cases')
+        is_crim = True
+    else:
+        dropped_sheet = gsheet.worksheet('DEV_Closed_Civil_Cases')
+        is_crim = False
+    
+    #Build dataframes and isolate to current county
+    dropped_cases = pd.DataFrame(dropped_sheet.get_all_records())
+    #dropped_cases = dropped_cases[dropped_cases['County'] == disposed_cases['County'][0]]
+    common_table_df = pd.DataFrame(common_sheet.get_all_records())
+    #common_table_df = common_table_df[common_table_df['County'] == disposed_cases['County'][0]]
+
+    #Find the cases that are not in the dropped cases df
+    #These cases will need to be added into the closed and common table because we don't have data this old
+    #These disposed cases can go back as far as 01/01/2019
+    old_disposed_cases = disposed_cases[~(disposed_cases['Cause Number'].isin(dropped_cases['Cause Number']))]
+    old_disposed_cases.reset_index(inplace = True)
+
+    #Find the cases that are already in the dropped cases df, but not yet labeled as disposed
+    #Since these are already in the dropped table, we only need to update a few of the columns
+    new_disposed_cases = disposed_cases[disposed_cases['Cause Number'].isin(dropped_cases[dropped_cases['Status'] == 'Dropped']['Cause Number'])]
+    new_disposed_cases.reset_index(inplace = True)
+
+    #Iterate through each of those cases and update the corresponding version in new_civil_df
+    if is_crim:
+        old_disposed_cases['Court'] = '293'
+        old_disposed_cases['Docket Date'] = ''
+        old_disposed_cases['Outstanding Warrants'] = ''
+        old_disposed_cases['First Offense'] = ''
+        old_disposed_cases['ST RPT Column'] = ''
+        old_disposed_cases['Report Generated Date'] = ''
+        old_disposed_cases['Original As Of Date'] = old_disposed_cases['Disposed As Of Date']
+        old_disposed_cases['Last As Of Date'] = old_disposed_cases['Disposed As Of Date']
+        old_disposed_cases['Dropped DateTime'] = ''
+        #Correct the order of the columns
+        old_disposed_cases = old_disposed_cases[[
+            'County',
+            'Cause Number',
+            'File Date',
+            'Court',
+            'Docket Date',
+            'Outstanding Warrants',
+            'First Offense',
+            'ST RPT Column',
+            'Report Generated Date',
+            'Original As Of Date',
+            'Last As Of Date',
+            'Case Type',
+            'Status',
+            'Load DateTime',
+            'Dropped DateTime',
+            'Disposed Dates',
+            'Dispositions',
+            'Disposed As Of Date',
+            'Number of Dispositions'
+        ]]
+
+        #Now append to dropped cases df
+        dropped_cases = dropped_cases.append(old_disposed_cases, ignore_index = True)
+    else:
+        old_disposed_cases['Cause of Action'] = ''
+        old_disposed_cases['Docket Date'] = ''
+        old_disposed_cases['Docket Type'] = ''
+        old_disposed_cases['ANS File'] = ''
+        old_disposed_cases['CR Number'] = ''
+        old_disposed_cases['Report Generated Date'] = ''
+        old_disposed_cases['Original As Of Date'] = old_disposed_cases['Disposed As Of Date']
+        old_disposed_cases['Last As Of Date'] = old_disposed_cases['Disposed As Of Date']
+        old_disposed_cases['Dropped DateTime'] = ''
+        #Correct the order of the columns
+        old_disposed_cases = old_disposed_cases[[
+            'County',
+            'Cause Number',
+            'File Date',
+            'Cause of Action',
+            'Docket Date',
+            'Docket Type',
+            'ANS File',
+            'CR Number',
+            'Report Generated Date',
+            'Original As Of Date',
+            'Last As Of Date',
+            'Case Type',
+            'Status',
+            'Load DateTime',
+            'Dropped DateTime',
+            'Disposed Dates',
+            'Dispositions',
+            'Disposed As Of Date',
+            'Number Of Dispositions'
+        ]]
+
+        #Now append to dropped cases df
+        dropped_cases = dropped_cases.append(old_disposed_cases, ignore_index = True)
+
+    #Now append the old cases df to the common_table_df
+    common_table_df = common_table_df.append(convert_to_common_table_df(old_disposed_cases), ignore_index = True)
+
+    #Iterate through each of the newly disposed cases and update the corresponding version in dropped_cases
+    for i in new_disposed_cases.index:
+        dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed Dates']] = new_disposed_cases['Disposed Dates'][i]
+        dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Dispositions']] = new_disposed_cases['Dispositions'][i]
+        dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed As Of Date']] = new_disposed_cases['Disposed As Of Date'][i]
+        dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Number Of Dispositions']] = new_disposed_cases['Number Of Dispositions'][i]
+    
+    #Iterate through each of the newly disposed cases and update the corresponding version in the common table
+    for i in new_disposed_cases.index:
+        common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed Dates']] = new_disposed_cases['Disposed Dates'][i]
+        common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Dispositions']] = new_disposed_cases['Dispositions'][i]
+        common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed As Of Date']] = new_disposed_cases['Disposed As Of Date'][i]
+        common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Number Of Dispositions']] = new_disposed_cases['Number Of Dispositions'][i]
+
+    #Now update the google sheet
+    #For common table
+    common_sheet.clear()
+    common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
+
+    #For dropped cases table
+    dropped_sheet.clear()
+    dropped_sheet.update([dropped_cases.columns.values.tolist()] + dropped_cases.values.tolist())
+
+    return
+    
