@@ -608,7 +608,7 @@ def update_juvenile_cases(juvenile_cases):
         #Create a df that consists only of pending juvenile cases in the county for the current report
         current_county_cases = common_table_df[common_table_df['County'] == juvenile_cases['County'][0]]
         current_county_cases = current_county_cases[current_county_cases['Case Type'] == 'Juvenile']
-        current_county_pending_cases = current_county_pending_cases[current_county_pending_cases['Status'] == 'Open']
+        current_county_pending_cases = current_county_cases[current_county_cases['Status'] == 'Open']
         current_county_pending_cases.reset_index(inplace = True)
         #Update the 'Original As Of Date' for the new cases df
         for i in current_county_pending_cases.index:
