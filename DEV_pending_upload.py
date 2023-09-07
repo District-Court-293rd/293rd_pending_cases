@@ -124,14 +124,14 @@ def convert_to_common_table_df(case_df):
         df['Number Of Dispositions'] = case_df['Number Of Dispositions']
 
     #Determine if cases are criminal, juvenile, or civil. They will have different logic
-    if case_df['Case Type'][0].count('Criminal') == 0:
-        df['Cause'] = case_df['Cause of Action']
-        df['Docket Type'] = case_df['Docket Type']
-        df['ANS File'] = case_df['ANS File']
-        df['CR Number'] = case_df['CR Number']
-        #The following columns are only available in Criminal reports, so set them to empty strings
-        df['Outstanding Warrants'] = ''
-        df['ST RPT Column'] = ''
+    if case_df['Case Type'][0].count('Criminal') == 1:
+        df['Cause'] = case_df['First Offense']
+        df['Outstanding Warrants'] = case_df['Outstanding Warrants']
+        df['ST RPT Column'] = case_df['ST RPT Column']
+        #The following columns are only available in Civil Reports, so set them to empty strings
+        df['Docket Type'] = ''
+        df['ANS File'] = ''
+        df['CR Number'] = ''
     elif case_df['Case Type'][0].count('Juvenile') == 1:
         df['Cause'] = case_df['Offense']
         #The following columns are not available in Juvenile Reports, so set them to empty strings
@@ -141,13 +141,13 @@ def convert_to_common_table_df(case_df):
         df['Outstanding Warrants'] = case_df['Outstanding Warrants']
         df['ST RPT Column'] = case_df['ST RPT Column']
     else:
-        df['Cause'] = case_df['First Offense']
-        df['Outstanding Warrants'] = case_df['Outstanding Warrants']
-        df['ST RPT Column'] = case_df['ST RPT Column']
-        #The following columns are only available in Civil Reports, so set them to empty strings
-        df['Docket Type'] = ''
-        df['ANS File'] = ''
-        df['CR Number'] = ''
+        df['Cause'] = case_df['Cause of Action']
+        df['Docket Type'] = case_df['Docket Type']
+        df['ANS File'] = case_df['ANS File']
+        df['CR Number'] = case_df['CR Number']
+        #The following columns are only available in Criminal reports, so set them to empty strings
+        df['Outstanding Warrants'] = ''
+        df['ST RPT Column'] = ''
 
     return df
 
