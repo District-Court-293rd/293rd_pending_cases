@@ -138,8 +138,8 @@ def convert_to_common_table_df(case_df):
         df['Docket Type'] = ''
         df['ANS File'] = ''
         df['CR Number'] = ''
-        df['Outstanding Warrants'] = case_df['Outstanding Warrants']
-        df['ST RPT Column'] = case_df['ST RPT Column']
+        df['Outstanding Warrants'] = ''
+        df['ST RPT Column'] = ''
     else:
         df['Cause'] = case_df['Cause of Action']
         df['Docket Type'] = case_df['Docket Type']
