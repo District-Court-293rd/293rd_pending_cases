@@ -172,7 +172,7 @@ def update_spreadsheet(file_name, content):
     elif df['Case Type'][0].count('Criminal') > 0:
         #Add to criminal cases tab
         update_criminal_cases(df)
-    elif df['Cast Type'][0].count('Juvenile') > 0:
+    elif df['Case Type'][0].count('Juvenile') > 0:
         #Add juvenile cases to common table
         update_juvenile_cases(df)
     else:
