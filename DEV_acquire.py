@@ -24,6 +24,8 @@ def build_dataframe(file_name, content):
         df = build_civil_cases_dataframe(content)
     elif file_name.upper().count('CR') > 0:
         df = build_criminal_cases_dataframe(content)
+    elif file_name.upper().count('JU') > 0:
+        df = build_juvenile_cases_dataframe(content)
     else:
         #Leave a message
         print("Something Went Wrong! Could not identify the PDF as Criminal or Civil.")
@@ -751,5 +753,128 @@ def build_criminal_disposed_cases_dataframe(text):
     
     #Add report as of date
     df['Disposed As Of Date'] = report_as_of_date
+    
+    return df
+
+def build_juvenile_cases_dataframe(text):
+    """
+    This function takes in the entire PDF document as a string of text. It will gather the info for each case
+    and add the info to a dictionary. The dictionary for each case will be added to a list which will be turned into
+    a dataframe.
+    
+    Parameter:
+        -text: A string consisting of the text of the entire juvenile cases PDF document.
+        
+    Returns:
+        -df: A dataframe of the newly gathered juvenile case info
+    """
+    
+    #Initialize containers
+    #Establish a container list for the dictionaries
+    case_list = []
+    offense_list = []
+    temp_dict = {}
+    
+    #Get the header and remove surrounding whitespace
+    header = text[:420].strip()
+
+    #Get the body and remove surrounding whitespace
+    body = text[420:].strip()
+    
+    #Get the 'AS OF' date:
+    report_as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[0]
+    
+    #Use if statement to check for county names inside the header info
+    if header.count('MAVERICK') >= 1:
+        county = 'Maverick'
+    elif header.count('DIMMIT') >= 1:
+        county = 'Dimmit'
+    elif header.count('ZAVALA') >= 1:
+        county = 'Zavala'
+    else:
+        county = 'Something went wrong!'
+        
+    #Set up regex to remove all subsequent headers
+    #This regex should identify the headers even if some of the info changes later on
+    body = re.sub(r"""\n\x0c\s*[A-Z0-9 \n/#\:-]*\(S\)\s*\n\n""", '', body)
+    
+    #Split the text on the \n to isolate each case
+    cases = body.split('\n')
+    
+    #Drop the last case. It's just the total case count from the report
+    cases.pop()
+    
+    #Remove cases that happen to be empty or consist of whitespace only
+    cases = [case for case in cases if case.isspace() == False and len(case) > 0]
+    
+    #Loop through each line. Add case info to temp dict, and then add that to the case list
+    #Some fields are commented out because we don't need that info yet.
+    for line in cases:
+        #Check if line is the start of a new case
+        if not line[0].isspace():
+            #Check if the temp_dict is empty.
+            #If not, add temp_dict data to case_list
+            if bool(temp_dict) == True:
+                #Add list info to temp_dict
+                temp_dict['Offense'] = offense_list
+
+                #Add temp dict data to case_list
+                case_list.append(temp_dict)
+
+            #Reset temp_dict
+            temp_dict = {}
+
+            #Reset lists
+            offense_list = []
+            
+            #Assign the county
+            temp_dict['County'] = county
+
+            #Gather the cause number
+            temp_dict['Cause Number'] = line[9:26].strip()
+
+            #Gather the file date
+            temp_dict['File Date'] = line[26:38].strip()
+
+            #Insert docket date column
+            temp_dict['Docket Date'] = ''
+
+            #Get court
+            #temp_dict['Court'] = line[38:70].strip()
+
+            #Get respondent
+            #temp_dict['Respondent'] = line[70:].strip()
+
+            #End of line, so move to next one
+
+        else:
+            #Get offenses
+            offense = line.strip()
+
+            #Check if offense is all whitesapace. If not, strip it and add to list
+            #Also check that the string is not empty
+            if offense.isspace() == False and len(offense) > 0:
+                offense_list.append(offense.strip())
+
+            #End of line
+
+    #Check that the last case was added to the list
+    #If not, add it
+    #Add list info to temp_dict
+    temp_dict['Offense'] = offense_list
+
+    #Add temp dict data to case_list
+    case_list.append(temp_dict)
+    
+    #How many?
+    print(f'Collected Data From {len(case_list)} Cases.')
+    
+    #Create dataframe
+    df = pd.DataFrame(case_list)
+    
+    #Add report as of date
+    df['Report Generated Date'] = report_as_of_date
+    df["Original As Of Date"] = report_as_of_date
+    df["Last As Of Date"] = report_as_of_date
     
     return df

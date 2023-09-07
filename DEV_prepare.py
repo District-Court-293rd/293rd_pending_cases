@@ -189,6 +189,9 @@ def prepare_dataframe(file_name, df):
     elif file_name.upper().count('CR') > 0:
         #Assign as Criminal case type
         df['Case Type'] = 'Criminal'
+    elif file_name.upper().count('JU') > 0:
+        #Assign as Juvenile case type
+        df['Case Type'] = 'Juvenile'
     else:
         #Check if any civil cases are tax cases and update accordingly
         df['Case Type'] = df['Cause Number'].apply(get_case_type)
@@ -217,6 +220,10 @@ def prepare_dataframe(file_name, df):
         df['Number Of Dispositions'] = df['Dispositions'].apply(count_number_of_dispositions)
         df['Dispositions'] = df['Dispositions'].apply(convert_name_list_to_string)
         df['Disposed Dates'] = df['Disposed Dates'].apply(convert_name_list_to_string)
+    
+    #Convert the juvenile case offense list to a single string with each item separated by a new line
+    if file_name.upper().count('JU') > 0:
+        df['Offense'] = df['Offense'].apply(convert_name_list_to_string)
 
     #Create Load Date column
     #df['load_date'] = str(date.today())
