@@ -442,6 +442,12 @@ def update_disposed_cases(disposed_cases):
     dropped_cases = pd.DataFrame(dropped_sheet.get_all_records())
     common_table_df = pd.DataFrame(common_sheet.get_all_records())
 
+    #Verify cause numbers are represented as strings
+    if len(dropped_cases) > 0:
+        dropped_cases['Cause Number'] = dropped_cases['Cause Number'].astype(str).str.strip()
+    if len(common_table_df) > 0:
+        common_table_df['Cause Number'] = common_table_df['Cause Number'].astype(str).str.strip()
+
     #Find the cases that are not in the dropped cases df
     #These cases will need to be added into the closed and common table because we don't have data this old
     #These disposed cases can go back as far as 01/01/2019
