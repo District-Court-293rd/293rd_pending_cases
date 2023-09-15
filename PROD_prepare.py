@@ -101,6 +101,19 @@ def convert_name_list_to_string(name_list):
 
     return name_string
 
+def count_number_of_dispositions(date_list):
+    """
+    This function takes in the list of disposition dates for disposed cases and counts how many there are.
+
+    Parameter:
+        - date_list: The list of strings representing the different disposed dates a case has
+
+    Returns:
+        - int: The number of disposed dates a case has, i.e., the number of dispositions related to that case
+    """
+
+    return len(date_list)
+
 def prepare_closed_cases(closed_cases_df, new_cases_df):
     """
     This function takes in a dataframe of newly closed cases and prepares them to be added to the appropriate closed cases tab.
@@ -117,15 +130,21 @@ def prepare_closed_cases(closed_cases_df, new_cases_df):
     """
 
     #Set status to closed
-    closed_cases_df['Status'] = 'Closed'
+    closed_cases_df['Status'] = 'Dropped'
 
-    #Set the closed datetime column to the uploaded report's 'As Of' date
-    date = new_cases_df['Report As Of Date'][0].strip()
+    #Set the dropped datetime column to the uploaded report's 'As Of' date
+    date = new_cases_df['Last As Of Date'][0].strip()
     time = '00:00:00'
     datetime_str = date + ' ' + time
 
     datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
-    closed_cases_df['Closed DateTime'] = str(datetime_object)
+    closed_cases_df['Dropped DateTime'] = str(datetime_object)
+
+    #Add other disposed case columns
+    closed_cases_df['Disposed Dates'] = ''
+    closed_cases_df['Dispositions'] = ''
+    closed_cases_df['Disposed As Of Date'] = ''
+    closed_cases_df['Number Of Dispositions'] = 0
 
     #Calculate the number of days to the final docket date
     #file_date = pd.to_datetime(closed_cases_df['File Date'])
@@ -170,6 +189,9 @@ def prepare_dataframe(file_name, df):
     elif file_name.upper().count('CR') > 0:
         #Assign as Criminal case type
         df['Case Type'] = 'Criminal'
+    elif file_name.upper().count('JU') > 0:
+        #Assign as Juvenile case type
+        df['Case Type'] = 'Juvenile'
     else:
         #Check if any civil cases are tax cases and update accordingly
         df['Case Type'] = df['Cause Number'].apply(get_case_type)
@@ -186,8 +208,25 @@ def prepare_dataframe(file_name, df):
     #Create Bad Cause Number column
     #df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)
     
-    #Create Status column. Defaults to Open
-    df['Status'] = 'Open'
+    #Create Status column. Defaults to open unless reading disposed cases
+    if file_name.upper().count('DISPOSED') > 0:
+        df['Status'] = 'Disposed'
+    else:
+        df['Status'] = 'Open'
+
+    #Create a new column for disposed cases that counts the number of dispositions related to a cause number
+    #Also convert the disposition list to a single string with each item separated by a new line
+    if file_name.upper().count('DISPOSED') > 0:
+        df['Number Of Dispositions'] = df['Dispositions'].apply(count_number_of_dispositions)
+        df['Dispositions'] = df['Dispositions'].apply(convert_name_list_to_string)
+        df['Disposed Dates'] = df['Disposed Dates'].apply(convert_name_list_to_string)
+    
+    #Convert the juvenile case offense list to a single string with each item separated by a new line
+    if file_name.upper().count('JU') > 0:
+        df['Offense'] = df['Offense'].apply(convert_name_list_to_string)
+
+    #Create Load Date column
+    #df['load_date'] = str(date.today())
 
     #Create Load DateTime column
     america_central_tz = pytz.timezone('America/Chicago')
@@ -200,7 +239,7 @@ def prepare_dataframe(file_name, df):
     #    df['Plaintiff Attorney'] = df['Plaintiff Attorney'].apply(convert_name_list_to_string)
     #    df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
     #    df['Defendant Attorney'] = df['Defendant Attorney'].apply(convert_name_list_to_string)
-    if df['Case Type'][0] == 'Criminal' or df['Case Type'][0] == 'Criminal OLS':
+    if (df['Case Type'][0] == 'Criminal' or df['Case Type'][0] == 'Criminal OLS') and df['Status'][0] != 'Disposed':
         df['First Offense'] = df['First Offense'].apply(convert_name_list_to_string)
         df['ST RPT Column'] = df['ST RPT Column'].apply(convert_name_list_to_string)
     
