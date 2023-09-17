@@ -6,6 +6,18 @@ import gspread
 import DEV_acquire
 import DEV_prepare
 
+#Set up google sheet name vars
+google_sheet_name = 'Pending Reports'
+common_sheet_name = 'DEV_Common_Table'
+civil_sheet_name = 'DEV_Civil_Cases'
+closed_civil_sheet_name = 'DEV_Closed_Civil_Cases'
+criminal_sheet_name = 'DEV_Criminal_Cases'
+closed_criminal_sheet_name = 'DEV_Closed_Criminal_Cases'
+ols_civil_sheet_name = 'DEV_OLS_Civil_Cases'
+closed_ols_civil_sheet_name = 'DEV_Closed_OLS_Civil_Cases'
+ols_criminal_sheet_name = 'DEV_OLS_Criminal_Cases'
+closed_ols_criminal_sheet_name = 'DEV_Closed_OLS_Criminal_Cases'
+
 credentials = {
   "type": st.secrets["type"],
   "project_id": st.secrets["project_id"],
@@ -198,21 +210,21 @@ def update_civil_cases(new_civil_df):
     gc = gspread.service_account_from_dict(credentials)
     
     #Open 'Pending Reports' Google Sheet By Name
-    gsheet = gc.open('Pending Reports')
+    gsheet = gc.open(google_sheet_name)
 
     #Make connection to 'DEV_Common_Table'
-    common_sheet = gsheet.worksheet('DEV_Common_Table')
+    common_sheet = gsheet.worksheet(common_sheet_name)
     
     if new_civil_df['Case Type'][0].count('OLS') > 0:
         #Send OLS data to the 'Civil OLS Cases' tab
-        civil_sheet = gsheet.worksheet('DEV_OLS_Civil_Cases')
+        civil_sheet = gsheet.worksheet(ols_civil_sheet_name)
         #Send closed OLS cases to the 'Closed Civil OLS Cases' tab
-        closed_sheet = gsheet.worksheet('DEV_Closed_OLS_Civil_Cases')
+        closed_sheet = gsheet.worksheet(closed_ols_civil_sheet_name)
     else:
         #Civil cases go to the 'Civil Cases' tab
-        civil_sheet = gsheet.worksheet('DEV_Civil_Cases')
+        civil_sheet = gsheet.worksheet(civil_sheet_name)
         #Closed cases go to the 'Closed Civil Cases' tab
-        closed_sheet = gsheet.worksheet('DEV_Closed_Civil_Cases')
+        closed_sheet = gsheet.worksheet(closed_civil_sheet_name)
 
     #Load the data currently on the civil cases tab in the 'Pending Reports' spreadsheet
     current_civil_df = pd.DataFrame(civil_sheet.get_all_records())
@@ -313,21 +325,21 @@ def update_criminal_cases(new_crim_df):
     gc = gspread.service_account_from_dict(credentials)
     
     #Open 'Pending Reports' Google Sheet By Name
-    gsheet = gc.open("Pending Reports")
+    gsheet = gc.open(google_sheet_name)
 
     #Make connection to 'DEV_Common_Table'
-    common_sheet = gsheet.worksheet('DEV_Common_Table')
+    common_sheet = gsheet.worksheet(common_sheet_name)
 
     if new_crim_df['Case Type'][0].count('OLS') > 0:
         #Send OLS data to the 'Criminal OLS Cases' tab
-        crim_sheet = gsheet.worksheet('DEV_OLS_Criminal_Cases')
+        crim_sheet = gsheet.worksheet(ols_criminal_sheet_name)
         #Send closed OLS cases to the 'Closed Criminal OLS Cases' tab
-        closed_sheet = gsheet.worksheet('DEV_Closed_OLS_Criminal_Cases')
+        closed_sheet = gsheet.worksheet(closed_ols_criminal_sheet_name)
     else:
         #Civil cases go to the 'Criminal Cases' tab
-        crim_sheet = gsheet.worksheet('DEV_Criminal_Cases')
+        crim_sheet = gsheet.worksheet(criminal_sheet_name)
         #Closed cases go to the 'Closed Criminal Cases' tab
-        closed_sheet = gsheet.worksheet('DEV_Closed_Criminal_Cases')
+        closed_sheet = gsheet.worksheet(closed_criminal_sheet_name)
 
     #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
     current_crim_df = pd.DataFrame(crim_sheet.get_all_records())
@@ -427,17 +439,17 @@ def update_disposed_cases(disposed_cases):
     gc = gspread.service_account_from_dict(credentials)
     
     #Open 'Pending Reports' Google Sheet By Name
-    gsheet = gc.open("Pending Reports")
+    gsheet = gc.open(google_sheet_name)
 
     #Make connection to 'DEV_Common_Table'
-    common_sheet = gsheet.worksheet('DEV_Common_Table')
+    common_sheet = gsheet.worksheet(common_sheet_name)
 
     #Open the associated dropped table
     if disposed_cases['Case Type'][0].count('Criminal') > 0:
-        dropped_sheet = gsheet.worksheet('DEV_Closed_Criminal_Cases')
+        dropped_sheet = gsheet.worksheet(closed_criminal_sheet_name)
         is_crim = True
     else:
-        dropped_sheet = gsheet.worksheet('DEV_Closed_Civil_Cases')
+        dropped_sheet = gsheet.worksheet(closed_civil_sheet_name)
         is_crim = False
     
     #Build dataframes
@@ -602,10 +614,10 @@ def update_juvenile_cases(juvenile_cases):
     gc = gspread.service_account_from_dict(credentials)
     
     #Open 'Pending Reports' Google Sheet By Name
-    gsheet = gc.open("Pending Reports")
+    gsheet = gc.open(google_sheet_name)
 
     #Make connection to 'DEV_Common_Table'
-    common_sheet = gsheet.worksheet('DEV_Common_Table')
+    common_sheet = gsheet.worksheet(common_sheet_name)
 
     #Build common table df
     common_table_df = pd.DataFrame(common_sheet.get_all_records())
