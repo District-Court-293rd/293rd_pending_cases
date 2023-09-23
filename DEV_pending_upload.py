@@ -564,10 +564,17 @@ def update_disposed_cases(disposed_cases):
     #One entry labeled as 'Dropped' (the reopened version), and one entry labeled 'Disposed' (the original version)
     #Since the disposed report should now contain the disposed dates for the reopened version, we can drop the original version
     #and simply update the reopened version with the new disposed information.
-    new_disposed_cases.sort_values(by = ['County', 'Cause Number', 'Status'], ignore_index=True, inplace=True)
-    new_disposed_cases.drop_duplicates(subset = ['Cause Number'], ignore_index=True, inplace=True, keep='last')
-    common_table_df.sort_values(by = ['County','Cause Number','Status'], ignore_index=True, inplace=True)
-    common_table_df.drop_duplicates(subset = ['Cause Number'], ignore_index=True, inplace=True, keep='last')
+
+    #First, separate the open cases from the dropped and disposed cases
+    open_common_table_cases = common_table_df[common_table_df['Status'] == 'Open']
+    closed_common_table_cases = common_table_df[common_table_df['Status'] != 'Open']
+
+    #Now drop the disposed version of the case.
+    closed_common_table_cases.sort_values(by = ['County','Cause Number','Status'], ignore_index=True, inplace=True)
+    closed_common_table_cases.drop_duplicates(subset = ['Cause Number'], ignore_index=True, inplace=True, keep='last')
+
+    #Finally, recreate the common_table_df by adding the open cases back to the closed_common_table_cases df
+    common_table_df = closed_common_table_cases.append(open_common_table_cases, ignore_index = True)
 
     #Iterate through each of the newly disposed cases and update the corresponding version in dropped_cases
     if len(new_disposed_cases) > 0:
@@ -622,6 +629,10 @@ def update_juvenile_cases(juvenile_cases):
     #Build common table df
     common_table_df = pd.DataFrame(common_sheet.get_all_records())
 
+    #Verify that cause numbers are represented as strings
+    if len(common_table_df) > 0:
+        common_table_df['Cause Number'] = common_table_df['Cause Number'].astype(str).str.strip()
+
     #Find the new juvenile cases (not already in the common table)
     new_juvenile_cases = juvenile_cases[~(juvenile_cases['Cause Number'].isin(common_table_df['Cause Number']))]
     new_juvenile_cases.reset_index(inplace = True)
@@ -631,9 +642,6 @@ def update_juvenile_cases(juvenile_cases):
     existing_juvenile_cases.reset_index(inplace = True)
 
     if len(common_table_df) > 0:
-        #Verify that cause numbers are represented as strings
-        common_table_df['Cause Number'] = common_table_df['Cause Number'].astype(str).str.strip()
-
         #Create a df that consists only of pending juvenile cases in the county for the current report
         current_county_cases = common_table_df[common_table_df['County'] == juvenile_cases['County'][0]]
         current_county_cases = current_county_cases[current_county_cases['Case Type'] == 'Juvenile']
