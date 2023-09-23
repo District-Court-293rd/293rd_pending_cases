@@ -106,7 +106,8 @@ def convert_to_common_table_df(case_df):
         "Disposed Dates": [],
         "Dispositions": [],
         "Disposed As Of Date": [],
-        "Number Of Dispositions": []
+        "Number Of Dispositions": [],
+        "Comments": []
     }
 
     df = pd.DataFrame(dict)
@@ -124,6 +125,7 @@ def convert_to_common_table_df(case_df):
     df['Last As Of Date'] = case_df['Last As Of Date']
     df['Load DateTime'] = case_df['Load DateTime']
     df['Dropped DateTime'] = '' #These are open cases, so none will have a closed date yet
+    df['Comments'] = case_df['Comments']
     if case_df['Status'][0] != 'Disposed':
         df['Disposed Dates'] = ''
         df['Dispositions'] = ''
@@ -259,7 +261,7 @@ def update_civil_cases(new_civil_df):
         #Instanciate closed_cases_df
         closed_cases_df = pd.DataFrame()
 
-    #Update the 'Original As Of Date' for the new cases df
+    #Update the 'Original As Of Date' and 'Comments' columns for the new cases df
     if len(current_civil_df) > 0:
         #Create a df that consists only of pending cases in the county for the current report
         current_county_pending_cases = current_civil_df[current_civil_df['County'] == new_civil_df['County'][0]]
@@ -267,6 +269,7 @@ def update_civil_cases(new_civil_df):
         #Iterate through each of those cases and update the corresponding version in new_civil_df
         for i in current_county_pending_cases.index:
             new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'][i]
+            new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Comments']] = current_county_pending_cases['Comments'][i]
 
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
@@ -374,7 +377,7 @@ def update_criminal_cases(new_crim_df):
         #Instanciate closed_cases_df
         closed_cases_df = pd.DataFrame()
 
-    #Update the 'Original As Of Date' for the new cases df
+    #Update the 'Original As Of Date' and 'Comments' columns for the new cases df
     if len(current_crim_df) > 0:
         #Create a df that consists only of pending cases in the county for the current report
         current_county_pending_cases = current_crim_df[current_crim_df['County'] == new_crim_df['County'][0]]
@@ -382,6 +385,7 @@ def update_criminal_cases(new_crim_df):
         #Iterate through each of those cases and update the corresponding version in new_crim_df
         for i in current_county_pending_cases.index:
             new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'][i]
+            new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Comments']] = current_county_pending_cases['Comments'][i]
 
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
@@ -492,6 +496,7 @@ def update_disposed_cases(disposed_cases):
         old_disposed_cases['Original As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Last As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Dropped DateTime'] = ''
+        old_disposed_cases['Comments'] = ''
         #Correct the order of the columns
         old_disposed_cases = old_disposed_cases[[
             'County',
@@ -512,7 +517,8 @@ def update_disposed_cases(disposed_cases):
             'Disposed Dates',
             'Dispositions',
             'Disposed As Of Date',
-            'Number Of Dispositions'
+            'Number Of Dispositions',
+            'Comments'
         ]]
 
         #Now append to dropped cases df
@@ -527,6 +533,7 @@ def update_disposed_cases(disposed_cases):
         old_disposed_cases['Original As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Last As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Dropped DateTime'] = ''
+        old_disposed_cases['Comments'] = ''
         #Correct the order of the columns
         old_disposed_cases = old_disposed_cases[[
             'County',
@@ -547,7 +554,8 @@ def update_disposed_cases(disposed_cases):
             'Disposed Dates',
             'Dispositions',
             'Disposed As Of Date',
-            'Number Of Dispositions'
+            'Number Of Dispositions',
+            'Comments'
         ]]
 
         #Now append to dropped cases df
@@ -647,9 +655,10 @@ def update_juvenile_cases(juvenile_cases):
         current_county_cases = current_county_cases[current_county_cases['Case Type'] == 'Juvenile']
         current_county_pending_cases = current_county_cases[current_county_cases['Status'] == 'Open']
         current_county_pending_cases.reset_index(inplace = True)
-        #Update the 'Original As Of Date' for the new cases df
+        #Update the 'Original As Of Date' and 'Comments' columns for the new cases df
         for i in current_county_pending_cases.index:
             juvenile_cases.loc[juvenile_cases['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'][i]
+            juvenile_cases.loc[juvenile_cases['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Comments']] = current_county_pending_cases['Comments'][i]
 
         #Update dropped cases in common table
         dropped_cases = current_county_pending_cases[~(current_county_pending_cases['Cause Number'].isin(juvenile_cases['Cause Number']))]
