@@ -305,6 +305,7 @@ def update_civil_cases(new_civil_df):
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
+    common_table_df.sort_values(by = ['Status'], ignore_index=True, inplace=True, ascending = False)
     common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
     
     print('Civil Cases Updated!')
@@ -421,6 +422,7 @@ def update_criminal_cases(new_crim_df):
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
+    common_table_df.sort_values(by = ['Status'], ignore_index=True, inplace=True, ascending = False)
     common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
     
     print('Criminal Cases Updated!')
@@ -605,6 +607,7 @@ def update_disposed_cases(disposed_cases):
     #Now update the google sheet
     #For common table
     common_sheet.clear()
+    common_table_df.sort_values(by = ['Status'], ignore_index=True, inplace=True, ascending = False)
     common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
 
     #For dropped cases table
@@ -686,6 +689,7 @@ def update_juvenile_cases(juvenile_cases):
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
+    common_table_df.sort_values(by = ['Status'], ignore_index=True, inplace=True, ascending = False)
     common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
     
     print('Juvenile Cases Updated!')
