@@ -607,7 +607,7 @@ def update_disposed_cases(disposed_cases):
     #Now update the google sheet
     #For common table
     common_sheet.clear()
-    common_table_df.sort_values(by = ['Status'], ignore_index=True, inplace=True, ascending = False)
+    #common_table_df.sort_values(by = ['Status'], ignore_index=True, inplace=True, ascending = False)
     common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
 
     #For dropped cases table
