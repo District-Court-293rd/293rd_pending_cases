@@ -130,7 +130,9 @@ if len(common_df) > 0:
     #Verify the columns are string types
     common_df['Last As Of Date'] = common_df['Last As Of Date'].astype(str).str.strip()
     common_df['Load DateTime'] = common_df['Load DateTime'].astype(str).str.strip()
-    
+    common_df['County'] = common_df['County'].astype(str).str.strip()
+    common_df['Case Type'] = common_df['Case Type'].astype(str).str.strip()
+
     dimmit_civil_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
     dimmit_civil_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
     dimmit_criminal_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
