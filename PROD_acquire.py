@@ -261,7 +261,8 @@ def build_civil_cases_dataframe(text):
     df["Report Generated Date"] = report_generated_date
     df["Original As Of Date"] = report_as_of_date
     df["Last As Of Date"] = report_as_of_date
-    df["Comments"] = ''
+    #Comment column removed as of 10/07/2023
+    #df["Comments"] = ''
         
     return df
 
@@ -611,7 +612,8 @@ def build_criminal_cases_dataframe(text):
     df["Report Generated Date"] = report_generated_date
     df["Original As Of Date"] = report_as_of_date
     df["Last As Of Date"] = report_as_of_date
-    df["Comments"] = ''
+    #Comment column removed as of 10/07/2023
+    #df["Comments"] = ''
     
     return df
 
@@ -878,6 +880,7 @@ def build_juvenile_cases_dataframe(text):
     df['Report Generated Date'] = report_as_of_date
     df["Original As Of Date"] = report_as_of_date
     df["Last As Of Date"] = report_as_of_date
-    df["Comments"] = ''
+    #Comment column removed as of 10/07/2023
+    #df["Comments"] = ''
     
     return df
