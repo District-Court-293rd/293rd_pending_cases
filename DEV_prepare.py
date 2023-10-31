@@ -209,14 +209,14 @@ def prepare_dataframe(file_name, df):
     #df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)
     
     #Create Status column. Defaults to open unless reading disposed cases
-    if file_name.upper().count('DISPOSED') > 0:
+    if file_name.upper().count('DISP') > 0:
         df['Status'] = 'Disposed'
     else:
         df['Status'] = 'Open'
 
     #Create a new column for disposed cases that counts the number of dispositions related to a cause number
     #Also convert the disposition list to a single string with each item separated by a new line
-    if file_name.upper().count('DISPOSED') > 0:
+    if file_name.upper().count('DISP') > 0:
         df['Number Of Dispositions'] = df['Dispositions'].apply(count_number_of_dispositions)
         df['Dispositions'] = df['Dispositions'].apply(convert_name_list_to_string)
         df['Disposed Dates'] = df['Disposed Dates'].apply(convert_name_list_to_string)
