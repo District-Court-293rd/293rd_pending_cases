@@ -16,9 +16,9 @@ def build_dataframe(file_name, content):
         - df: A dataframe of the information extracted from the uploaded PDF.
     """
     #Check if it is criminal or civil and then call the associated functions
-    if file_name.upper().count('CR') > 0 and file_name.upper().count('DISPOSED') > 0:
+    if file_name.upper().count('CR') > 0 and file_name.upper().count('DISP') > 0:
         df = build_criminal_disposed_cases_dataframe(content)
-    elif (file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0) and file_name.upper().count('DISPOSED') > 0:
+    elif (file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0) and file_name.upper().count('DISP') > 0:
         df = build_civil_disposed_cases_dataframe(content)
     elif file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0:
         df = build_civil_cases_dataframe(content)
