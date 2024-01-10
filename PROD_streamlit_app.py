@@ -122,12 +122,20 @@ def convert_as_of_date_format(as_of_date):
     It is needed in order to always pull the correct max date when dealing with more than one year.
     Currently, the 'MM/DD/YYYY' format is not working as expected with the max() function.
 
+    Note: Some as_of_dates are in 'MM/DD/YY' format. Check for these and convert as needed.
+
     Parameter:
         - as_of_date: A string representing the latest as of date in the 'MM/DD/YYYY' format
 
     Returns:
         - new_date: A new string representing the latest as of date in the 'YYYYMMDD' format
     """
+
+    #First check if date is in 'MM/DD/YY' format
+    if len(as_of_date) == 8:
+        #Fill in the rest of the year
+        as_of_date = as_of_date[:6] + '20' + as_of_date[6:]
+        
     year = as_of_date[-4:]
     month = as_of_date[:2]
     day = as_of_date[3:5]
