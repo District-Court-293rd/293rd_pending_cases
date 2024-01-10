@@ -116,6 +116,47 @@ def convert_datetime_format(datetime):
     #Put them together and return the string
     return new_date + ' at ' + new_time
 
+def convert_as_of_date_format(as_of_date):
+    """
+    This function will transform the as_of_date format from 'MM/DD/YYYY' to 'YYYYMMDD'.
+    It is needed in order to always pull the correct max date when dealing with more than one year.
+    Currently, the 'MM/DD/YYYY' format is not working as expected with the max() function.
+
+    Parameter:
+        - as_of_date: A string representing the latest as of date in the 'MM/DD/YYYY' format
+
+    Returns:
+        - new_date: A new string representing the latest as of date in the 'YYYYMMDD' format
+    """
+    year = as_of_date[-4:]
+    month = as_of_date[:2]
+    day = as_of_date[3:5]
+
+    new_date = year + month + day
+
+    return new_date
+
+def reverse_as_of_date_format(as_of_date):
+    """
+    This function will transform the as_of_date format from 'YYYYMMDD' to 'MM/DD/YYYY'.
+    It is needed to make the date easier to read when displayed in the streamlit app sidebar.
+
+    Parameter:
+        - as_of_date: A string representing the latest as of date in the 'YYYYMMDD' format
+    
+    Returns:
+        - new_date: A string representing the latest as of date in the 'MM/DD/YYYY' format
+    """
+
+    year = as_of_date[:4]
+    month = as_of_date[4:6]
+    day = as_of_date[6:]
+
+    new_date = month + '/' + day + '/' + year
+
+    return new_date
+
+
 
 ############################################## Begin App ##################################################
 
@@ -133,6 +174,9 @@ if len(common_df) > 0:
     common_df['County'] = common_df['County'].astype(str).str.strip()
     common_df['Case Type'] = common_df['Case Type'].astype(str).str.strip()
 
+    #Convert 'Last As Of Date' to YYYYMMDD format so that the max() function works properly.
+    common_df['Last As Of Date'] = common_df['Last As Of Date'].apply(convert_as_of_date_format)
+
     dimmit_civil_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
     dimmit_civil_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
     dimmit_criminal_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
@@ -149,27 +193,27 @@ if len(common_df) > 0:
     #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
     with st.sidebar:
         st.subheader("Dimmit Civil Cases")
-        st.write("Latest As Of Date: " + dimmit_civil_last_as_of_date)
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_civil_last_as_of_date))
         st.write("Latest Load Date: " + convert_datetime_format(dimmit_civil_last_load_date))
         st.divider()
         st.subheader("Dimmit Criminal Cases")
-        st.write("Latest As Of Date: " + dimmit_criminal_last_as_of_date)
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_criminal_last_as_of_date))
         st.write("Latest Load Date: " + convert_datetime_format(dimmit_criminal_last_load_date))
         st.divider()
         st.subheader("Maverick Civil Cases")
-        st.write("Latest As Of Date: " + maverick_civil_last_as_of_date)
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_civil_last_as_of_date))
         st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
         st.divider()
         st.subheader("Maverick Criminal Cases")
-        st.write("Latest As Of Date: " + maverick_criminal_last_as_of_date)
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_criminal_last_as_of_date))
         st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
         st.divider()
         st.subheader("Zavala Civil Cases")
-        st.write("Latest As Of Date: " + zavala_civil_last_as_of_date)
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_civil_last_as_of_date))
         st.write("Latest Load Date: " + convert_datetime_format(zavala_civil_last_load_date))
         st.divider()
         st.subheader("Zavala Criminal Cases")
-        st.write("Latest As Of Date: " + zavala_criminal_last_as_of_date)
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_criminal_last_as_of_date))
         st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_last_load_date))
         st.divider()
 
