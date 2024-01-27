@@ -777,30 +777,22 @@ def build_juvenile_cases_dataframe(text):
     #Establish a container list for the dictionaries
     case_list = []
     offense_list = []
+    docket_date_list = []
+    dispo_date_list = []
     temp_dict = {}
     
     #Get the header and remove surrounding whitespace
-    header = text[:420].strip()
+    header = text[:450].strip()
 
     #Get the body and remove surrounding whitespace
-    body = text[420:].strip()
+    body = text[450:].strip()
     
     #Get the 'AS OF' date:
     report_as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[0]
-    
-    #Use if statement to check for county names inside the header info
-    if header.count('MAVERICK') >= 1:
-        county = 'Maverick'
-    elif header.count('DIMMIT') >= 1:
-        county = 'Dimmit'
-    elif header.count('ZAVALA') >= 1:
-        county = 'Zavala'
-    else:
-        county = 'Something went wrong!'
         
     #Set up regex to remove all subsequent headers
     #This regex should identify the headers even if some of the info changes later on
-    body = re.sub(r"""\n\x0c\s*[A-Z0-9 \n/#\:-]*\(S\)\s*\n\n""", '', body)
+    body = re.sub(r"""\n\x0c\s*[A-Z0-9 \(\)\n/#\:-]*\.\sDATE""", '', body)
     
     #Split the text on the \n to isolate each case
     cases = body.split('\n')
@@ -814,6 +806,9 @@ def build_juvenile_cases_dataframe(text):
     #Loop through each line. Add case info to temp dict, and then add that to the case list
     #Some fields are commented out because we don't need that info yet.
     for line in cases:
+        if line.isspace() or len(line) == 0:
+            continue
+
         #Check if line is the start of a new case
         if not line[0].isspace():
             #Check if the temp_dict is empty.
@@ -821,6 +816,8 @@ def build_juvenile_cases_dataframe(text):
             if bool(temp_dict) == True:
                 #Add list info to temp_dict
                 temp_dict['Offense'] = offense_list
+                temp_dict['Docket Date'] = docket_date_list
+                temp_dict['Disposition Date'] = dispo_date_list
 
                 #Add temp dict data to case_list
                 case_list.append(temp_dict)
@@ -830,18 +827,14 @@ def build_juvenile_cases_dataframe(text):
 
             #Reset lists
             offense_list = []
-            
-            #Assign the county
-            temp_dict['County'] = county
+            docket_date_list = []
+            dispo_date_list = []
 
             #Gather the cause number
             temp_dict['Cause Number'] = line[9:26].strip()
 
             #Gather the file date
             temp_dict['File Date'] = line[26:38].strip()
-
-            #Insert docket date column
-            temp_dict['Docket Date'] = ''
 
             #Get court
             #temp_dict['Court'] = line[38:70].strip()
@@ -853,19 +846,36 @@ def build_juvenile_cases_dataframe(text):
 
         else:
             #Get offenses
-            offense = line.strip()
+            offense = line[5:88].strip()
 
             #Check if offense is all whitesapace. If not, strip it and add to list
             #Also check that the string is not empty
             if offense.isspace() == False and len(offense) > 0:
                 offense_list.append(offense.strip())
 
-            #End of line
+            #Get Docket Date
+            docket_date = line[88:98].strip()
 
+            #Check if offense is all whitesapace. If not, strip it and add to list
+            #Also check that the string is not empty
+            if docket_date.isspace() == False and len(docket_date) > 0:
+                docket_date_list.append(docket_date.strip())
+
+            #Get Disposition Date
+            dispo_date = line[98:].strip()
+
+            #Check if offense is all whitesapace. If not, strip it and add to list
+            #Also check that the string is not empty
+            if dispo_date.isspace() == False and len(dispo_date) > 0:
+                dispo_date_list.append(dispo_date.strip())
+
+            #End of line
+        
     #Check that the last case was added to the list
-    #If not, add it
     #Add list info to temp_dict
     temp_dict['Offense'] = offense_list
+    temp_dict['Docket Date'] = docket_date_list
+    temp_dict['Disposition Date'] = dispo_date_list
 
     #Add temp dict data to case_list
     case_list.append(temp_dict)
@@ -876,11 +886,9 @@ def build_juvenile_cases_dataframe(text):
     #Create dataframe
     df = pd.DataFrame(case_list)
     
-    #Add date and comments columns
-    df['Report Generated Date'] = report_as_of_date
+    #Add report as of date
     df["Original As Of Date"] = report_as_of_date
     df["Last As Of Date"] = report_as_of_date
-    #Comment column removed as of 10/07/2023
-    #df["Comments"] = ''
+    df["Report Generated Date"] = report_as_of_date
     
     return df
