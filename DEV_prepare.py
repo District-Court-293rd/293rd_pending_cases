@@ -239,7 +239,7 @@ def prepare_dataframe(file_name, df):
 def prepare_pending_juvenile_cases(pending_juvenile_cases):
     """
     This function takes in a dataframe of pending juvenile cases.
-    It will add any necessary columns and perform transformations as necessary.
+    It will add required columns and perform transformations as necessary.
     It returns the updated dataframe.
 
     Parameter:
@@ -314,7 +314,7 @@ def prepare_disposed_juvenile_cases(disposed_juvenile_cases):
     disposed_juvenile_cases['Number Of Dispositions'] = disposed_juvenile_cases['Disposed Dates'].apply(count_number_of_dispositions)
 
     #Convert disposition date list into a single string
-    disposed_juvenile_cases['Disposed Dates']
+    disposed_juvenile_cases['Disposed Dates'] = disposed_juvenile_cases['Disposed Dates'].apply(convert_name_list_to_string)
 
     #Convert offense list into a single string
     disposed_juvenile_cases['Offense'] = disposed_juvenile_cases['Offense'].apply(convert_name_list_to_string)
@@ -358,3 +358,57 @@ def prepare_disposed_juvenile_cases(disposed_juvenile_cases):
     ]]
 
     return disposed_juvenile_cases
+
+def prepare_dropped_juvenile_cases(dropped_juvenile_cases, dropped_as_of_date):
+    """
+    This function takes in a dataframe of dropped juvenile cases.
+    It will add required columns and perform transformations as necessary.
+    It returns the updated dataframe ready to be added to the closed juvenile cases table.
+
+    Parameter:
+        dropped_juvenile_cases: A dataframe representing dropped juvenile cases only
+        dropped_as_of_date: A string representing the date the case was dropped from the juvenile report.
+
+    Returns:
+        dropped_juvenile_cases: The updated version of the original dataframe
+    """
+
+    #Add case status
+    dropped_juvenile_cases['Status'] = 'Dropped'
+
+    #Add disposition description (this data is not included in the report, but the column is needed to match up with the other case reports)
+    dropped_juvenile_cases['Dispositions'] = ''
+
+    #Set number of dispositions to 0 since the case was dropped.
+    dropped_juvenile_cases['Number Of Dispositions'] = 0
+
+    #Set disposed dates to an empty string since the case was dropped.
+    dropped_juvenile_cases['Disposed Dates'] = ''
+
+    #Set the dropped datetime column to the newest report's 'As Of' date
+    time = '00:00:00'
+    datetime_str = dropped_as_of_date + ' ' + time
+    datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
+    dropped_juvenile_cases['Dropped DateTime'] = str(datetime_object)
+
+    #Reorder columns
+    dropped_juvenile_cases = dropped_juvenile_cases[[
+        'County',
+        'Cause Number',
+        'File Date',
+        'Offense',
+        'Docket Date',
+        'Report Generated Date',
+        'Original As Of Date',
+        'Last As Of Date',
+        'Case Type',
+        'Status',
+        'Load DateTime',
+        'Dropped DateTime',
+        'Disposed Dates',
+        'Dispositions',
+        'Disposed As Of Date',
+        'Number Of Dispositions'
+    ]]
+
+    return dropped_juvenile_cases
