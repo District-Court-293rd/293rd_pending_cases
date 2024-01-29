@@ -817,7 +817,7 @@ def build_juvenile_cases_dataframe(text):
                 #Add list info to temp_dict
                 temp_dict['Offense'] = offense_list
                 temp_dict['Docket Date'] = docket_date_list
-                temp_dict['Disposition Date'] = dispo_date_list
+                temp_dict['Disposed Dates'] = dispo_date_list
 
                 #Add temp dict data to case_list
                 case_list.append(temp_dict)
@@ -875,7 +875,7 @@ def build_juvenile_cases_dataframe(text):
     #Add list info to temp_dict
     temp_dict['Offense'] = offense_list
     temp_dict['Docket Date'] = docket_date_list
-    temp_dict['Disposition Date'] = dispo_date_list
+    temp_dict['Disposed Dates'] = dispo_date_list
 
     #Add temp dict data to case_list
     case_list.append(temp_dict)
@@ -890,5 +890,6 @@ def build_juvenile_cases_dataframe(text):
     df["Original As Of Date"] = report_as_of_date
     df["Last As Of Date"] = report_as_of_date
     df["Report Generated Date"] = report_as_of_date
+    df["Disposed As Of Date"] = report_as_of_date
     
     return df
