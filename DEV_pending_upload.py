@@ -130,7 +130,7 @@ def convert_to_common_table_df(case_df):
     df['Dropped DateTime'] = '' #These are open cases, so none will have a closed date yet
     #Comment column removed as of 10/07/2023
     #df['Comments'] = case_df['Comments']
-    if case_df['Status'][0] != 'Disposed':
+    if case_df['Status'].iloc[0] != 'Disposed':
         df['Disposed Dates'] = ''
         df['Dispositions'] = ''
         df['Disposed As Of Date'] = ''
