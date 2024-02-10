@@ -356,7 +356,7 @@ def prepare_disposed_juvenile_cases(disposed_juvenile_cases):
     disposed_juvenile_cases['Court'] = '293'
 
     #Set the dropped datetime column to the uploaded report's 'As Of' date
-    date = disposed_juvenile_cases['Last As Of Date'][0].strip()
+    date = disposed_juvenile_cases['Last As Of Date'].iloc([0]).strip()
     time = '00:00:00'
     datetime_str = date + ' ' + time
 
