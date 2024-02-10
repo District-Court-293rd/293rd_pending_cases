@@ -185,18 +185,20 @@ if len(common_df) > 0:
     #Convert 'Last As Of Date' to YYYYMMDD format so that the max() function works properly.
     common_df['Last As Of Date'] = common_df['Last As Of Date'].apply(convert_as_of_date_format)
 
-    dimmit_civil_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
-    dimmit_civil_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
+    dimmit_civil_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Last As Of Date'].max()
+    dimmit_civil_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Load DateTime'].max()[:16]
     dimmit_criminal_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
     dimmit_criminal_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
-    maverick_civil_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
-    maverick_civil_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
+    maverick_civil_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Last As Of Date'].max()
+    maverick_civil_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Load DateTime'].max()[:16]
     maverick_criminal_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
     maverick_criminal_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
-    zavala_civil_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal')]['Last As Of Date'].max()
-    zavala_civil_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal')]['Load DateTime'].max()[:16]
+    zavala_civil_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Last As Of Date'].max()
+    zavala_civil_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Load DateTime'].max()[:16]
     zavala_criminal_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
     zavala_criminal_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+    juvenile_last_as_of_date = common_df[common_df['Case Type'] == 'Juvenile']['Last As Of Date'].max()
+    juvenile_last_load_date = common_df[common_df['Case Type'] == 'Juvenile']['Load DateTime'].max()[:16]
 
     #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
     with st.sidebar:
@@ -223,6 +225,10 @@ if len(common_df) > 0:
         st.subheader("Zavala Criminal Cases")
         st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_criminal_last_as_of_date))
         st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_last_load_date))
+        st.divider()
+        st.subheader("Juvenile Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(juvenile_last_as_of_date))
+        st.write("Latest Load Date: " + convert_datetime_format(juvenile_last_load_date))
         st.divider()
 
 

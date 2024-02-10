@@ -3,8 +3,8 @@ import streamlit as st
 from datetime import date, datetime
 import pandas as pd
 import gspread
-import PROD_acquire
-import PROD_prepare
+import DEV_acquire
+import DEV_prepare
 
 #Set up google sheet name vars
 google_sheet_name = 'Pending Reports'
@@ -13,6 +13,8 @@ civil_sheet_name = 'Civil Cases'
 closed_civil_sheet_name = 'Closed Civil Cases'
 criminal_sheet_name = 'Criminal Cases'
 closed_criminal_sheet_name = 'Closed Criminal Cases'
+juvenile_sheet_name = 'Juvenile Cases'
+closed_juvenile_sheet_name = 'Closed Juvenile Cases'
 ols_civil_sheet_name = 'OLS Civil Cases'
 closed_ols_civil_sheet_name = 'Closed OLS Civil Cases'
 ols_criminal_sheet_name = 'OLS Criminal Cases'
@@ -113,7 +115,7 @@ def convert_to_common_table_df(case_df):
 
     df = pd.DataFrame(dict)
 
-    #Some portion of the criminal and civil cases will be the same. Update those columns first
+    #Some portion of the criminal, civil, and juvenile cases will be the same. Update those columns first
     df['County'] = case_df['County']
     df['Cause Number'] = case_df['Cause Number']
     df['File Date'] = case_df['File Date']
@@ -128,7 +130,7 @@ def convert_to_common_table_df(case_df):
     df['Dropped DateTime'] = '' #These are open cases, so none will have a closed date yet
     #Comment column removed as of 10/07/2023
     #df['Comments'] = case_df['Comments']
-    if case_df['Status'][0] != 'Disposed':
+    if case_df['Status'].iloc[0] != 'Disposed':
         df['Disposed Dates'] = ''
         df['Dispositions'] = ''
         df['Disposed As Of Date'] = ''
@@ -140,7 +142,7 @@ def convert_to_common_table_df(case_df):
         df['Number Of Dispositions'] = case_df['Number Of Dispositions']
 
     #Determine if cases are criminal, juvenile, or civil. They will have different logic
-    if case_df['Case Type'][0].count('Criminal') == 1:
+    if case_df['Case Type'].iloc[0].count('Criminal') == 1:
         df['Cause'] = case_df['First Offense']
         df['Outstanding Warrants'] = case_df['Outstanding Warrants']
         df['ST RPT Column'] = case_df['ST RPT Column']
@@ -148,7 +150,7 @@ def convert_to_common_table_df(case_df):
         df['Docket Type'] = ''
         df['ANS File'] = ''
         df['CR Number'] = ''
-    elif case_df['Case Type'][0].count('Juvenile') == 1:
+    elif case_df['Case Type'].iloc[0].count('Juvenile') == 1:
         df['Cause'] = case_df['Offense']
         #The following columns are not available in Juvenile Reports, so set them to empty strings
         df['Docket Type'] = ''
@@ -176,24 +178,33 @@ def update_spreadsheet(file_name, content):
     """
     
     #Extract the PDF data
-    df = PROD_acquire.build_dataframe(file_name, content)
-    #Prepare the df and add new columns
-    df = PROD_prepare.prepare_dataframe(file_name, df)
+    df = DEV_acquire.build_dataframe(file_name, content)
 
-    #If case type is 'Criminal' or 'Criminal OLS', send to criminal function
-    #If report is for disposed cases, send them to disposed case function
-    if df['Status'][0].count('Disposed') > 0:
-        #Send to disposed cases
-        update_disposed_cases(df)
-    elif df['Case Type'][0].count('Criminal') > 0:
-        #Add to criminal cases tab
-        update_criminal_cases(df)
-    elif df['Case Type'][0].count('Juvenile') > 0:
-        #Add juvenile cases to common table
-        update_juvenile_cases(df)
+    #The juvenile case reports are different than the others, so will need separate string of logic
+    if content[:450].upper().count('JUVENILE') > 0:
+        #Separate juvenile cases into pending and disposed df's
+        pending_juvenile_cases = df[df["Disposed Dates"].str.len() == 0]
+        disposed_juvenile_cases = df[df["Disposed Dates"].str.len() > 0]
+
+        #Prepare pending and disposed juvenile cases df's
+        pending_juvenile_cases = DEV_prepare.prepare_pending_juvenile_cases(pending_juvenile_cases)
+        disposed_juvenile_cases = DEV_prepare.prepare_disposed_juvenile_cases(disposed_juvenile_cases)
+        #Update pending and disposed juvenile cases in google sheet
+        update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases)
     else:
-        #Add to civil cases tab
-        update_civil_cases(df)
+        #Prepare the df and add new columns
+        df = DEV_prepare.prepare_dataframe(file_name, df)
+        #If case type is 'Criminal' or 'Criminal OLS', send to criminal function
+        #If report is for disposed cases, send them to disposed case function
+        if df['Status'].iloc[0].count('Disposed') > 0:
+            #Send to disposed cases
+            update_disposed_cases(df)
+        elif df['Case Type'].iloc[0].count('Criminal') > 0:
+            #Add to criminal cases tab
+            update_criminal_cases(df)
+        else:
+            #Add to civil cases tab
+            update_civil_cases(df)
     
     return
     
@@ -216,10 +227,10 @@ def update_civil_cases(new_civil_df):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common Table'
+    #Make connection to 'DEV_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
     
-    if new_civil_df['Case Type'][0].count('OLS') > 0:
+    if new_civil_df['Case Type'].iloc[0].count('OLS') > 0:
         #Send OLS data to the 'Civil OLS Cases' tab
         civil_sheet = gsheet.worksheet(ols_civil_sheet_name)
         #Send closed OLS cases to the 'Closed Civil OLS Cases' tab
@@ -244,11 +255,11 @@ def update_civil_cases(new_civil_df):
         #Create closed cases df
         closed_cases_df = current_civil_df[~(current_civil_df['Cause Number'].isin(new_civil_df['Cause Number']))]
         #Make sure the closed cases are only cases from the same county as the new_civil_df
-        closed_cases_df = closed_cases_df[closed_cases_df['County'] == new_civil_df['County'][0]]
+        closed_cases_df = closed_cases_df[closed_cases_df['County'] == new_civil_df['County'].iloc[0]]
         #Remove closed cases from current_civil_df
         current_civil_df = current_civil_df[~(current_civil_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
-        closed_cases_df = PROD_prepare.prepare_closed_cases(closed_cases_df, new_civil_df)
+        closed_cases_df = DEV_prepare.prepare_closed_cases(closed_cases_df, new_civil_df)
         #Find next available row
         next_available_row = find_next_available_row(closed_sheet)
         #If any cases were closed, add the newly closed cases to the 'Closed Civil Cases' tab
@@ -266,13 +277,13 @@ def update_civil_cases(new_civil_df):
     #Update the 'Original As Of Date' and 'Comments' columns for the new cases df
     if len(current_civil_df) > 0:
         #Create a df that consists only of pending cases in the county for the current report
-        current_county_pending_cases = current_civil_df[current_civil_df['County'] == new_civil_df['County'][0]]
+        current_county_pending_cases = current_civil_df[current_civil_df['County'] == new_civil_df['County'].iloc[0]]
         current_county_pending_cases.reset_index(inplace = True)
         #Iterate through each of those cases and update the corresponding version in new_civil_df
         for i in current_county_pending_cases.index:
-            new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'][i]
+            new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'].iloc[i]
             #Comment column removed as of 10/07/2023
-            #new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Comments']] = current_county_pending_cases['Comments'][i]
+            #new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Comments']] = current_county_pending_cases['Comments'].iloc[i]
 
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
@@ -289,7 +300,7 @@ def update_civil_cases(new_civil_df):
     #Clear what's currently on the Civil Cases worksheet
     civil_sheet.clear()
 
-    #Now upload to Civil Cases worksheet in 'Pending Reports' spreadsheet and leave a message
+    #Now upload to Civil Cases worksheet in 'Pending Reports' spreadsheet
     civil_sheet.update([current_civil_df.columns.values.tolist()] + current_civil_df.values.tolist())
 
     #Now append the current_civil_df to the common_table_df, remove duplicates, and update the closed cases
@@ -300,11 +311,11 @@ def update_civil_cases(new_civil_df):
     if len(closed_cases_df) > 0:
         #Reset index
         closed_cases_df.reset_index(inplace = True)
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Dropped DateTime']] = closed_cases_df['Dropped DateTime'][0]
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Report Generated Date']] = closed_cases_df['Report Generated Date'][0]
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Last As Of Date']] = closed_cases_df['Last As Of Date'][0]
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Load DateTime']] = closed_cases_df['Load DateTime'][0]
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Status']] = closed_cases_df['Status'][0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Dropped DateTime']] = closed_cases_df['Dropped DateTime'].iloc[0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Report Generated Date']] = closed_cases_df['Report Generated Date'].iloc[0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Last As Of Date']] = closed_cases_df['Last As Of Date'].iloc[0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Load DateTime']] = closed_cases_df['Load DateTime'].iloc[0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Status']] = closed_cases_df['Status'].iloc[0]
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
@@ -334,16 +345,16 @@ def update_criminal_cases(new_crim_df):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common Table'
+    #Make connection to 'DEV_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
 
-    if new_crim_df['Case Type'][0].count('OLS') > 0:
+    if new_crim_df['Case Type'].iloc[0].count('OLS') > 0:
         #Send OLS data to the 'Criminal OLS Cases' tab
         crim_sheet = gsheet.worksheet(ols_criminal_sheet_name)
         #Send closed OLS cases to the 'Closed Criminal OLS Cases' tab
         closed_sheet = gsheet.worksheet(closed_ols_criminal_sheet_name)
     else:
-        #Civil cases go to the 'Criminal Cases' tab
+        #Criminal cases go to the 'Criminal Cases' tab
         crim_sheet = gsheet.worksheet(criminal_sheet_name)
         #Closed cases go to the 'Closed Criminal Cases' tab
         closed_sheet = gsheet.worksheet(closed_criminal_sheet_name)
@@ -362,11 +373,11 @@ def update_criminal_cases(new_crim_df):
         #Create closed cases df
         closed_cases_df = current_crim_df[~(current_crim_df['Cause Number'].isin(new_crim_df['Cause Number']))]
         #Make sure the closed cases are only cases from the same county as the new_crim_df
-        closed_cases_df = closed_cases_df[closed_cases_df['County'] == new_crim_df['County'][0]]
+        closed_cases_df = closed_cases_df[closed_cases_df['County'] == new_crim_df['County'].iloc[0]]
         #Remove closed cases from current_crim_df
         current_crim_df = current_crim_df[~(current_crim_df['Cause Number'].isin(closed_cases_df['Cause Number']))]
         #Prepare closed cases df
-        closed_cases_df = PROD_prepare.prepare_closed_cases(closed_cases_df, new_crim_df)
+        closed_cases_df = DEV_prepare.prepare_closed_cases(closed_cases_df, new_crim_df)
         #Find the next available row
         next_available_row = find_next_available_row(closed_sheet)
         #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
@@ -384,13 +395,13 @@ def update_criminal_cases(new_crim_df):
     #Update the 'Original As Of Date' and 'Comments' columns for the new cases df
     if len(current_crim_df) > 0:
         #Create a df that consists only of pending cases in the county for the current report
-        current_county_pending_cases = current_crim_df[current_crim_df['County'] == new_crim_df['County'][0]]
+        current_county_pending_cases = current_crim_df[current_crim_df['County'] == new_crim_df['County'].iloc[0]]
         current_county_pending_cases.reset_index(inplace = True)
         #Iterate through each of those cases and update the corresponding version in new_crim_df
         for i in current_county_pending_cases.index:
-            new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'][i]
+            new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'].iloc[i]
             #Comment column removed as of 10/07/2023
-            #new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Comments']] = current_county_pending_cases['Comments'][i]
+            # new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Comments']] = current_county_pending_cases['Comments'].iloc[i]
 
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
@@ -410,7 +421,7 @@ def update_criminal_cases(new_crim_df):
     #Now upload to Criminal Cases worksheet in 'Pending Reports' spreadsheet and leave a message
     crim_sheet.update([current_crim_df.columns.values.tolist()] + current_crim_df.values.tolist())
 
-    #Now append the current_ccrim_df to the common_table_df, remove duplicates, and update the closed cases
+    #Now append the current_crim_df to the common_table_df, remove duplicates, and update the closed cases
     #Drop duplicates based on cause number and status since cases have the potential to be reopened.
     common_table_df = common_table_df.append(convert_to_common_table_df(current_crim_df), ignore_index = True)
     common_table_df = common_table_df.drop_duplicates(subset = ['Cause Number', 'Status'], ignore_index = True, keep = 'last')
@@ -418,11 +429,11 @@ def update_criminal_cases(new_crim_df):
     if len(closed_cases_df) > 0:
         #Reset index
         closed_cases_df.reset_index(inplace = True)
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Dropped DateTime']] = closed_cases_df['Dropped DateTime'][0]
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Report Generated Date']] = closed_cases_df['Report Generated Date'][0]
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Last As Of Date']] = closed_cases_df['Last As Of Date'][0]
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Load DateTime']] = closed_cases_df['Load DateTime'][0]
-        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Status']] = closed_cases_df['Status'][0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Dropped DateTime']] = closed_cases_df['Dropped DateTime'].iloc[0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Report Generated Date']] = closed_cases_df['Report Generated Date'].iloc[0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Last As Of Date']] = closed_cases_df['Last As Of Date'].iloc[0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Load DateTime']] = closed_cases_df['Load DateTime'].iloc[0]
+        common_table_df.loc[(common_table_df['Cause Number'].isin(closed_cases_df['Cause Number'])) & (common_table_df['Status'] == 'Open'), ['Status']] = closed_cases_df['Status'].iloc[0]
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
@@ -451,11 +462,11 @@ def update_disposed_cases(disposed_cases):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common Table'
+    #Make connection to 'DEV_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
 
     #Open the associated dropped table
-    if disposed_cases['Case Type'][0].count('Criminal') > 0:
+    if disposed_cases['Case Type'].iloc[0].count('Criminal') > 0:
         dropped_sheet = gsheet.worksheet(closed_criminal_sheet_name)
         is_crim = True
     else:
@@ -526,7 +537,6 @@ def update_disposed_cases(disposed_cases):
             'Dispositions',
             'Disposed As Of Date',
             'Number Of Dispositions'#,
-            #Comment column removed as of 10/07/2023
             #'Comments'
         ]]
 
@@ -566,7 +576,6 @@ def update_disposed_cases(disposed_cases):
             'Dispositions',
             'Disposed As Of Date',
             'Number Of Dispositions'#,
-            #Comment column removed as of 10/07/2023
             #'Comments'
         ]]
 
@@ -599,20 +608,20 @@ def update_disposed_cases(disposed_cases):
     #Iterate through each of the newly disposed cases and update the corresponding version in dropped_cases
     if len(new_disposed_cases) > 0:
         for i in new_disposed_cases.index:
-            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Status']] = new_disposed_cases['Status'][i]
-            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed Dates']] = new_disposed_cases['Disposed Dates'][i]
-            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Dispositions']] = new_disposed_cases['Dispositions'][i]
-            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed As Of Date']] = new_disposed_cases['Disposed As Of Date'][i]
-            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Number Of Dispositions']] = new_disposed_cases['Number Of Dispositions'][i]
+            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Status']] = new_disposed_cases['Status'].iloc[i]
+            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Disposed Dates']] = new_disposed_cases['Disposed Dates'].iloc[i]
+            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Dispositions']] = new_disposed_cases['Dispositions'].iloc[i]
+            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Disposed As Of Date']] = new_disposed_cases['Disposed As Of Date'].iloc[i]
+            dropped_cases.loc[dropped_cases['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Number Of Dispositions']] = new_disposed_cases['Number Of Dispositions'].iloc[i]
     
     #Iterate through each of the newly disposed cases and update the corresponding version in the common table
     if len(common_table_df) > 0:
         for i in new_disposed_cases.index:
-            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Status']] = new_disposed_cases['Status'][i]
-            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed Dates']] = new_disposed_cases['Disposed Dates'][i]
-            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Dispositions']] = new_disposed_cases['Dispositions'][i]
-            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Disposed As Of Date']] = new_disposed_cases['Disposed As Of Date'][i]
-            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'][i], ['Number Of Dispositions']] = new_disposed_cases['Number Of Dispositions'][i]
+            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Status']] = new_disposed_cases['Status'].iloc[i]
+            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Disposed Dates']] = new_disposed_cases['Disposed Dates'].iloc[i]
+            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Dispositions']] = new_disposed_cases['Dispositions'].iloc[i]
+            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Disposed As Of Date']] = new_disposed_cases['Disposed As Of Date'].iloc[i]
+            common_table_df.loc[common_table_df['Cause Number'] == new_disposed_cases['Cause Number'].iloc[i], ['Number Of Dispositions']] = new_disposed_cases['Number Of Dispositions'].iloc[i]
 
     #Now update the google sheet
     #For common table
@@ -626,13 +635,14 @@ def update_disposed_cases(disposed_cases):
 
     return
     
-def update_juvenile_cases(juvenile_cases):
+def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
     """
-    This function takes in the juvenile cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
-    It will only update the common table.
+    This function takes in the juvenile cases dataframes (both pending and disposed) and updates it with the current data on the 'Pending Reports' spreadsheet.
+    It will update the open juvenile cases table, the disposed juvenile cases table, and then finally the common table.
 
     Parameter:
-    - juvenile_cases: The newly created dataframe from the most recent juvenile cases PDF report
+    - pending_juvenile_cases: The newly created dataframe from the most recent juvenile cases PDF report (pending cases only)
+    - disposed_juvenile_cases: The newly created dataframe from the most recent juvenile cases PDF report (disposed cases only)
 
     Returns:
     - Nothing.
@@ -644,63 +654,113 @@ def update_juvenile_cases(juvenile_cases):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common Table'
+    #Make connection to 'DEV_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
+    pending_juvenile_sheet = gsheet.worksheet(juvenile_sheet_name)
+    disposed_juvenile_sheet = gsheet.worksheet(closed_juvenile_sheet_name)
 
-    #Build common table df
+    #Build dataframes from existing tables
     common_table_df = pd.DataFrame(common_sheet.get_all_records())
+    pending_juvenile_cases_table_df = pd.DataFrame(pending_juvenile_sheet.get_all_records())
+    disposed_juvenile_cases_table_df = pd.DataFrame(disposed_juvenile_sheet.get_all_records())
+
+    #Are the tables empty? Default to True
+    is_common_table_empty = True
+    is_pending_juvenile_table_empty = True
+    is_disposed_juvenile_table_empty = True 
+
+    if len(common_table_df) > 0:
+        is_common_table_empty = False
+    if len(pending_juvenile_cases_table_df) > 0:
+        is_pending_juvenile_table_empty = False
+    if len(disposed_juvenile_cases_table_df) > 0:
+        is_disposed_juvenile_table_empty = False 
 
     #Verify that cause numbers are represented as strings
-    if len(common_table_df) > 0:
+    if is_common_table_empty == False:
         common_table_df['Cause Number'] = common_table_df['Cause Number'].astype(str).str.strip()
+    if is_pending_juvenile_table_empty == False:
+        pending_juvenile_cases_table_df['Cause Number'] = pending_juvenile_cases_table_df['Cause Number'].astype(str).str.strip()
+    if is_disposed_juvenile_table_empty == False:
+        disposed_juvenile_cases_table_df['Cause Number'] = disposed_juvenile_cases_table_df['Cause Number'].astype(str).str.strip()
 
-    #Find the new juvenile cases (not already in the common table)
-    new_juvenile_cases = juvenile_cases[~(juvenile_cases['Cause Number'].isin(common_table_df['Cause Number']))]
-    new_juvenile_cases.reset_index(inplace = True)
+    #First, find which cases (if any) have been dropped since last upload
+    #If a case was previously listed as pending, but cannot be found in either the newly created pending or disposed cases dataframes,
+    #it will be considered dropped (but not disposed).
+    if is_pending_juvenile_table_empty == False:
+        dropped_cases = pending_juvenile_cases_table_df[~(pending_juvenile_cases_table_df['Cause Number'].isin(pending_juvenile_cases['Cause Number']))]
+        dropped_cases = dropped_cases[~(dropped_cases['Cause Number'].isin(disposed_juvenile_cases['Cause Number']))]
+    else:
+        dropped_cases = pd.DataFrame()
 
-    #Find the existing juvenile cases (already in the common table)
-    existing_juvenile_cases = juvenile_cases[juvenile_cases['Cause Number'].isin(common_table_df['Cause Number'])]
-    existing_juvenile_cases.reset_index(inplace = True)
+    #Update the 'Original As Of Date' column for the new pending and disposed juvenile cases dataframes
+    if is_pending_juvenile_table_empty == False:
+        for i in pending_juvenile_cases_table_df.index:
+            pending_juvenile_cases.loc[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = pending_juvenile_cases_table_df['Original As Of Date'].iloc[i]
+            disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = pending_juvenile_cases_table_df['Original As Of Date'].iloc[i]
 
-    if len(common_table_df) > 0:
-        #Create a df that consists only of pending juvenile cases in the county for the current report
-        current_county_cases = common_table_df[common_table_df['County'] == juvenile_cases['County'][0]]
-        current_county_cases = current_county_cases[current_county_cases['Case Type'] == 'Juvenile']
-        current_county_pending_cases = current_county_cases[current_county_cases['Status'] == 'Open']
-        current_county_pending_cases.reset_index(inplace = True)
-        #Update the 'Original As Of Date' and 'Comments' columns for the new cases df
-        for i in current_county_pending_cases.index:
-            juvenile_cases.loc[juvenile_cases['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'][i]
-            #Comment column removed as of 10/07/2023
-            #juvenile_cases.loc[juvenile_cases['Cause Number'] == current_county_pending_cases['Cause Number'][i], ['Comments']] = current_county_pending_cases['Comments'][i]
+    #Now update the pending juvenile cases table
+    #I can simply clear the entire table and add the new pending juvenile cases df because all county cases are included in each report
+    pending_juvenile_sheet.clear()
+    pending_juvenile_sheet.update([pending_juvenile_cases.columns.values.tolist()] + pending_juvenile_cases.values.tolist())
 
-        #Update dropped cases in common table
-        dropped_cases = current_county_pending_cases[~(current_county_pending_cases['Cause Number'].isin(juvenile_cases['Cause Number']))]
-        dropped_cases.reset_index(inplace = True)
+    #Update the disposed juvenile cases dataframe with the 'Original As Of Date' values from the disposed juvenile cases table dataframe.
+    #This allows us to account for cases that have been reopened and closed again
+    if is_disposed_juvenile_table_empty == False:
+        for i in disposed_juvenile_cases_table_df.index:
+            disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = disposed_juvenile_cases_table_df['Original As Of Date'].iloc[i]
+            disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Dropped DateTime']] = disposed_juvenile_cases_table_df['Dropped DateTime'].iloc[i]
+        #Find any previously dropped cases and add them to the disposed cases dataframe
+        previously_dropped_cases = disposed_juvenile_cases_table_df[disposed_juvenile_cases_table_df['Status'] == 'Dropped']
+        disposed_juvenile_cases = disposed_juvenile_cases.append(previously_dropped_cases, ignore_index = True)
 
-        if len(dropped_cases) > 0:
-            #Set the dropped datetime column to the uploaded report's 'As Of' date
-            date = juvenile_cases['Last As Of Date'][0].strip()
-            time = '00:00:00'
-            datetime_str = date + ' ' + time
+    #Now update the closed juvenile cases table
+    #If there are newly dropped cases, prepare them and add to the disposed cases dataframe
+    if len(dropped_cases) > 0:
+            dropped_cases = DEV_prepare.prepare_dropped_juvenile_cases(dropped_cases, pending_juvenile_cases['Last As Of Date'].iloc[0])
+            disposed_juvenile_cases = disposed_juvenile_cases.append(dropped_cases, ignore_index = True)
+    
+    #I chose to clear the entire sheet and add all currently disposed cases again because this accounts for any cases that were reopened and closed again.
+    #We will have the most up to date information for each case.
+    disposed_juvenile_sheet.clear()
+    disposed_juvenile_sheet.update([disposed_juvenile_cases.columns.values.tolist()] + disposed_juvenile_cases.values.tolist())
 
-            datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
-
-            for i in dropped_cases.index:
-                common_table_df.loc[common_table_df['Cause Number'] == dropped_cases['Cause Number'][i], ['Status']] = 'Dropped'
-                common_table_df.loc[common_table_df['Cause Number'] == dropped_cases['Cause Number'][i], ['Dropped DateTime']] = datetime_object
-                common_table_df.loc[common_table_df['Cause Number'] == dropped_cases['Cause Number'][i], ['Report Generated Date']] = dropped_cases['Report Generated Date'][i]
-                common_table_df.loc[common_table_df['Cause Number'] == dropped_cases['Cause Number'][i], ['Last As Of Date']] = dropped_cases['Last As Of Date'][i]
-                common_table_df.loc[common_table_df['Cause Number'] == dropped_cases['Cause Number'][i], ['Load DateTime']] = dropped_cases['Load DateTime'][i]
-
-    #Now append the juvenile_cases dataframe to the common_table_df, and remove duplicates
+    #Now update the common table
+    #Append the pending juvenile cases df to the common_table_df, remove duplicates, and update the closed cases
     #Drop duplicates based on cause number and status since cases have the potential to be reopened.
-    common_table_df = common_table_df.append(convert_to_common_table_df(juvenile_cases), ignore_index = True)
+    common_table_df = common_table_df.append(convert_to_common_table_df(pending_juvenile_cases), ignore_index = True)
     common_table_df = common_table_df.drop_duplicates(subset = ['Cause Number', 'Status'], ignore_index = True, keep = 'last')
+
+    #Determine which dropped and disposed cases don't already exist in the common table.
+    #These should only exist the first time we run the juvenile report
+    disposed_cases_not_in_common_table = disposed_juvenile_cases[~(disposed_juvenile_cases['Cause Number'].isin(common_table_df['Cause Number']))]
+    #Convert these to the common table dataframe format and append them
+    #Must separate the dropped and disposed cases because the convert_to_common_table_df function can't update both at the same time
+    if len(disposed_cases_not_in_common_table[disposed_cases_not_in_common_table['Status'] == 'Disposed']) > 0:
+        common_table_df = common_table_df.append(convert_to_common_table_df(disposed_cases_not_in_common_table[disposed_cases_not_in_common_table['Status'] == 'Disposed']), ignore_index = True)
+    if len(disposed_cases_not_in_common_table[disposed_cases_not_in_common_table['Status'] == 'Dropped']) > 0:
+        common_table_df = common_table_df.append(convert_to_common_table_df(disposed_cases_not_in_common_table[disposed_cases_not_in_common_table['Status'] == 'Dropped']), ignore_index = True)
+    
+    if is_common_table_empty == False:
+        #Reset index, iterate through the disposed juvenile cases, and update the newly dropped/disposed cases in the common table
+        #I do not believe this will account for cases that were reopened and closed again. I need more info on how the report will behave in those instances before I can code for it.
+        disposed_juvenile_cases.reset_index(inplace = True)
+        for i in disposed_juvenile_cases.index:
+            common_table_df.loc[(common_table_df['Cause Number'] == (disposed_juvenile_cases['Cause Number'].iloc[i])) & (common_table_df['Status'] == 'Open'), ['Dropped DateTime']] = disposed_juvenile_cases['Dropped DateTime'].iloc[i]
+            common_table_df.loc[(common_table_df['Cause Number'] == (disposed_juvenile_cases['Cause Number'].iloc[i])) & (common_table_df['Status'] == 'Open'), ['Report Generated Date']] = disposed_juvenile_cases['Report Generated Date'].iloc[i]
+            common_table_df.loc[(common_table_df['Cause Number'] == (disposed_juvenile_cases['Cause Number'].iloc[i])) & (common_table_df['Status'] == 'Open'), ['Disposed Dates']] = disposed_juvenile_cases['Disposed Dates'].iloc[i]
+            #common_table_df.loc[(common_table_df['Cause Number'] == (disposed_juvenile_cases['Cause Number'].iloc[i])) & (common_table_df['Status'] == 'Open'), ['Dispositions']] = disposed_juvenile_cases['Dispositions'][i] #Juvenile reports do not contain dispositions
+            common_table_df.loc[(common_table_df['Cause Number'] == (disposed_juvenile_cases['Cause Number'].iloc[i])) & (common_table_df['Status'] == 'Open'), ['Disposed As Of Date']] = disposed_juvenile_cases['Disposed As Of Date'].iloc[i]
+            common_table_df.loc[(common_table_df['Cause Number'] == (disposed_juvenile_cases['Cause Number'].iloc[i])) & (common_table_df['Status'] == 'Open'), ['Number Of Dispositions']] = disposed_juvenile_cases['Number Of Dispositions'].iloc[i]
+            common_table_df.loc[(common_table_df['Cause Number'] == (disposed_juvenile_cases['Cause Number'].iloc[i])) & (common_table_df['Status'] == 'Open'), ['Last As Of Date']] = disposed_juvenile_cases['Last As Of Date'].iloc[i]
+            common_table_df.loc[(common_table_df['Cause Number'] == (disposed_juvenile_cases['Cause Number'].iloc[i])) & (common_table_df['Status'] == 'Open'), ['Load DateTime']] = disposed_juvenile_cases['Load DateTime'].iloc[i]
+            common_table_df.loc[(common_table_df['Cause Number'] == (disposed_juvenile_cases['Cause Number'].iloc[i])) & (common_table_df['Status'] == 'Open'), ['Status']] = disposed_juvenile_cases['Status'].iloc[i]
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
-    common_table_df.sort_values(by = ['Status'], ignore_index=True, inplace=True, ascending = False)
+    common_table_df.sort_values(by = ['Case Type','County','Status'], ignore_index=True, inplace=True, ascending = False)
     common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
     
     print('Juvenile Cases Updated!')
+
+    return
