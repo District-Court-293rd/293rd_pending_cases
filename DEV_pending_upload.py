@@ -186,12 +186,6 @@ def update_spreadsheet(file_name, content):
         pending_juvenile_cases = df[df["Disposed Dates"].str.len() == 0]
         disposed_juvenile_cases = df[df["Disposed Dates"].str.len() > 0]
 
-        #Testing
-        st.write("disposed: " + str(len(disposed_juvenile_cases)))
-        st.write("pending: " + str(len(pending_juvenile_cases)))
-        st.write(type(disposed_juvenile_cases['Last As Of Date'].iloc(0)))
-        st.write(disposed_juvenile_cases['Last As Of Date'].iloc([0]).strip())
-
         #Prepare pending and disposed juvenile cases df's
         pending_juvenile_cases = DEV_prepare.prepare_pending_juvenile_cases(pending_juvenile_cases)
         disposed_juvenile_cases = DEV_prepare.prepare_disposed_juvenile_cases(disposed_juvenile_cases)
