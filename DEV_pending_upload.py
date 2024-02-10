@@ -663,7 +663,11 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
     pending_juvenile_cases_table_df = pd.DataFrame(pending_juvenile_sheet.get_all_records())
     disposed_juvenile_cases_table_df = pd.DataFrame(disposed_juvenile_sheet.get_all_records())
 
-    #Are the tables empty?
+    #Are the tables empty? Default to True
+    is_common_table_empty = True
+    is_pending_juvenile_table_empty = True
+    is_disposed_juvenile_table_empty = True 
+
     if len(common_table_df) > 0:
         is_common_table_empty = False
     if len(pending_juvenile_cases_table_df) > 0:
