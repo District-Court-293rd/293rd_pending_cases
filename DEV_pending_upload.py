@@ -736,8 +736,9 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
     disposed_cases_not_in_common_table = disposed_juvenile_cases[~(disposed_juvenile_cases['Cause Number'].isin(common_table_df['Cause Number']))]
     #Convert these to the common table dataframe format and append them
     #Must separate the dropped and disposed cases because the convert_to_common_table_df function can't update both at the same time
-    if len(disposed_cases_not_in_common_table) > 0:
+    if len(disposed_cases_not_in_common_table[disposed_cases_not_in_common_table['Status'] == 'Disposed']) > 0:
         common_table_df = common_table_df.append(convert_to_common_table_df(disposed_cases_not_in_common_table[disposed_cases_not_in_common_table['Status'] == 'Disposed']), ignore_index = True)
+    if len(disposed_cases_not_in_common_table[disposed_cases_not_in_common_table['Status'] == 'Dropped']) > 0:
         common_table_df = common_table_df.append(convert_to_common_table_df(disposed_cases_not_in_common_table[disposed_cases_not_in_common_table['Status'] == 'Dropped']), ignore_index = True)
     
     if is_common_table_empty == False:
@@ -753,7 +754,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
 
     #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
     common_sheet.clear()
-    common_table_df.sort_values(by = ['Status'], ignore_index=True, inplace=True, ascending = False)
+    common_table_df.sort_values(by = ['Case Type','County','Status'], ignore_index=True, inplace=True, ascending = False)
     common_sheet.update([common_table_df.columns.values.tolist()] + common_table_df.values.tolist())
     
     print('Juvenile Cases Updated!')
