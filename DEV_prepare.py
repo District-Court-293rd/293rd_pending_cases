@@ -81,6 +81,30 @@ def check_cause_number_format(value):
         return True
     else:
         return False
+    
+def get_county_name_from_cause_number(cause_number):
+    """
+    This function takes in the case cause number and looks at the last 3 characters to determine the county it belongs to.
+    MJU = Maverick
+    DJU = Dimmit
+    ZJU = Zavala
+
+    Parameter:
+        - cause_number: A string representing the cause number of a case
+    
+    Returns:
+        - county: A string representing the name of the county the case belongs to
+    """
+    #Look at the last 3 characters
+    if cause_number[-3:] == 'DJU':
+        county = 'Dimmit'
+    elif cause_number[-3:] == 'ZJU':
+        county = 'Zavala'
+    else:
+        #Default to Maverick county since it is the largest and most likely
+        county = 'Maverick'
+    
+    return county
 
 def convert_name_list_to_string(name_list):
     """
@@ -255,6 +279,9 @@ def prepare_pending_juvenile_cases(pending_juvenile_cases):
     #Add case status
     pending_juvenile_cases['Status'] = 'Open'
 
+    #Add county
+    pending_juvenile_cases['County'] = pending_juvenile_cases['Cause Number'].apply(get_county_name_from_cause_number)
+
     #Convert offense list into a single string
     pending_juvenile_cases['Offense'] = pending_juvenile_cases['Offense'].apply(convert_name_list_to_string)
 
@@ -306,6 +333,9 @@ def prepare_disposed_juvenile_cases(disposed_juvenile_cases):
 
     #Add case status
     disposed_juvenile_cases['Status'] = 'Disposed'
+
+    #Add county
+    disposed_juvenile_cases['County'] = disposed_juvenile_cases['Cause Number'].apply(get_county_name_from_cause_number)
 
     #Add disposition description (this data is not included in the report, but the column is needed to match up with the other case reports)
     disposed_juvenile_cases['Dispositions'] = ''
