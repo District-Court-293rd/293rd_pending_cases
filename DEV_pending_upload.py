@@ -183,8 +183,8 @@ def update_spreadsheet(file_name, content):
     #The juvenile case reports are different than the others, so will need separate string of logic
     if content[:450].upper().count('JUVENILE') > 0:
         #Separate juvenile cases into pending and disposed df's
-        pending_juvenile_cases = df[df["Disposed Dates"] == '']
-        disposed_juvenile_cases = df[df["Disposed Dates"] != '']
+        pending_juvenile_cases = df[df["Disposed Dates"].str.len() == 0]
+        disposed_juvenile_cases = df[df["Disposed Dates"].str.len() > 0]
         #Prepare pending and disposed juvenile cases df's
         pending_juvenile_cases = DEV_prepare.prepare_pending_juvenile_cases(pending_juvenile_cases)
         disposed_juvenile_cases = DEV_prepare.prepare_disposed_juvenile_cases(disposed_juvenile_cases)
