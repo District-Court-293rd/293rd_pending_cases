@@ -8,17 +8,17 @@ import PROD_prepare
 
 #Set up google sheet name vars
 google_sheet_name = 'Pending Reports'
-common_sheet_name = 'Common Table'
-civil_sheet_name = 'Civil Cases'
-closed_civil_sheet_name = 'Closed Civil Cases'
-criminal_sheet_name = 'Criminal Cases'
-closed_criminal_sheet_name = 'Closed Criminal Cases'
-juvenile_sheet_name = 'Juvenile Cases'
-closed_juvenile_sheet_name = 'Closed Juvenile Cases'
-ols_civil_sheet_name = 'OLS Civil Cases'
-closed_ols_civil_sheet_name = 'Closed OLS Civil Cases'
-ols_criminal_sheet_name = 'OLS Criminal Cases'
-closed_ols_criminal_sheet_name = 'Closed OLS Criminal Cases'
+common_sheet_name = 'Demo_Common_Table'
+civil_sheet_name = 'Demo_Civil_Cases'
+closed_civil_sheet_name = 'Demo_Closed_Civil_Cases'
+criminal_sheet_name = 'Demo_Criminal_Cases'
+closed_criminal_sheet_name = 'Demo_Closed_Criminal_Cases'
+juvenile_sheet_name = 'Demo_Juvenile_Cases'
+closed_juvenile_sheet_name = 'Demo_Closed_Juvenile_Cases'
+ols_civil_sheet_name = 'Demo_OLS_Civil_Cases'
+closed_ols_civil_sheet_name = 'Demo_Closed_OLS_Civil_Cases'
+ols_criminal_sheet_name = 'Demo_OLS_Criminal_Cases'
+closed_ols_criminal_sheet_name = 'Demo_Closed_OLS_Criminal_Cases'
 
 credentials = {
   "type": st.secrets["type"],
@@ -227,7 +227,7 @@ def update_civil_cases(new_civil_df):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common Table'
+    #Make connection to 'PROD_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
     
     if new_civil_df['Case Type'].iloc[0].count('OLS') > 0:
@@ -462,7 +462,7 @@ def update_disposed_cases(disposed_cases):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common_Table'
+    #Make connection to 'PROD_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
 
     #Open the associated dropped table
@@ -654,7 +654,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common Table'
+    #Make connection to 'PROD_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
     pending_juvenile_sheet = gsheet.worksheet(juvenile_sheet_name)
     disposed_juvenile_sheet = gsheet.worksheet(closed_juvenile_sheet_name)
