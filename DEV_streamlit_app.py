@@ -12,6 +12,8 @@ import DEV_pending_upload
 import gspread
 import streamlit_authenticator as stauth
 from pathlib import Path
+import re
+
 
 credentials = {
   "type": st.secrets["type"],
@@ -164,6 +166,66 @@ def reverse_as_of_date_format(as_of_date):
 
     return new_date
 
+def check_report_requirements(county, report_type, is_293rd, as_of_date, last_as_of_dict):
+    """
+    This function takes in several pieces of information found in the report header and verifies it all meets the requirements before allowing the report to be processed.
+    This will minimize future issues with the data and hopefully reduce the number of errors overall.
+
+    Parameters:
+        - county: A string representing the name of the county found in the header
+        - report_type: A string representing the type of report based on the header info (criminal, civil, etc.)
+        - is_293rd: A boolean representing whether or not the report is for the 293rd court district specifically
+        - as_of_date: A string representing the as of date found in the header
+        - last_as_of_dict: A dictionary containing the last as of date for each county and report type found in the common table
+
+    Returns:
+        - report_meets_requirements: A boolean indicating whether or not the report can be processed
+    """
+
+    #Assume report meets requirements until proven otherwise
+    report_meets_requirements = True
+
+    #If any of the information is unknown, the report fails.
+    if county == 'Unknown':
+        st.error("Could Not Identify County")
+        report_meets_requirements = False
+    if report_type == 'Unknown':
+        st.error("Could Not Identify the Report Type")
+        report_meets_requirements = False
+    if is_293rd == False:
+        st.error("Report Is Not Specific to the 293rd District Court")
+        report_meets_requirements = False
+    if as_of_date == 'Unknown':
+        st.error("Could Not Identify the Report As Of Date")
+        report_meets_requirements = False
+    
+    #If any of the above check failed, return false
+    if report_meets_requirements == False:
+        return report_meets_requirements
+    
+    #Get the corresponding last as of date from the common table
+    if report_type == 'Juvenile':
+        common_table_last_as_of_date = last_as_of_dict['Juvenile']
+    elif report_type == 'Civil Disposed':
+        common_table_last_as_of_date = last_as_of_dict['Civil'][county]
+    elif report_type == 'Criminal Disposed':
+        common_table_last_as_of_date = last_as_of_dict['Criminal'][county]
+    else:
+        common_table_last_as_of_date = last_as_of_dict[report_type][county]
+
+    #If common table as of date is empty, set to all 0's
+    if len(common_table_last_as_of_date) == 0:
+        common_table_last_as_of_date = '00000000'
+    
+    #Convert the report as of date to a usable format
+    as_of_date = convert_as_of_date_format(as_of_date)
+
+    #Check that the as of date is greater than or equal to the last of date found in the common table
+    if as_of_date < common_table_last_as_of_date:
+        st.error("The Report As Of Date Must Be Greater Than Or Equal to the Last As Of Date For That Report Type and County")
+        report_meets_requirements = False
+    
+    return report_meets_requirements
 
 ############################################## Begin App ##################################################
 
@@ -175,7 +237,7 @@ st.set_page_config(
 common_df = get_spreadsheet_data("DEV_Common_Table", credentials)
 
 if len(common_df) > 0:
-    #Verify the columns are string types
+    #Verify the columns are string types. Google sheets can mess with the data types
     common_df['Last As Of Date'] = common_df['Last As Of Date'].astype(str).str.strip()
     common_df['Load DateTime'] = common_df['Load DateTime'].astype(str).str.strip()
     common_df['County'] = common_df['County'].astype(str).str.strip()
@@ -198,6 +260,47 @@ if len(common_df) > 0:
     zavala_criminal_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
     juvenile_last_as_of_date = common_df[common_df['Case Type'] == 'Juvenile']['Last As Of Date'].max()
     juvenile_last_load_date = common_df[common_df['Case Type'] == 'Juvenile']['Load DateTime'].max()[:16]
+
+    #Create a dictionary that we can use to store the last as of date for each county and report type
+    last_as_of_dict = {
+        'Civl': {
+            'Dimmit': dimmit_civil_last_as_of_date,
+            'Maverick': maverick_civil_last_as_of_date,
+            'Zavala': zavala_civil_last_as_of_date
+        },
+        'Criminal': {
+            'Dimmit': dimmit_criminal_last_as_of_date,
+            'Maverick': maverick_criminal_last_as_of_date,
+            'Zavala': zavala_criminal_last_as_of_date
+        },
+        'Juvenile': juvenile_last_as_of_date
+    }
+
+    #Create a list to find the max as of date
+    as_of_date_list = [dimmit_civil_last_as_of_date,
+                        dimmit_criminal_last_as_of_date,
+                        maverick_civil_last_as_of_date,
+                        maverick_criminal_last_as_of_date,
+                        zavala_civil_last_as_of_date,
+                        zavala_criminal_last_as_of_date,
+                        juvenile_last_as_of_date]
+    
+    max_as_of_date = max(as_of_date_list)
+
+    if dimmit_civil_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+    if dimmit_criminal_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+    if maverick_civil_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+    if maverick_criminal_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+    if zavala_civil_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+    if zavala_criminal_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+    if juvenile_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
 
     #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
     with st.sidebar:
@@ -229,7 +332,21 @@ if len(common_df) > 0:
         st.write("Latest As Of Date: " + reverse_as_of_date_format(juvenile_last_as_of_date))
         st.write("Latest Load Date: " + convert_datetime_format(juvenile_last_load_date))
         st.divider()
-
+else:
+    #Create a dictionary that we can use to store the last as of date for each county and report type
+    last_as_of_dict = {
+        'Civl': {
+            'Dimmit': '00000000',
+            'Maverick': '00000000',
+            'Zavala': '00000000'
+        },
+        'Criminal': {
+            'Dimmit': '00000000',
+            'Maverick': '00000000',
+            'Zavala': '00000000'
+        },
+        'Juvenile': '00000000'
+    }
 
 #Create a placeholder for the page content
 page_content = st.empty()
@@ -266,13 +383,15 @@ with page_content.container():
         #Also create a container for the info messages
         info_container = st.empty()
 
-        #Use a for loop to iterate through the uploaded files
+        #Use a loop to create a dictionary for each uploaded report
+        #Tell the user what's happening
+        info_container.info("Collecting File Information...")
+
+        #Create list to hold each dictionary
+        report_list = []
+
         for file_object in file_objects:
-
             if file_object is not None:
-
-                #Inform the user which file is being processed
-                info_container.info("Began Processing " + file_object.name)
 
                 #Save the file. Will be deleted after data is uploaded
                 with open(file_object.name, 'wb') as f:
@@ -281,29 +400,212 @@ with page_content.container():
                 #Create content container
                 content = get_file_content(file_object.name)
 
-                #Build and prepare the dataframe, then update the spreadsheet
-                DEV_pending_upload.update_spreadsheet(file_object.name, content)
+                #Run preprocessing checks
+                header = content[:500]
 
-                #Delete the saved file. Leave messages for success or failure
+                #What county is this?
+                if header.count('MAVERICK') >= 1:
+                    county = 'Maverick'
+                elif header.count('DIMMIT') >= 1:
+                    county = 'Dimmit'
+                elif header.count('ZAVALA') >= 1:
+                    county = 'Zavala'
+                elif header.count('ALL COUNTIES') >= 1:
+                    county = 'All Counties'
+                else:
+                    county = 'Unknown'
+
+                #What type of report is this?
+                if header.count('CRIMINAL DETAILED PENDING CASES') >= 1:
+                    report_type = 'Criminal'
+                elif header.count('CIVIL PENDING CASES') >= 1:
+                    report_type = 'Civil'
+                elif header.count('JUVENILE CASE FILINGS') >= 1:
+                    report_type = 'Juvenile'
+                elif header.count('CIVIL DISPOSED CASES') >= 1:
+                    report_type = 'Civil Disposed'
+                elif header.count('CASES DISPOSED') >= 1:
+                    report_type = 'Criminal Disposed'
+                else:
+                    report_type = 'Unknown'
+
+                #Is this only for 293rd district court? The Or Statement is for the civil disposed cases report.
+                if header.count('293RD DISTRICT COURT') >= 1 or header.count('COURT: 293') >= 1:
+                    is_293rd = True
+                else:
+                    is_293rd = False
+                
+                #What is the as of date for this report?
+                if report_type == 'Criminal':
+                    as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[1]
+                elif report_type == 'Civil':
+                    as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[0]
+                elif report_type == 'Juvenile':
+                    as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[0]
+                elif report_type == 'Criminal Disposed':
+                    as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[1]
+                elif report_type == 'Civil Disposed':
+                    as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", header)[1]
+                else:
+                    as_of_date = 'Unknown'
+
+                #Create the dictionary
+                temp_dict = {
+                    'File Name': file_object.name,
+                    'County': county,
+                    'Report Type': report_type,
+                    'Is 293rd': is_293rd,
+                    'As Of Date': as_of_date,
+                    'Content': content
+                }
+
+                #Append temp_dict to report_list
+                report_list.append(temp_dict)
+
+                #Delete the file and continue to the next
                 if os.path.exists(file_object.name):
                     os.remove(file_object.name)
-
-                    #Leave a success message
-                    st.success("Pending Reports was successfully updated with " + file_object.name)
                 
-                else:
-                    st.error("Could Not Delete File " + file_object.name)
-
-                #Clear container
-                info_container.empty()
-
             else:
                 #Print an error message
                 st.error("A File Was Not Uploaded Correctly. Please Try Again")
+
+        #Tell the user we have started the batch checks
+        info_container.empty()
+        info_container.info("Running Batch Checks...")
+
+        #Verify all reports have the same as of date
+        for i in report_list.index:
+            if convert_as_of_date_format(report_list[0]['As Of Date']) != convert_as_of_date_format(report_list[i]['As Of Date']):
+                st.error("Report As Of Dates Must All Match. Please Try Again.")
+                st.stop()
+        
+        #Convert the list to a dataframe and check for duplicates.
+        #No duplicate combinations of county and report type are allowed.
+        report_df = pd.DataFrame(report_list)
+
+        duplicate_reports = report_df[report_df.duplicated(['County', 'Report Type'], keep = False)]
+        if len(duplicate_reports) > 0:
+            st.error("Duplicate Report Found. Only One Report Per County and Report Type Is Allowed. Please Correct and Try Again.")
+            st.write(duplicate_reports[['File Name', 'County', 'Report Type', 'As Of Date']])
+            st.stop()
+
+        #Use a for loop to iterate through the uploaded files
+        for report in report_list:
+
+            #Inform the user which file is being processed
+            info_container.info("Verifying " + report['File Name'] + " meets report requirements...")
+
+            #Check if report meets requirements
+            report_meets_requirements = check_report_requirements(report['County'], report['Report Type'], report['Is_293rd'], report['As Of Date'], last_as_of_dict)
+
+            #If report passes requirements check, build and prepare the dataframe, then update the spreadsheet
+            if report_meets_requirements == True:
+                info_container.empty()
+                info_container.info("Began Processing " + report['File Name'])
+                DEV_pending_upload.update_spreadsheet(report['Report Type'], report['Content'])
+            else:
+                st.error(report['File Name'] + " Did Not Meet Requirements and Will Not Be Processed. Please double check it is the correct version and date.")
+                info_container.empty()
+                #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
+                bar_value += progress_per_file
+                progress_bar.progress(bar_value)
+                continue
+
+            #Leave a success message
+            st.success("Pending Reports was successfully updated with " + report['File Name'])
+
+            #Clear container
+            info_container.empty()
 
             #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
             bar_value += progress_per_file
             progress_bar.progress(bar_value)
 
         #Update message
-        progress_message_container.header("Complete! All Files Processed Successfully!")
+        progress_message_container.header("Complete! All Accepted Files Processed Successfully!")
+
+        #Gather the most recent 'As Of' and 'Load' dates for each section
+        common_df = get_spreadsheet_data("DEV_Common_Table", credentials)
+
+        if len(common_df) > 0:
+            #Verify the columns are string types. Google sheets can mess with the data types
+            common_df['Last As Of Date'] = common_df['Last As Of Date'].astype(str).str.strip()
+            common_df['Load DateTime'] = common_df['Load DateTime'].astype(str).str.strip()
+            common_df['County'] = common_df['County'].astype(str).str.strip()
+            common_df['Case Type'] = common_df['Case Type'].astype(str).str.strip()
+
+            #Convert 'Last As Of Date' to YYYYMMDD format so that the max() function works properly.
+            common_df['Last As Of Date'] = common_df['Last As Of Date'].apply(convert_as_of_date_format)
+
+            dimmit_civil_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Last As Of Date'].max()
+            dimmit_civil_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Load DateTime'].max()[:16]
+            dimmit_criminal_last_as_of_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
+            dimmit_criminal_last_load_date = common_df[(common_df['County'] == 'Dimmit') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+            maverick_civil_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Last As Of Date'].max()
+            maverick_civil_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Load DateTime'].max()[:16]
+            maverick_criminal_last_as_of_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
+            maverick_criminal_last_load_date = common_df[(common_df['County'] == 'Maverick') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+            zavala_civil_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Last As Of Date'].max()
+            zavala_civil_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] != 'Criminal') & (common_df['Case Type'] != 'Juvenile')]['Load DateTime'].max()[:16]
+            zavala_criminal_last_as_of_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Last As Of Date'].max()
+            zavala_criminal_last_load_date = common_df[(common_df['County'] == 'Zavala') & (common_df['Case Type'] == 'Criminal')]['Load DateTime'].max()[:16]
+            juvenile_last_as_of_date = common_df[common_df['Case Type'] == 'Juvenile']['Last As Of Date'].max()
+            juvenile_last_load_date = common_df[common_df['Case Type'] == 'Juvenile']['Load DateTime'].max()[:16]
+
+            #Create a list to find the max as of date
+            as_of_date_list = [dimmit_civil_last_as_of_date,
+                               dimmit_criminal_last_as_of_date,
+                               maverick_civil_last_as_of_date,
+                               maverick_criminal_last_as_of_date,
+                               zavala_civil_last_as_of_date,
+                               zavala_criminal_last_as_of_date,
+                               juvenile_last_as_of_date]
+            
+            max_as_of_date = max(as_of_date_list)
+
+            if dimmit_civil_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+            if dimmit_criminal_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+            if maverick_civil_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+            if maverick_criminal_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+            if zavala_civil_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+            if zavala_criminal_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+            if juvenile_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+
+            #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
+            with st.sidebar:
+                st.subheader("Dimmit Civil Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_civil_last_as_of_date))
+                st.write("Latest Load Date: " + convert_datetime_format(dimmit_civil_last_load_date))
+                st.divider()
+                st.subheader("Dimmit Criminal Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_criminal_last_as_of_date))
+                st.write("Latest Load Date: " + convert_datetime_format(dimmit_criminal_last_load_date))
+                st.divider()
+                st.subheader("Maverick Civil Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_civil_last_as_of_date))
+                st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
+                st.divider()
+                st.subheader("Maverick Criminal Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_criminal_last_as_of_date))
+                st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
+                st.divider()
+                st.subheader("Zavala Civil Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_civil_last_as_of_date))
+                st.write("Latest Load Date: " + convert_datetime_format(zavala_civil_last_load_date))
+                st.divider()
+                st.subheader("Zavala Criminal Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_criminal_last_as_of_date))
+                st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_last_load_date))
+                st.divider()
+                st.subheader("Juvenile Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(juvenile_last_as_of_date))
+                st.write("Latest Load Date: " + convert_datetime_format(juvenile_last_load_date))
+                st.divider()
