@@ -497,7 +497,7 @@ with page_content.container():
             info_container.info("Verifying " + report['File Name'] + " meets report requirements...")
 
             #Check if report meets requirements
-            report_meets_requirements = check_report_requirements(report['County'], report['Report Type'], report['Is_293rd'], report['As Of Date'], last_as_of_dict)
+            report_meets_requirements = check_report_requirements(report['County'], report['Report Type'], report['Is 293rd'], report['As Of Date'], last_as_of_dict)
 
             #If report passes requirements check, build and prepare the dataframe, then update the spreadsheet
             if report_meets_requirements == True:
