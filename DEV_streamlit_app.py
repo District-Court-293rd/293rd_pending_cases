@@ -288,7 +288,7 @@ if len(common_df) > 0:
     max_as_of_date = max(as_of_date_list)
 
     missing_report_container = st.empty()
-    with missing_report_container:
+    with missing_report_container.container():
         if dimmit_civil_last_as_of_date != max_as_of_date:
             st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
         if dimmit_criminal_last_as_of_date != max_as_of_date:
@@ -591,7 +591,7 @@ with page_content.container():
             max_as_of_date = max(as_of_date_list)
 
             missing_report_container.empty()
-            with missing_report_container:
+            with missing_report_container.container():
                 if dimmit_civil_last_as_of_date != max_as_of_date:
                     st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
                 if dimmit_criminal_last_as_of_date != max_as_of_date:
