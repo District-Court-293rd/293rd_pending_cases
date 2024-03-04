@@ -263,7 +263,7 @@ if len(common_df) > 0:
 
     #Create a dictionary that we can use to store the last as of date for each county and report type
     last_as_of_dict = {
-        'Civl': {
+        'Civil': {
             'Dimmit': dimmit_civil_last_as_of_date,
             'Maverick': maverick_civil_last_as_of_date,
             'Zavala': zavala_civil_last_as_of_date
@@ -335,7 +335,7 @@ if len(common_df) > 0:
 else:
     #Create a dictionary that we can use to store the last as of date for each county and report type
     last_as_of_dict = {
-        'Civl': {
+        'Civil': {
             'Dimmit': '00000000',
             'Maverick': '00000000',
             'Zavala': '00000000'
