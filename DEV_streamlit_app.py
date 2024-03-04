@@ -475,7 +475,7 @@ with page_content.container():
         info_container.info("Running Batch Checks...")
 
         #Verify all reports have the same as of date
-        for i in report_list.index:
+        for i in range(1, len(report_list)):
             if convert_as_of_date_format(report_list[0]['As Of Date']) != convert_as_of_date_format(report_list[i]['As Of Date']):
                 st.error("Report As Of Dates Must All Match. Please Try Again.")
                 st.stop()
