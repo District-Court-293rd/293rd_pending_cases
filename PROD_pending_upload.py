@@ -169,7 +169,7 @@ def convert_to_common_table_df(case_df):
 
     return df
 
-def update_spreadsheet(file_name, content):
+def update_spreadsheet(report_type, content):
     """
     This function takes in a list containing the file paths of the PDFs that need to be extracted. It'll loop
     and build civil and criminal case dataframes. Then, it will load the data currently stored in the 'Pending Reports'
@@ -178,10 +178,10 @@ def update_spreadsheet(file_name, content):
     """
     
     #Extract the PDF data
-    df = PROD_acquire.build_dataframe(file_name, content)
+    df = PROD_acquire.build_dataframe(report_type, content)
 
     #The juvenile case reports are different than the others, so will need separate string of logic
-    if content[:450].upper().count('JUVENILE') > 0:
+    if report_type == 'Juvenile':
         #Separate juvenile cases into pending and disposed df's
         pending_juvenile_cases = df[df["Disposed Dates"].str.len() == 0]
         disposed_juvenile_cases = df[df["Disposed Dates"].str.len() > 0]
@@ -193,13 +193,13 @@ def update_spreadsheet(file_name, content):
         update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases)
     else:
         #Prepare the df and add new columns
-        df = PROD_prepare.prepare_dataframe(file_name, df)
+        df = PROD_prepare.prepare_dataframe(report_type, df)
         #If case type is 'Criminal' or 'Criminal OLS', send to criminal function
         #If report is for disposed cases, send them to disposed case function
-        if df['Status'].iloc[0].count('Disposed') > 0:
+        if report_type == 'Criminal Disposed' or report_type == 'Civil Disposed':
             #Send to disposed cases
             update_disposed_cases(df)
-        elif df['Case Type'].iloc[0].count('Criminal') > 0:
+        elif report_type == 'Criminal':
             #Add to criminal cases tab
             update_criminal_cases(df)
         else:
@@ -227,7 +227,7 @@ def update_civil_cases(new_civil_df):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common Table'
+    #Make connection to 'PROD_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
     
     if new_civil_df['Case Type'].iloc[0].count('OLS') > 0:
@@ -462,7 +462,7 @@ def update_disposed_cases(disposed_cases):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common_Table'
+    #Make connection to 'PROD_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
 
     #Open the associated dropped table
@@ -654,7 +654,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
     #Open 'Pending Reports' Google Sheet By Name
     gsheet = gc.open(google_sheet_name)
 
-    #Make connection to 'Common Table'
+    #Make connection to 'PROD_Common_Table'
     common_sheet = gsheet.worksheet(common_sheet_name)
     pending_juvenile_sheet = gsheet.worksheet(juvenile_sheet_name)
     disposed_juvenile_sheet = gsheet.worksheet(closed_juvenile_sheet_name)

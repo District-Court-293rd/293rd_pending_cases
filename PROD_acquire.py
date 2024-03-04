@@ -2,7 +2,7 @@ import pandas as pd
 import re
 
 
-def build_dataframe(file_name, content):
+def build_dataframe(report_type, content):
     """
     This function takes in the file name and text content of the uploaded PDF. It will use the file name to determine
     whether the PDF is a civil case or criminal case PDF. After that, it will feed the text content to the appropriate
@@ -16,19 +16,19 @@ def build_dataframe(file_name, content):
         - df: A dataframe of the information extracted from the uploaded PDF.
     """
     #Check if it is criminal or civil and then call the associated functions
-    if file_name.upper().count('CR') > 0 and file_name.upper().count('DISP') > 0:
+    if report_type == 'Criminal Disposed':
         df = build_criminal_disposed_cases_dataframe(content)
-    elif (file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0) and file_name.upper().count('DISP') > 0:
+    elif report_type == 'Civil Disposed':
         df = build_civil_disposed_cases_dataframe(content)
-    elif file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0:
+    elif report_type == 'Civil':
         df = build_civil_cases_dataframe(content)
-    elif file_name.upper().count('CR') > 0:
+    elif report_type == 'Criminal':
         df = build_criminal_cases_dataframe(content)
-    elif file_name.upper().count('JU') > 0:
+    elif report_type == 'Juvenile':
         df = build_juvenile_cases_dataframe(content)
     else:
         #Leave a message
-        print("Something Went Wrong! Could not identify the PDF as Criminal or Civil.")
+        print("Something Went Wrong! Could not identify the PDF as Criminal, Civil, or Juvenile.")
         return -1
 
     return df

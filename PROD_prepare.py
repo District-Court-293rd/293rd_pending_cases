@@ -186,7 +186,7 @@ def prepare_closed_cases(closed_cases_df, new_cases_df):
 
     return closed_cases_df
 
-def prepare_dataframe(file_name, df):
+def prepare_dataframe(report_type, df):
     """
     This function takes in a newly created case dataframe and adds additional columns. Do not pass in a dataframe
     that has already been manually updated. It will remove any previous work.
@@ -201,16 +201,9 @@ def prepare_dataframe(file_name, df):
     #Verify Cause Numbers are represented as strings
     #df['Cause Number'] = df['Cause Number'].astype(str)
 
-    #Now check if it is criminal, civil, or OLS
-    if file_name.upper().count('OLS') > 0 and file_name.upper().count('CR') > 0:
-        #Assign as OLS case type
-        df['Case Type'] = 'Criminal OLS'
-    elif file_name.upper().count('OLS') > 0 and ( file_name.upper().count('CV') > 0 or file_name.upper().count('CIVIL') > 0 ):
-        #Assign as OLS case type
-        df['Case Type'] = 'Civil OLS'
-    elif file_name.upper().count('CR') > 0:
-        #Assign as Criminal case type
-        df['Case Type'] = 'Criminal'
+    #Get Case type
+    if report_type != 'Civil':
+        df['Case Type'] = report_type
     else:
         #Check if any civil cases are tax cases and update accordingly
         df['Case Type'] = df['Cause Number'].apply(get_case_type)
@@ -228,14 +221,14 @@ def prepare_dataframe(file_name, df):
     #df['Bad Cause Number'] = df['Cause Number'].apply(check_cause_number_format)
     
     #Create Status column. Defaults to open unless reading disposed cases
-    if file_name.upper().count('DISP') > 0:
+    if report_type == 'Criminal Disposed' or report_type == 'Civil Disposed':
         df['Status'] = 'Disposed'
     else:
         df['Status'] = 'Open'
 
     #Create a new column for disposed cases that counts the number of dispositions related to a cause number
     #Also convert the disposition list to a single string with each item separated by a new line
-    if file_name.upper().count('DISP') > 0:
+    if report_type == 'Criminal Disposed' or report_type == 'Civil Disposed':
         df['Number Of Dispositions'] = df['Dispositions'].apply(count_number_of_dispositions)
         df['Dispositions'] = df['Dispositions'].apply(convert_name_list_to_string)
         df['Disposed Dates'] = df['Disposed Dates'].apply(convert_name_list_to_string)
@@ -254,7 +247,7 @@ def prepare_dataframe(file_name, df):
     #    df['Plaintiff Attorney'] = df['Plaintiff Attorney'].apply(convert_name_list_to_string)
     #    df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
     #    df['Defendant Attorney'] = df['Defendant Attorney'].apply(convert_name_list_to_string)
-    if (df['Case Type'][0] == 'Criminal' or df['Case Type'][0] == 'Criminal OLS') and df['Status'][0] != 'Disposed':
+    if report_type == 'Criminal' or report_type == 'Criminal OLS':
         df['First Offense'] = df['First Offense'].apply(convert_name_list_to_string)
         df['ST RPT Column'] = df['ST RPT Column'].apply(convert_name_list_to_string)
     
