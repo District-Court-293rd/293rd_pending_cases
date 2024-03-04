@@ -370,7 +370,7 @@ with page_content.container():
         #Create a container for the progress bar message
         progress_message_container = st.empty()
         #Create a progress bar for visual verification that something is happening
-        progress_message_container.header("Please Wait, Processing In Progress:")
+        progress_message_container.header("Please Wait, Collecting File Information:")
         progress_bar = st.progress(0)
 
         #Use the remainder of 100 / the number of uploaded files to start the progress bar
@@ -473,15 +473,24 @@ with page_content.container():
                 st.error("A File Was Not Uploaded Correctly. Please Try Again")
 
         #Tell the user we have started the batch checks
+        progress_message_container.empty()
+        progress_message_container.header("Please Wait, Running Batch Checks:")        
+        
         info_container.empty()
-        info_container.info("Running Batch Checks...")
+        info_container.info("Checking As Of Dates For Each Report...")
 
         #Verify all reports have the same as of date
         for i in range(1, len(report_list)):
             if convert_as_of_date_format(report_list[0]['As Of Date']) != convert_as_of_date_format(report_list[i]['As Of Date']):
-                st.error("Report As Of Dates Must All Match. Please Try Again.")
+                st.error("Report As Of Dates Must All Match. One or more report's as of date is not the same as the others. Please Try Again.")
                 st.stop()
         
+        success_container = st.empty()
+        success_container.success("All Report Dates Match")
+        
+        info_container.empty()
+        info_container.info("Checking For Duplicate Reports...")
+
         #Convert the list to a dataframe and check for duplicates.
         #No duplicate combinations of county and report type are allowed.
         report_df = pd.DataFrame(report_list)
@@ -491,6 +500,12 @@ with page_content.container():
             st.error("Duplicate Report Found. Only One Report Per County and Report Type Is Allowed. Please Correct and Try Again.")
             st.write(duplicate_reports[['File Name', 'County', 'Report Type', 'As Of Date']])
             st.stop()
+        
+        success_container.success("No Duplicate Reports Found")
+
+        #Update progress message
+        progress_message_container.empty()
+        progress_message_container.header("Batch Checks Complete. Now Processing Reports:")  
 
         #Use a for loop to iterate through the uploaded files
         for report in report_list:
