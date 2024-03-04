@@ -482,7 +482,10 @@ with page_content.container():
         #Verify all reports have the same as of date
         for i in range(1, len(report_list)):
             if convert_as_of_date_format(report_list[0]['As Of Date']) != convert_as_of_date_format(report_list[i]['As Of Date']):
-                st.error("Report As Of Dates Must All Match. One or more report's as of date is not the same as the others. Please Try Again.")
+                info_container.empty()
+                progress_message_container.empty()
+                progress_message_container.header("Error: Please verify the As Of Date is the same for each report and try again.")
+                st.error("Report As Of Dates Must All Match. One or more report's as of date is not the same as the others.")
                 st.stop()
         
         success_container = st.empty()
@@ -497,7 +500,10 @@ with page_content.container():
 
         duplicate_reports = report_df[report_df.duplicated(['County', 'Report Type'], keep = False)]
         if len(duplicate_reports) > 0:
-            st.error("Duplicate Report Found. Only One Report Per County and Report Type Is Allowed. Please Correct and Try Again.")
+            info_container.empty()
+            progress_message_container.empty()
+            progress_message_container.header("Error: At least one duplicate report found. Please add the correct report and try again.")
+            st.error("Duplicate Report Found. Only One Report Per County and Report Type Is Allowed.")
             st.write(duplicate_reports[['File Name', 'County', 'Report Type', 'As Of Date']])
             st.stop()
         
