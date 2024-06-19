@@ -504,7 +504,7 @@ with page_content.container():
             info_container.empty()
             progress_message_container.empty()
             progress_message_container.header("Error: A Report's As Of Date Is Greater Than The Allowed Maximum As Of Date.")
-            st.error("All Reports Must Be Updated To " + max_as_of_date + " Before Updating To " + as_of_date_list[-1] + ". Please Try Again.")
+            st.error("All Reports Must Be Updated To " + reverse_as_of_date_format(max_as_of_date) + " Before Updating To " + reverse_as_of_date_format(as_of_date_list[-1]) + ". Please Try Again.")
             st.stop()
 
         success_container = st.empty()
