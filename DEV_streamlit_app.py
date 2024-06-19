@@ -492,6 +492,23 @@ with page_content.container():
         
         success_container = st.empty()
         success_container.success("All Report Dates Match")
+
+        info_container.empty()
+        info_container.info("Checking For Correct As Of Dates...")
+
+        #Once the user updates a report, do not let them update that report again until all other reports are at the same As Of Date
+        #Logically, we can check this by counting the number of unique As Of Date values.
+        #If there are more than 2, then send an error message and stop processing
+        as_of_date_list.append(convert_as_of_date_format(report_list[0]['As Of Date']))
+        if len(set(as_of_date_list)) > 2:
+            info_container.empty()
+            progress_message_container.empty()
+            progress_message_container.header("Error: A Report's As Of Date Is Greater Than The Allowed Maximum As Of Date.")
+            st.error("All Reports Must Be Updated To The Same As Of Date Before Updating Them Further. Please Try Again.")
+            st.stop()
+
+        success_container = st.empty()
+        success_container.success("All Report As Of Dates Are Allowed")
         
         info_container.empty()
         info_container.info("Checking For Duplicate Reports...")

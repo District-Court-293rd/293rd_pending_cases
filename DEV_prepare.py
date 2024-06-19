@@ -202,11 +202,13 @@ def prepare_dataframe(report_type, df):
     #df['Cause Number'] = df['Cause Number'].astype(str)
 
     #Get Case type
-    if report_type != 'Civil':
-        df['Case Type'] = report_type
-    else:
+    if report_type == 'Criminal Disposed':
+        df['Case Type'] = 'Criminal'
+    elif report_type == 'Civil Disposed' or report_type == 'Civil':
         #Check if any civil cases are tax cases and update accordingly
         df['Case Type'] = df['Cause Number'].apply(get_case_type)
+    else:
+        df['Case Type'] = report_type
     
     #Removed on 05-27-2023
     #Create On Track column
