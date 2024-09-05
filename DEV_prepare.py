@@ -411,7 +411,7 @@ def prepare_dropped_juvenile_cases(dropped_juvenile_cases, dropped_as_of_date):
     dropped_juvenile_cases['Disposed Dates'] = ''
 
     #Set disposed as of date to dropped as of date
-    dropped_juvenile_cases['Disposed As Of Date'] = dropped_as_of_date
+    #dropped_juvenile_cases['Disposed As Of Date'] = dropped_as_of_date
 
     #Set the dropped datetime column to the newest report's 'As Of' date
     time = '00:00:00'
