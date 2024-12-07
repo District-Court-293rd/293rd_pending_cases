@@ -10,3 +10,5 @@ PyPDF2==1.26.0
 streamlit
 streamlit_authenticator
 plotly==5.6.0
+SQLAlchemy
+pyodbc
