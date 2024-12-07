@@ -14,6 +14,8 @@ def init_connection():
         + st.secrets["username"]
         + ";PWD="
         + st.secrets["password"]
+        + ";Authentication="
+        + st.secrets["auth"]
     )
 
 conn = init_connection()
