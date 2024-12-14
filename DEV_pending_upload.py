@@ -291,7 +291,6 @@ def update_civil_cases(new_civil_df):
             else:
                 new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
 
-
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
 
@@ -734,8 +733,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
                 if len(new_docket_date) > 0 and new_docket_date.isspace() == False and current_docket_dates.find(new_docket_date) == -1:
                     disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
                 else:
-                    disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
-            
+                    disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates   
 
     #Now update the pending juvenile cases table
     #I can simply clear the entire table and add the new pending juvenile cases df because all county cases are included in each report
