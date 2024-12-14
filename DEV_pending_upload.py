@@ -282,8 +282,15 @@ def update_civil_cases(new_civil_df):
         #Iterate through each of those cases and update the corresponding version in new_civil_df
         for i in current_county_pending_cases.index:
             new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'].iloc[i]
-            #Comment column removed as of 10/07/2023
-            #new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Comments']] = current_county_pending_cases['Comments'].iloc[i]
+            #Check for an updated docket date. If docket date has changed and is not blank, append the old ones to the new one.
+            new_docket_date = new_civil_df[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i]]['Docket Date'].astype(str).str.strip()
+            current_docket_dates = current_county_pending_cases['Docket Date'].iloc[i].astype(str).str.strip()
+
+            if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+                new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
+            else:
+                new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
+
 
     #Append new_civil_df to current_civil_df
     current_civil_df = current_civil_df.append(new_civil_df, ignore_index = True)
@@ -400,8 +407,14 @@ def update_criminal_cases(new_crim_df):
         #Iterate through each of those cases and update the corresponding version in new_crim_df
         for i in current_county_pending_cases.index:
             new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'].iloc[i]
-            #Comment column removed as of 10/07/2023
-            # new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Comments']] = current_county_pending_cases['Comments'].iloc[i]
+            #Check for an updated docket date. If docket date has changed and is not blank, append the old ones to the new one.
+            new_docket_date = new_crim_df[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i]]['Docket Date'].astype(str).str.strip()
+            current_docket_dates = current_county_pending_cases['Docket Date'].iloc[i].astype(str).str.strip()
+
+            if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+                new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
+            else:
+                new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
 
     #Append new_crim_df to current_crim_df
     current_crim_df = current_crim_df.append(new_crim_df, ignore_index = True)
@@ -695,9 +708,33 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
 
     #Update the 'Original As Of Date' column for the new pending and disposed juvenile cases dataframes
     if is_pending_juvenile_table_empty == False:
+        #Create a temporary reference table to iterate through both the pending and disposed cases. That way we know we have all the cause numbers included in one dataframe
+        ref_table = pending_juvenile_cases[['Cause Number', 'Status']].append(disposed_juvenile_cases[['Cause Number', 'Original As Of Date', 'Docket Date', 'Status']], ignore_index = True)
+        ref_table = ref_table[ref_table['Cause Number'].isin(pending_juvenile_cases_table_df['Cause Number'])]
+
         for i in pending_juvenile_cases_table_df.index:
-            pending_juvenile_cases.loc[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = pending_juvenile_cases_table_df['Original As Of Date'].iloc[i]
-            disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = pending_juvenile_cases_table_df['Original As Of Date'].iloc[i]
+            #Use reference table to determine if the pending or the disposed dataframe needs to be updated. Then update
+            if ref_table[ref_table['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i]]['Status'] == 'Open':
+                pending_juvenile_cases.loc[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = pending_juvenile_cases_table_df['Original As Of Date'].iloc[i]
+                #Check for an updated docket date. If docket date has changed and is not blank, append the old ones to the new one.
+                new_docket_date = pending_juvenile_cases[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i]]['Docket Date'].astype(str).str.strip()
+                current_docket_dates = pending_juvenile_cases_table_df['Docket Date'].iloc[i].astype(str).str.strip()
+
+                if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+                    pending_juvenile_cases.loc[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
+                else:
+                    pending_juvenile_cases.loc[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
+            else:
+                disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = pending_juvenile_cases_table_df['Original As Of Date'].iloc[i]
+                #Check for an updated docket date. If docket date has changed and is not blank, append the old ones to the new one.
+                new_docket_date = disposed_juvenile_cases[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i]]['Docket Date'].astype(str).str.strip()
+                current_docket_dates = pending_juvenile_cases_table_df['Docket Date'].iloc[i].astype(str).str.strip()
+
+                if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+                    disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
+                else:
+                    disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
+            
 
     #Now update the pending juvenile cases table
     #I can simply clear the entire table and add the new pending juvenile cases df because all county cases are included in each report
@@ -710,6 +747,14 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
         for i in disposed_juvenile_cases_table_df.index:
             disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = disposed_juvenile_cases_table_df['Original As Of Date'].iloc[i]
             disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Dropped DateTime']] = disposed_juvenile_cases_table_df['Dropped DateTime'].iloc[i]
+            #Check for an updated docket date. If docket date has changed and is not blank, append the old ones to the new one.
+            new_docket_date = disposed_juvenile_cases[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i]]['Docket Date'].astype(str).str.strip()
+            current_docket_dates = disposed_juvenile_cases_table_df['Docket Date'].iloc[i].astype(str).str.strip()
+
+            if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+                disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
+            else:
+                disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
         #Find any previously dropped cases and add them to the disposed cases dataframe
         previously_dropped_cases = disposed_juvenile_cases_table_df[disposed_juvenile_cases_table_df['Status'] == 'Dropped']
         disposed_juvenile_cases = disposed_juvenile_cases.append(previously_dropped_cases, ignore_index = True)
