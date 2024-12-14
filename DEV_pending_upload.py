@@ -715,7 +715,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
 
         for i in pending_juvenile_cases_table_df.index:
             #Use reference table to determine if the pending or the disposed dataframe needs to be updated. Then update
-            if ref_table[ref_table['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i]]['Status'] == 'Open':
+            if ref_table[ref_table['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i]]['Status'].reset_index(drop=True)[0] == 'Open':
                 pending_juvenile_cases.loc[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = pending_juvenile_cases_table_df['Original As Of Date'].iloc[i]
                 #Check for an updated docket date. If docket date has changed and is not blank, append the old ones to the new one.
                 new_docket_date = str(pending_juvenile_cases[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i]]['Docket Date'].reset_index(drop=True)[0]).strip()
