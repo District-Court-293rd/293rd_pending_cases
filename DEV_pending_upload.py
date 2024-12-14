@@ -408,7 +408,8 @@ def update_criminal_cases(new_crim_df):
         for i in current_county_pending_cases.index:
             new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Original As Of Date']] = current_county_pending_cases['Original As Of Date'].iloc[i]
             #Check for an updated docket date. If docket date has changed and is not blank, append the old ones to the new one.
-            new_docket_date = str(new_crim_df[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i]]['Docket Date'][0]).strip()
+            #Have to reset the index of the resulting series so that I can select the individual value at index = 0
+            new_docket_date = str(new_crim_df[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i]]['Docket Date'].reset_index(drop=True)[0]).strip()
             current_docket_dates = str(current_county_pending_cases['Docket Date'].iloc[i]).strip()
 
             if len(new_docket_date) > 0 and new_docket_date.isspace() == False and current_docket_dates.find(new_docket_date) == -1:
