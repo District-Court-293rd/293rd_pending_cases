@@ -286,7 +286,7 @@ def update_civil_cases(new_civil_df):
             new_docket_date = str(new_civil_df[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i]]['Docket Date'][0]).strip()
             current_docket_dates = str(current_county_pending_cases['Docket Date'].iloc[i]).strip()
 
-            if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+            if len(new_docket_date) > 0 and new_docket_date.isspace() == False and current_docket_dates.find(new_docket_date) == -1:
                 new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
             else:
                 new_civil_df.loc[new_civil_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
@@ -411,7 +411,7 @@ def update_criminal_cases(new_crim_df):
             new_docket_date = str(new_crim_df[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i]]['Docket Date'][0]).strip()
             current_docket_dates = str(current_county_pending_cases['Docket Date'].iloc[i]).strip()
 
-            if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+            if len(new_docket_date) > 0 and new_docket_date.isspace() == False and current_docket_dates.find(new_docket_date) == -1:
                 new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
             else:
                 new_crim_df.loc[new_crim_df['Cause Number'] == current_county_pending_cases['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
@@ -720,7 +720,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
                 new_docket_date = str(pending_juvenile_cases[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i]]['Docket Date'][0]).strip()
                 current_docket_dates = str(pending_juvenile_cases_table_df['Docket Date'].iloc[i]).strip()
 
-                if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+                if len(new_docket_date) > 0 and new_docket_date.isspace() == False and current_docket_dates.find(new_docket_date) == -1:
                     pending_juvenile_cases.loc[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
                 else:
                     pending_juvenile_cases.loc[pending_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
@@ -730,7 +730,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
                 new_docket_date = str(disposed_juvenile_cases[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i]]['Docket Date'][0]).strip()
                 current_docket_dates = str(pending_juvenile_cases_table_df['Docket Date'].iloc[i]).strip()
 
-                if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+                if len(new_docket_date) > 0 and new_docket_date.isspace() == False and current_docket_dates.find(new_docket_date) == -1:
                     disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
                 else:
                     disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
@@ -751,7 +751,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
             new_docket_date = str(disposed_juvenile_cases[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i]]['Docket Date'][0]).strip()
             current_docket_dates = str(disposed_juvenile_cases_table_df['Docket Date'].iloc[i]).strip()
 
-            if new_docket_date != '' and new_docket_date.isspace == False and current_docket_dates.find(new_docket_date) == -1:
+            if len(new_docket_date) > 0 and new_docket_date.isspace() == False and current_docket_dates.find(new_docket_date) == -1:
                 disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
             else:
                 disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
