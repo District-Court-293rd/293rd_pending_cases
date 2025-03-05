@@ -711,7 +711,10 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
         #Create a temporary reference table to iterate through both the pending and disposed cases. That way we know we have all the cause numbers included in one dataframe
         ref_table = pending_juvenile_cases[['Cause Number', 'Status']].append(disposed_juvenile_cases[['Cause Number', 'Original As Of Date', 'Docket Date', 'Status']], ignore_index = True)
         ref_table = ref_table[ref_table['Cause Number'].isin(pending_juvenile_cases_table_df['Cause Number'])]
-
+        #If there are any dropped cases, remove them from the pending juvenile cases table df for the next part:
+        if len(dropped_cases) > 0:
+            pending_juvenile_cases_table_df = pending_juvenile_cases_table_df[~(pending_juvenile_cases_table_df['Cause Number'].isin(dropped_cases['Cause Number']))]
+        
         for i in pending_juvenile_cases_table_df.index:
             #Use reference table to determine if the pending or the disposed dataframe needs to be updated. Then update
             if ref_table[ref_table['Cause Number'] == pending_juvenile_cases_table_df['Cause Number'].iloc[i]]['Status'].reset_index(drop=True)[0] == 'Open':
