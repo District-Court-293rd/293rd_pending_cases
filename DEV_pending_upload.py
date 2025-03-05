@@ -746,6 +746,14 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
     #Update the disposed juvenile cases dataframe with the 'Original As Of Date' values from the disposed juvenile cases table dataframe.
     #This allows us to account for cases that have been reopened and closed again
     if is_disposed_juvenile_table_empty == False:
+        #Find any previously dropped cases and add them to the disposed cases dataframe
+        previously_dropped_cases = disposed_juvenile_cases_table_df[disposed_juvenile_cases_table_df['Status'] == 'Dropped']
+        disposed_juvenile_cases = disposed_juvenile_cases.append(previously_dropped_cases, ignore_index = True)
+
+        #Now remove the dropped cases from the disposed_juvenile_cases_table_df.
+        #Running the for loop below without this step is likely causing issues with key errors where index = 0.
+        disposed_juvenile_cases_table_df = disposed_juvenile_cases_table_df[disposed_juvenile_cases_table_df['Status'] != 'Dropped']
+
         for i in disposed_juvenile_cases_table_df.index:
             disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = disposed_juvenile_cases_table_df['Original As Of Date'].iloc[i]
             disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Dropped DateTime']] = disposed_juvenile_cases_table_df['Dropped DateTime'].iloc[i]
@@ -757,9 +765,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
                 disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
             else:
                 disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
-        #Find any previously dropped cases and add them to the disposed cases dataframe
-        previously_dropped_cases = disposed_juvenile_cases_table_df[disposed_juvenile_cases_table_df['Status'] == 'Dropped']
-        disposed_juvenile_cases = disposed_juvenile_cases.append(previously_dropped_cases, ignore_index = True)
+        
 
     #Now update the closed juvenile cases table
     #If there are newly dropped cases, prepare them and add to the disposed cases dataframe
