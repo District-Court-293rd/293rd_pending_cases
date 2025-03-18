@@ -758,12 +758,6 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
             disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Original As Of Date']] = disposed_juvenile_cases_table_df['Original As Of Date'].iloc[i]
             disposed_juvenile_cases.loc[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i], ['Dropped DateTime']] = disposed_juvenile_cases_table_df['Dropped DateTime'].iloc[i]
             #Check for an updated docket date. If docket date has changed and is not blank, append the old ones to the new one.
-
-            #Troubleshooting
-            st.write('Cause Number: ' + disposed_juvenile_cases_table_df['Cause Number'].iloc[i])
-            st.write('Matching newly disposed juvenile case should be shown below: ')
-            st.write(disposed_juvenile_cases[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i]])
-
             new_docket_date = str(disposed_juvenile_cases[disposed_juvenile_cases['Cause Number'] == disposed_juvenile_cases_table_df['Cause Number'].iloc[i]]['Docket Date'].reset_index(drop=True)[0]).strip()
             current_docket_dates = str(disposed_juvenile_cases_table_df['Docket Date'].iloc[i]).strip()
 
