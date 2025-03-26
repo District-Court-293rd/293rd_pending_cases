@@ -48,7 +48,7 @@ def check_for_combined_case(string):
     """
     
     #If the string contains the letters 'CV' or 'TX' and IS NOT 'TX DFPS' or 'TX LLC', return True
-    if (string.count('CV') > 0 or string.count('TX') > 0) and (string.count('TX DFPS') == 0) and (string.count('TX LLC') == 0):
+    if (string.count('CV') > 0 or string.count('TX') > 0) and (string.count('TX DFPS') == 0) and (string.count('TX LLC') == 0) and (string.count('SOUTHWEST TX') == 0):
         return True
     else:
         return False
