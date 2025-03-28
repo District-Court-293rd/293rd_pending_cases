@@ -951,7 +951,15 @@ def build_inactive_cases_dataframe(text):
     
     #If there are zero inactive cases on the report, return
     if num_cases == '0':
-        return pd.DataFrame()
+        return pd.DataFrame(columns = ['County',
+                                       'Cause Number',
+                                       'File Date',
+                                       'Inactive Start Date',
+                                       'Inactive End Date',
+                                       'Status',
+                                       'Inactive Reason',
+                                       'Original As Of Date',
+                                       'Last As Of Date'])
     
     for case in cases:
         
@@ -968,10 +976,10 @@ def build_inactive_cases_dataframe(text):
         temp_dict['File Date'] = case[19:36].strip()
 
         #Get inactive date
-        temp_dict['Inactive Date'] = case[36:46].strip()
+        temp_dict['Inactive Start Date'] = case[36:46].strip()
 
         #Get reactivated date
-        temp_dict['Reactivated Date'] = case[46:65].strip()
+        temp_dict['Inactive End Date'] = case[46:65].strip()
 
         #Assign Status
         temp_dict['Status'] = 'Inactive'
