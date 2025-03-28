@@ -19,6 +19,7 @@ ols_civil_sheet_name = 'DEV_OLS_Civil_Cases'
 closed_ols_civil_sheet_name = 'DEV_Closed_OLS_Civil_Cases'
 ols_criminal_sheet_name = 'DEV_OLS_Criminal_Cases'
 closed_ols_criminal_sheet_name = 'DEV_Closed_OLS_Criminal_Cases'
+inactive_sheet_name = 'DEV_Inactive_Cases'
 
 credentials = {
   "type": st.secrets["type"],
@@ -181,6 +182,7 @@ def update_spreadsheet(report_type, content):
     df = DEV_acquire.build_dataframe(report_type, content)
 
     #The juvenile case reports are different than the others, so will need separate string of logic
+    #The inactive cases will also need a separate string of logic
     if report_type == 'Juvenile':
         #Separate juvenile cases into pending and disposed df's
         pending_juvenile_cases = df[df["Disposed Dates"].str.len() == 0]
@@ -191,6 +193,10 @@ def update_spreadsheet(report_type, content):
         disposed_juvenile_cases = DEV_prepare.prepare_disposed_juvenile_cases(disposed_juvenile_cases)
         #Update pending and disposed juvenile cases in google sheet
         update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases)
+    elif report_type == 'Inactive':
+        #Prepare the inactive case df and update the spreadsheet
+        DEV_prepare.prepare_inactive_cases(df)
+        update_inactive_cases(df)
     else:
         #Prepare the df and add new columns
         df = DEV_prepare.prepare_dataframe(report_type, df)
@@ -816,4 +822,95 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
     
     print('Juvenile Cases Updated!')
 
+    return
+
+def update_inactive_cases(new_inactive_df):
+    """
+    This function takes in the newly created inactive cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
+    It will connect to the Google Sheet, load the current data, append the new data to the current data, and drop duplicates without 
+    losing previous work. Finally, it will upload the updated dataframe to the Inactive Cases sheet of the 'Pending Reports' spreadsheet.
+    
+    Parameter:
+        - new_inactive_df: The newly created dataframe from the most recent criminal cases PDF data
+
+    Returns:
+        - Nothing.
+    """
+
+    #Set up credentials to interact with Google Sheets
+    gc = gspread.service_account_from_dict(credentials)
+    
+    #Open 'Pending Reports' Google Sheet By Name
+    gsheet = gc.open(google_sheet_name)
+
+    #Make connection to 'DEV_Common_Table'
+    common_sheet = gsheet.worksheet(common_sheet_name)
+
+    #Inactive cases go to the 'Criminal Cases' tab
+    inactive_sheet = gsheet.worksheet(inactive_sheet_name)
+
+    #Load the data currently on the criminal cases tab in the 'Pending Reports' spreadsheet
+    current_inactive_df = pd.DataFrame(inactive_sheet.get_all_records())
+
+    #Before appending the new cases, create the closed cases df and udpate the closed cases tab
+    if len(current_inactive_df) > 0:
+        #First, Verify that all Cause Numbers are represented as strings
+        new_inactive_df['Cause Number'] = new_inactive_df['Cause Number'].astype(str).str.strip()
+        current_inactive_df['Cause Number'] = current_inactive_df['Cause Number'].astype(str).str.strip()
+        #Create reactivated cases df
+        reactivated_cases_df = current_inactive_df[~(current_inactive_df['Cause Number'].isin(new_inactive_df['Cause Number']))]
+        #Make sure the closed cases are only cases from the same county as the new_inactive_df
+        reactivated_cases_df = reactivated_cases_df[reactivated_cases_df['County'] == new_inactive_df['County'].iloc[0]]
+        #Remove reactivated cases from current_inactive_df
+        #current_inactive_df = current_inactive_df[~(current_inactive_df['Cause Number'].isin(reactivated_cases_df['Cause Number']))]
+        #Prepare closed cases df
+        reactivated_cases_df = DEV_prepare.prepare_reactivated_cases(reactivated_cases_df, new_inactive_df)
+        #Find the next available row
+        #next_available_row = find_next_available_row(closed_sheet)
+        #If any cases were closed, add the newly closed cases to the 'Closed Criminal Cases' tab
+        #if len(closed_cases_df) > 0:
+            #If the first available row is the first row in the sheet, include the column names when updating
+            #Otherwise, only send the values
+            #if next_available_row == 'A1':
+            #    closed_sheet.update([closed_cases_df.columns.values.tolist()] + closed_cases_df.values.tolist())
+            #else:
+            #    closed_sheet.update(next_available_row, closed_cases_df.values.tolist())
+    else:
+        #Instanciate closed_cases_df
+        reactivated_cases_df = pd.DataFrame()
+
+    #Update the 'Original As Of Date' column for the new cases df
+    if len(current_inactive_df) > 0:
+        #Create a df that consists only of pending cases in the county for the current report
+        current_county_inactive_cases = current_inactive_df[current_inactive_df['County'] == new_inactive_df['County'].iloc[0]]
+        current_county_inactive_cases.reset_index(inplace = True)
+        #Iterate through each of those cases and update the corresponding version in new_crim_df
+        for i in current_county_inactive_cases.index:
+            new_inactive_df.loc[new_inactive_df['Cause Number'] == current_county_inactive_cases['Cause Number'].iloc[i], ['Original As Of Date']] = current_county_inactive_cases['Original As Of Date'].iloc[i]
+            #Check for an updated docket date. If docket date has changed and is not blank, append the old ones to the new one.
+            #Have to reset the index of the resulting series so that I can select the individual value at index = 0
+            new_docket_date = str(new_inactive_df[new_inactive_df['Cause Number'] == current_county_inactive_cases['Cause Number'].iloc[i]]['Docket Date'].reset_index(drop=True)[0]).strip()
+            current_docket_dates = str(current_county_inactive_cases['Docket Date'].iloc[i]).strip()
+
+            if len(new_docket_date) > 0 and new_docket_date.isspace() == False and current_docket_dates.find(new_docket_date) == -1:
+                new_inactive_df.loc[new_inactive_df['Cause Number'] == current_county_inactive_cases['Cause Number'].iloc[i], ['Docket Date']] = new_docket_date + '\n' + current_docket_dates
+            else:
+                new_inactive_df.loc[new_inactive_df['Cause Number'] == current_county_inactive_cases['Cause Number'].iloc[i], ['Docket Date']] = current_docket_dates
+
+    #Append new_inactive_df to current_inactive_df
+    current_inactive_df = current_inactive_df.append(new_inactive_df, ignore_index = True)
+
+    #Verify that all Cause Numbers are represented as strings
+    current_inactive_df['Cause Number'] = current_inactive_df['Cause Number'].astype(str).str.strip()
+
+    #Drop duplicate cases while keeping the most recent version
+    current_inactive_df = current_inactive_df.drop_duplicates(subset = ['Cause Number'], ignore_index = True, keep = 'last')
+
+    #Clear what's currently on the Criminal Cases worksheet
+    inactive_sheet.clear()
+
+    #Now upload to Inactive Cases worksheet in 'Pending Reports' spreadsheet and leave a message
+    inactive_sheet.update([current_inactive_df.columns.values.tolist()] + current_inactive_df.values.tolist())
+
+    print('Inactive Cases Updated!')
     return

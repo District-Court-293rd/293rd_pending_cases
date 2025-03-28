@@ -407,7 +407,7 @@ with page_content.container():
                 #Run preprocessing checks
                 header = content[:500]
 
-                #What county is this?
+                #What county is this? This won't work for Inactive reports
                 if header.count('MAVERICK') >= 1:
                     county = 'Maverick'
                 elif header.count('DIMMIT') >= 1:
@@ -430,10 +430,24 @@ with page_content.container():
                     report_type = 'Civil Disposed'
                 elif header.count('CASES DISPOSED') >= 1:
                     report_type = 'Criminal Disposed'
+                elif header.count('INACTIVITY REPORT') >= 1:
+                    report_type = 'Inactive'
                 else:
                     report_type = 'Unknown'
 
+                #For Inactive report county, check the name at the beginning of the header
+                if report_type == 'Inactive':
+                    if header.count('LEOPOLDO VIELMA') >= 1:
+                        county = 'Maverick'
+                    elif header.count('MARICELA G. GONZALEZ') >= 1:
+                        county = 'Dimmit'
+                    elif header.count('RACHEL P. RAMIREZ') >= 1:
+                        county = 'Zavala'
+                    else:
+                        county = 'Unknown'
+
                 #Is this only for 293rd district court? The Or Statement is for the civil disposed cases report.
+                #The inactive report does not indicate which court it is, so will default to False
                 if header.count('293RD DISTRICT COURT') >= 1 or header.count('COURT: 293') >= 1:
                     is_293rd = True
                 else:
@@ -450,6 +464,8 @@ with page_content.container():
                     as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[1]
                 elif report_type == 'Civil Disposed':
                     as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", header)[1]
+                elif report_type == 'Inactive':
+                    as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[1]
                 else:
                     as_of_date = 'Unknown'
 
@@ -515,10 +531,11 @@ with page_content.container():
 
         #Convert the list to a dataframe and check for duplicates.
         #No duplicate combinations of county and report type are allowed.
+        #The only exception applies to the inactivity reports. Theres no way to tell with them
         report_df = pd.DataFrame(report_list)
 
         duplicate_reports = report_df[report_df.duplicated(['County', 'Report Type'], keep = False)]
-        if len(duplicate_reports) > 0:
+        if len(duplicate_reports[duplicate_reports['Report Type'] != 'Inactive']) > 0:
             info_container.empty()
             progress_message_container.empty()
             progress_message_container.header("Error: At least one duplicate report found. Please add the correct report and try again.")
@@ -534,36 +551,65 @@ with page_content.container():
 
         #Use a for loop to iterate through the uploaded files
         for report in report_list:
+            if report['Report Type'] != 'Inactive':
 
-            #Inform the user which file is being processed
-            info_container.info("Verifying " + report['File Name'] + " meets report requirements...")
+                #Inform the user which file is being processed
+                info_container.info("Verifying " + report['File Name'] + " meets report requirements...")
 
-            #Check if report meets requirements
-            report_meets_requirements = check_report_requirements(report['County'], report['Report Type'], report['Is 293rd'], report['As Of Date'], last_as_of_dict)
+                #Check if report meets requirements
+                report_meets_requirements = check_report_requirements(report['County'], report['Report Type'], report['Is 293rd'], report['As Of Date'], last_as_of_dict)
 
-            #If report passes requirements check, build and prepare the dataframe, then update the spreadsheet
-            if report_meets_requirements == True:
+                #If report passes requirements check, build and prepare the dataframe, then update the spreadsheet
+                if report_meets_requirements == True:
+                    info_container.empty()
+                    info_container.info("Began Processing " + report['File Name'])
+                    DEV_pending_upload.update_spreadsheet(report['Report Type'], report['Content'])
+                else:
+                    st.error(report['File Name'] + " Did Not Meet Requirements and Will Not Be Processed. Please double check it is the correct version and date.")
+                    info_container.empty()
+                    #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
+                    bar_value += progress_per_file
+                    progress_bar.progress(bar_value)
+                    continue
+
+                #Leave a success message
+                success_container.empty()
+                st.success("Pending Reports was successfully updated with " + report['File Name'])
+
+                #Clear container
                 info_container.empty()
-                info_container.info("Began Processing " + report['File Name'])
-                DEV_pending_upload.update_spreadsheet(report['Report Type'], report['Content'])
-            else:
-                st.error(report['File Name'] + " Did Not Meet Requirements and Will Not Be Processed. Please double check it is the correct version and date.")
-                info_container.empty()
+
                 #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
                 bar_value += progress_per_file
                 progress_bar.progress(bar_value)
-                continue
+            
+            elif report['Report Type'] == 'Inactive':
+                #Inform the user which file is being processed
+                info_container.info("Processing Inactivity Report: " + report['File Name'])
 
-            #Leave a success message
-            success_container.empty()
-            st.success("Pending Reports was successfully updated with " + report['File Name'])
+                if report['County'] == 'Unknown':
+                    st.error("Could not identify county for Inactivity Report: " + report['File Name'])
+                    st.error("Skipping this file...")
+                    #Clear container
+                    info_container.empty()
+                    #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
+                    bar_value += progress_per_file
+                    progress_bar.progress(bar_value)
+                    continue
 
-            #Clear container
-            info_container.empty()
+                #Now process the report and update the spreadsheet
+                DEV_pending_upload.update_spreadsheet(report['Report Type'], report['Content'])
 
-            #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
-            bar_value += progress_per_file
-            progress_bar.progress(bar_value)
+                #Leave a success message
+                success_container.empty()
+                st.success("Pending Reports was successfully updated with " + report['File Name'])
+
+                #Clear container
+                info_container.empty()
+
+                #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
+                bar_value += progress_per_file
+                progress_bar.progress(bar_value)
 
         #Update message
         progress_message_container.header("Complete! All Accepted Files Processed Successfully!")

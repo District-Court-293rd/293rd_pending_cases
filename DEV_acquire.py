@@ -26,6 +26,8 @@ def build_dataframe(report_type, content):
         df = build_criminal_cases_dataframe(content)
     elif report_type == 'Juvenile':
         df = build_juvenile_cases_dataframe(content)
+    elif report_type == 'Inactive':
+        df = build_inactive_cases_dataframe(content)
     else:
         #Leave a message
         print("Something Went Wrong! Could not identify the PDF as Criminal, Civil, or Juvenile.")
@@ -891,5 +893,107 @@ def build_juvenile_cases_dataframe(text):
     df["Last As Of Date"] = report_as_of_date
     df["Report Generated Date"] = report_as_of_date
     df["Disposed As Of Date"] = report_as_of_date
+    
+    return df
+
+def build_inactive_cases_dataframe(text):
+    """
+    This function takes in the entire PDF document as a string of text. It will gather the info for each case
+    and add the info to a dictionary. The dictionary for each case will be added to a list which will be turned into
+    a dataframe.
+    
+    Parameter:
+        -text: A string consisting of the text of the entire inactive cases PDF document.
+        
+    Returns:
+        -df: A dataframe of the newly gathered inactive case info
+    """
+    
+    #Initialize containers
+    case_list = []
+    temp_dict = {}
+    
+    #Separate the first header from the body
+    #We'll use this to identify the county later
+    header = text[:350]
+
+    #Use regex to find the 'AS OF' and 'RAN ON' dates
+    dates = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)
+
+    #For 'AS OF' date:
+    report_as_of_date = dates[1]
+
+    #For county, check the name at the beginning of the header
+    if header.count('LEOPOLDO VIELMA') >= 1:
+        county = 'Maverick'
+    elif header.count('MARICELA G. GONZALEZ') >= 1:
+        county = 'Dimmit'
+    elif header.count('RACHEL P. RAMIREZ') >= 1:
+        county = 'Zavala'
+    else:
+        county = 'Unknown'
+    
+    #Body
+    body = text[350:]
+    
+    #Remove leading and trailing whitespaces from the body text
+    body = body.strip()
+    
+    #Split the text on the '\n' to isolate each case
+    cases = body.split('\n')
+    
+    #Remove cases that happen to be empty or consist of whitespace only
+    cases = [case for case in cases if case.isspace() == False and len(case) > 0]
+    
+    #Check the case count
+    num_cases = cases.pop()
+    num_cases = num_cases[19:].strip()
+    
+    #If there are zero inactive cases on the report, return
+    if num_cases == '0':
+        return pd.DataFrame()
+    
+    for case in cases:
+        
+        #Strip the case string
+        case = case.strip()
+
+        #Assign county
+        temp_dict['County'] = county
+
+        #Gather the cause number
+        temp_dict['Cause Number'] = case[:19].strip()
+
+        #Gather the file date
+        temp_dict['File Date'] = case[19:36].strip()
+
+        #Get inactive date
+        temp_dict['Inactive Date'] = case[36:46].strip()
+
+        #Get reactivated date
+        temp_dict['Reactivated Date'] = case[46:65].strip()
+
+        #Assign Status
+        temp_dict['Status'] = 'Inactive'
+
+        #Get inactive reason
+        temp_dict['Inactive Reason'] = case[65:].strip()
+        
+        case_list.append(temp_dict)
+        
+        #Reset temp_dict
+        temp_dict = {}
+
+        #End of line, so move to next one
+    
+    #How many?
+    print(f'Collected Data From {len(case_list)} Cases.')
+    
+    #Create dataframe
+    df = pd.DataFrame(case_list)
+
+    #Add 'Report Generated Date', 'Original As Of Date', 'Last As Of Date', and 'Comments' columns
+    df["Original As Of Date"] = report_as_of_date
+    df["Last As Of Date"] = report_as_of_date
     
     return df
