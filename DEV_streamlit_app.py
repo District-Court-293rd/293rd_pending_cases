@@ -430,21 +430,12 @@ with page_content.container():
                     report_type = 'Civil Disposed'
                 elif header.count('CASES DISPOSED') >= 1:
                     report_type = 'Criminal Disposed'
-                elif header.count('INACTIVITY REPORT') >= 1:
-                    report_type = 'Inactive'
+                elif header.count('PENDING CRIMINAL CASES - INACTIVITY REPORT') >= 1:
+                    report_type = 'Criminal Inactive'
+                elif header.count('PENDING CIVIL CASES - INACTIVITY REPORT') >= 1:
+                    report_type = 'Civil Inactive'
                 else:
                     report_type = 'Unknown'
-
-                #For Inactive report county, check the name at the beginning of the header
-                if report_type == 'Inactive':
-                    if header.count('LEOPOLDO VIELMA') >= 1:
-                        county = 'Maverick'
-                    elif header.count('MARICELA G. GONZALEZ') >= 1:
-                        county = 'Dimmit'
-                    elif header.count('RACHEL P. RAMIREZ') >= 1:
-                        county = 'Zavala'
-                    else:
-                        county = 'Unknown'
 
                 #Is this only for 293rd district court? The Or Statement is for the civil disposed cases report.
                 #The inactive report does not indicate which court it is, so will default to False
@@ -452,6 +443,22 @@ with page_content.container():
                     is_293rd = True
                 else:
                     is_293rd = False
+
+                #For Inactive report county, check the name at the beginning of the header
+                #If the name matches properly, it should be a 293rd district case
+                if report_type == 'Criminal Inactive' or report_type == 'Civil Inactive':
+                    if header.count('LEOPOLDO VIELMA') >= 1:
+                        county = 'Maverick'
+                        is_293rd = True
+                    elif header.count('MARICELA G. GONZALEZ') >= 1:
+                        county = 'Dimmit'
+                        is_293rd = True
+                    elif header.count('RACHEL P. RAMIREZ') >= 1:
+                        county = 'Zavala'
+                        is_293rd = True
+                    else:
+                        county = 'Unknown'
+                        is_293rd = False
                 
                 #What is the as of date for this report?
                 if report_type == 'Criminal':
@@ -464,7 +471,9 @@ with page_content.container():
                     as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[1]
                 elif report_type == 'Civil Disposed':
                     as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", header)[1]
-                elif report_type == 'Inactive':
+                elif report_type == 'Criminal Inactive':
+                    as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[1]
+                elif report_type == 'Civil Inactive':
                     as_of_date = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)[1]
                 else:
                     as_of_date = 'Unknown'
@@ -551,7 +560,7 @@ with page_content.container():
 
         #Use a for loop to iterate through the uploaded files
         for report in report_list:
-            if report['Report Type'] != 'Inactive':
+            if report['Report Type'] != 'Criminal Inactive' and report['Report Type'] != 'Civil Inactive':
 
                 #Inform the user which file is being processed
                 info_container.info("Verifying " + report['File Name'] + " meets report requirements...")
@@ -583,7 +592,7 @@ with page_content.container():
                 bar_value += progress_per_file
                 progress_bar.progress(bar_value)
             
-            elif report['Report Type'] == 'Inactive':
+            elif report['Report Type'] == 'Criminal Inactive' and report['Report Type'] == 'Civil Inactive':
                 #Inform the user which file is being processed
                 info_container.info("Processing Inactivity Report: " + report['File Name'])
 

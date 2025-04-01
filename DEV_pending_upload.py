@@ -19,7 +19,8 @@ ols_civil_sheet_name = 'DEV_OLS_Civil_Cases'
 closed_ols_civil_sheet_name = 'DEV_Closed_OLS_Civil_Cases'
 ols_criminal_sheet_name = 'DEV_OLS_Criminal_Cases'
 closed_ols_criminal_sheet_name = 'DEV_Closed_OLS_Criminal_Cases'
-inactive_sheet_name = 'DEV_Inactive_Cases'
+criminal_inactive_sheet_name = 'DEV_Criminal_Inactive_Cases'
+civil_inactive_sheet_name = 'DEV_Civil_Inactive_Cases'
 
 credentials = {
   "type": st.secrets["type"],
@@ -193,9 +194,12 @@ def update_spreadsheet(report_type, content):
         disposed_juvenile_cases = DEV_prepare.prepare_disposed_juvenile_cases(disposed_juvenile_cases)
         #Update pending and disposed juvenile cases in google sheet
         update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases)
-    elif report_type == 'Inactive':
+    elif report_type == 'Criminal Inactive':
         #Update the inactive spreadsheet. It's a simple report, so no need to prepare it
-        update_inactive_cases(df)
+        update_criminal_inactive_cases(df)
+    elif report_type == 'Civil Inactive':
+        #Update the inactive spreadsheet. It's a simple report, so no need to prepare it
+        update_civil_inactive_cases(df)
     else:
         #Prepare the df and add new columns
         df = DEV_prepare.prepare_dataframe(report_type, df)
@@ -823,7 +827,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
 
     return
 
-def update_inactive_cases(new_inactive_df):
+def update_civil_inactive_cases(new_inactive_df):
     """
     This function takes in the newly created inactive cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
     It will connect to the Google Sheet, load the current data, append the new data to the current data, and drop duplicates without 
@@ -843,7 +847,7 @@ def update_inactive_cases(new_inactive_df):
     gsheet = gc.open(google_sheet_name)
 
     #Inactive cases go to the 'Inactive Cases' tab
-    inactive_sheet = gsheet.worksheet(inactive_sheet_name)
+    inactive_sheet = gsheet.worksheet(civil_inactive_sheet_name)
 
     #Load the data currently on the inactive cases tab in the 'Pending Reports' spreadsheet
     current_inactive_table_df = pd.DataFrame(inactive_sheet.get_all_records())
@@ -925,3 +929,16 @@ def update_inactive_cases(new_inactive_df):
 
         print('Inactive Cases Updated!')
         return
+
+def update_criminal_inactive_cases(new_inactive_df):
+    """
+    This function takes in the newly created inactive cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
+    It will connect to the Google Sheet, load the current data, append the new data to the current data, and drop duplicates without 
+    losing previous work. Finally, it will upload the updated dataframe to the Inactive Cases sheet of the 'Pending Reports' spreadsheet.
+    
+    Parameter:
+        - new_inactive_df: The newly created dataframe from the most recent criminal cases PDF data
+
+    Returns:
+        - Nothing.
+    """
