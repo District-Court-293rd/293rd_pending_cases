@@ -853,9 +853,12 @@ def update_civil_inactive_cases(new_inactive_df):
     current_inactive_table_df = pd.DataFrame(inactive_sheet.get_all_records())
 
     #Convert the lists of strings to a single string in the new_inactive_df
-    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].apply(DEV_prepare.convert_name_list_to_string).astype(str).str.strip()
-    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].apply(DEV_prepare.convert_name_list_to_string).astype(str).str.strip()
-    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].apply(DEV_prepare.convert_name_list_to_string).astype(str).str.strip()
+    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].apply(DEV_prepare.convert_name_list_to_string)
+    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].astype(str).str.strip()
+    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].apply(DEV_prepare.convert_name_list_to_string)
+    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].astype(str).str.strip()
+    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].apply(DEV_prepare.convert_name_list_to_string)
+    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].astype(str).str.strip()
 
     if len(current_inactive_table_df) > 0:
         #First, Verify that all Cause Numbers are represented as strings
@@ -965,9 +968,12 @@ def update_criminal_inactive_cases(new_inactive_df):
     current_inactive_table_df = pd.DataFrame(inactive_sheet.get_all_records())
 
     #Convert the lists of strings to a single string in the new_inactive_df
-    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].apply(DEV_prepare.convert_name_list_to_string).astype(str).str.strip()
-    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].apply(DEV_prepare.convert_name_list_to_string).astype(str).str.strip()
-    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].apply(DEV_prepare.convert_name_list_to_string).astype(str).str.strip()
+    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].apply(DEV_prepare.convert_name_list_to_string)
+    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].astype(str).str.strip()
+    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].apply(DEV_prepare.convert_name_list_to_string)
+    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].astype(str).str.strip()
+    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].apply(DEV_prepare.convert_name_list_to_string)
+    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].astype(str).str.strip()
 
     if len(current_inactive_table_df) > 0:
         #First, Verify that all Cause Numbers are represented as strings
