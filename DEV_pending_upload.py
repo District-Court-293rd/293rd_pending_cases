@@ -200,6 +200,7 @@ def update_spreadsheet(report_type, content):
         update_criminal_inactive_cases(df)
     elif report_type == 'Civil Inactive':
         #Update the inactive spreadsheet.
+        st.write(len(df))
         st.write(df)
         st.write(df['Inactive Start Date'])
         DEV_prepare.prepare_inactive_cases(df)
