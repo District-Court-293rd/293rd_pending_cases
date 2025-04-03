@@ -898,13 +898,14 @@ def update_civil_inactive_cases(new_inactive_df, report):
                 inactivated_cases_df['Last As Of Date'].iloc[i] = str(new_inactive_df['Last As Of Date']) + '\n' + str(active_table_df.loc[active_table_df['Cause Number'] == (inactivated_cases_df['Cause Number'].iloc[i]), ['Last As Of Date']])
             
             #Now add them to the inactive_table_df
-            inactive_table_df = inactive_table_df.append(inactivated_cases_df, ignore_index = True)
+            inactive_table_df = inactive_table_df.append(inactivated_cases_df, ignore_index = True).reset_index(drop=True)
             #And remove them from active_table_df
             active_table_df = active_table_df[~(active_table_df['Cause Number'].isin(inactivated_cases_df['Cause Number']))].reset_index(drop=True)
 
         #At this point, all cases in the inactive_table_df will be in the new_inactive_df.
         #All that needs to be updated now is the last as of date
         if len(inactive_table_df) > 0:
+            inactive_table_df = inactive_table_df.reset_index(drop=True)
             for i in inactive_table_df.index:
                 if len(inactive_table_df['Last As Of Date'].iloc[i]) > 10:
                     inactive_table_df['Last As Of Date'].iloc[i] = str(new_inactive_df['Last As Of Date'].iloc[0]) + str(inactive_table_df['Last As Of Date'].iloc[i])[10:]
@@ -1046,13 +1047,14 @@ def update_criminal_inactive_cases(new_inactive_df, report):
                 inactivated_cases_df['Last As Of Date'].iloc[i] = str(new_inactive_df['Last As Of Date']) + '\n' + str(active_table_df.loc[active_table_df['Cause Number'] == (inactivated_cases_df['Cause Number'].iloc[i]), ['Last As Of Date']])
             
             #Now add them to the inactive_table_df
-            inactive_table_df = inactive_table_df.append(inactivated_cases_df, ignore_index = True)
+            inactive_table_df = inactive_table_df.append(inactivated_cases_df, ignore_index = True).reset_index(drop=True)
             #And remove them from active_table_df
             active_table_df = active_table_df[~(active_table_df['Cause Number'].isin(inactivated_cases_df['Cause Number']))].reset_index(drop=True)
 
         #At this point, all cases in the inactive_table_df will be in the new_inactive_df.
         #All that needs to be updated now is the last as of date
         if len(inactive_table_df) > 0:
+            inactive_table_df = inactive_table_df.reset_index(drop=True)
             for i in inactive_table_df.index:
                 if len(inactive_table_df['Last As Of Date'].iloc[i]) > 10:
                     inactive_table_df['Last As Of Date'].iloc[i] = str(new_inactive_df['Last As Of Date'].iloc[0]) + str(inactive_table_df['Last As Of Date'].iloc[i])[10:]
