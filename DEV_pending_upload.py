@@ -204,7 +204,7 @@ def update_spreadsheet(report):
         #Update the inactive spreadsheet.
         if len(df) > 0:
             DEV_prepare.prepare_inactive_cases(df)
-            
+
         update_civil_inactive_cases(df, report)
     else:
         #Prepare the df and add new columns
@@ -945,7 +945,7 @@ def update_civil_inactive_cases(new_inactive_df, report):
         #Since the new_inactive_df is empty in this case, all of the inactive_table_df cases must now be considered reactivated.
         #We need to change the status of these cases to 'Active' and set the 'Estimated Inactive End Date' to the current report's 'As Of Date'.
         #Then add these cases to the active_table_df and remove them from the inactive_table_df
-        reactivated_cases_df = inactive_table_df
+        reactivated_cases_df = inactive_table_df.reset_index(drop=True)
         if len(reactivated_cases_df) > 0:
             reactivated_cases_df['Status'] = 'Active'
             for i in reactivated_cases_df.index:
@@ -1093,7 +1093,7 @@ def update_criminal_inactive_cases(new_inactive_df, report):
         #Since the new_inactive_df is empty in this case, all of the inactive_table_df cases must now be considered reactivated.
         #We need to change the status of these cases to 'Active' and set the 'Estimated Inactive End Date' to the current report's 'As Of Date'.
         #Then add these cases to the active_table_df and remove them from the inactive_table_df
-        reactivated_cases_df = inactive_table_df
+        reactivated_cases_df = inactive_table_df.reset_index(drop=True)
         if len(reactivated_cases_df) > 0:
             reactivated_cases_df['Status'] = 'Active'
             for i in reactivated_cases_df.index:
