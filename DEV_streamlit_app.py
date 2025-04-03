@@ -572,7 +572,7 @@ with page_content.container():
                 if report_meets_requirements == True:
                     info_container.empty()
                     info_container.info("Began Processing " + report['File Name'])
-                    DEV_pending_upload.update_spreadsheet(report['Report Type'], report['Content'])
+                    DEV_pending_upload.update_spreadsheet(report)
                 else:
                     st.error(report['File Name'] + " Did Not Meet Requirements and Will Not Be Processed. Please double check it is the correct version and date.")
                     info_container.empty()
@@ -607,7 +607,7 @@ with page_content.container():
                     continue
 
                 #Now process the report and update the spreadsheet
-                DEV_pending_upload.update_spreadsheet(report['Report Type'], report['Content'])
+                DEV_pending_upload.update_spreadsheet(report)
 
                 #Leave a success message
                 success_container.empty()

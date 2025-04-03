@@ -171,7 +171,7 @@ def convert_to_common_table_df(case_df):
 
     return df
 
-def update_spreadsheet(report_type, content):
+def update_spreadsheet(report):
     """
     This function takes in a list containing the file paths of the PDFs that need to be extracted. It'll loop
     and build civil and criminal case dataframes. Then, it will load the data currently stored in the 'Pending Reports'
@@ -180,11 +180,11 @@ def update_spreadsheet(report_type, content):
     """
     
     #Extract the PDF data
-    df = DEV_acquire.build_dataframe(report_type, content)
+    df = DEV_acquire.build_dataframe(report['Report Type'], report['Content'])
 
     #The juvenile case reports are different than the others, so will need separate string of logic
     #The inactive cases will also need a separate string of logic
-    if report_type == 'Juvenile':
+    if report['Report Type'] == 'Juvenile':
         #Separate juvenile cases into pending and disposed df's
         pending_juvenile_cases = df[df["Disposed Dates"].str.len() == 0]
         disposed_juvenile_cases = df[df["Disposed Dates"].str.len() > 0]
@@ -194,26 +194,23 @@ def update_spreadsheet(report_type, content):
         disposed_juvenile_cases = DEV_prepare.prepare_disposed_juvenile_cases(disposed_juvenile_cases)
         #Update pending and disposed juvenile cases in google sheet
         update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases)
-    elif report_type == 'Criminal Inactive':
+    elif report['Report Type'] == 'Criminal Inactive':
         #Update the inactive spreadsheet.
         DEV_prepare.prepare_inactive_cases(df)
-        update_criminal_inactive_cases(df)
-    elif report_type == 'Civil Inactive':
+        update_criminal_inactive_cases(df, report)
+    elif report['Report Type'] == 'Civil Inactive':
         #Update the inactive spreadsheet.
-        st.write(len(df))
-        st.write(df)
-        st.write(df['Inactive Start Date'])
         DEV_prepare.prepare_inactive_cases(df)
-        update_civil_inactive_cases(df)
+        update_civil_inactive_cases(df, report)
     else:
         #Prepare the df and add new columns
-        df = DEV_prepare.prepare_dataframe(report_type, df)
+        df = DEV_prepare.prepare_dataframe(report['Report Type'], df)
         #If case type is 'Criminal' or 'Criminal OLS', send to criminal function
         #If report is for disposed cases, send them to disposed case function
-        if report_type == 'Criminal Disposed' or report_type == 'Civil Disposed':
+        if report['Report Type'] == 'Criminal Disposed' or report['Report Type'] == 'Civil Disposed':
             #Send to disposed cases
             update_disposed_cases(df)
-        elif report_type == 'Criminal':
+        elif report['Report Type'] == 'Criminal':
             #Add to criminal cases tab
             update_criminal_cases(df)
         else:
@@ -832,7 +829,7 @@ def update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases):
 
     return
 
-def update_civil_inactive_cases(new_inactive_df):
+def update_civil_inactive_cases(new_inactive_df, report):
     """
     This function takes in the newly created inactive cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
     It will connect to the Google Sheet, load the current data, append the new data to the current data, and drop duplicates without 
@@ -857,7 +854,7 @@ def update_civil_inactive_cases(new_inactive_df):
     #Load the data currently on the inactive cases tab in the 'Pending Reports' spreadsheet
     current_inactive_table_df = pd.DataFrame(inactive_sheet.get_all_records())
 
-    if len(current_inactive_table_df) > 0:
+    if len(current_inactive_table_df) > 0 and len(new_inactive_df) > 0:
         #First, Verify that all Cause Numbers are represented as strings
         new_inactive_df['Cause Number'] = new_inactive_df['Cause Number'].astype(str).str.strip()
         current_inactive_table_df['Cause Number'] = current_inactive_table_df['Cause Number'].astype(str).str.strip()
@@ -932,14 +929,55 @@ def update_civil_inactive_cases(new_inactive_df):
         print('Inactive Cases Updated!')
         return
     
-    else:
+    elif len(current_inactive_table_df) > 0 and len(new_inactive_df) == 0:
+        #First, Verify that all Cause Numbers are represented as strings
+        current_inactive_table_df['Cause Number'] = current_inactive_table_df['Cause Number'].astype(str).str.strip()
+
+        #Split it into active and inactive cases for the current report's county
+        active_table_df = current_inactive_table_df[(current_inactive_table_df['Status'] == 'Active') & (current_inactive_table_df['County'] == report['County'])]
+
+        inactive_table_df = current_inactive_table_df[(current_inactive_table_df['Status'] == 'Inactive') & (current_inactive_table_df['County'] == report['County'])]
+
+        #Since the new_inactive_df is empty in this case, all of the inactive_table_df cases must now be considered reactivated.
+        #We need to change the status of these cases to 'Active' and set the 'Estimated Inactive End Date' to the current report's 'As Of Date'.
+        #Then add these cases to the active_table_df and remove them from the inactive_table_df
+        reactivated_cases_df = inactive_table_df
+        if len(reactivated_cases_df) > 0:
+            reactivated_cases_df['Status'] = 'Active'
+            for i in reactivated_cases_df.index:
+                if reactivated_cases_df['Estimated Inactive End Date'].iloc[i] == '':
+                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = report['As Of Date']
+                else:
+                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = report['As Of Date'] + '\n' + str(reactivated_cases_df['Estimated Inactive End Date'].iloc[i])
+            
+            #Now add them to the active_table_df
+            active_table_df = active_table_df.append(reactivated_cases_df, ignore_index = True)
+            #And remove from inactive table df
+            inactive_table_df = inactive_table_df[~(inactive_table_df['Cause Number'].isin(reactivated_cases_df['Cause Number']))].reset_index(drop=True)
+
+        #The active_table_df should contain all cases from the inactive report for this county in this case
+        #Now append active_table_df to the total inactive_table_df and remove duplicates, keeping last.
+        #This should give use the entirely new, updated inactive table.
+        current_inactive_table_df = current_inactive_table_df.append(active_table_df, ignore_index = True)
+        current_inactive_table_df.drop_duplicates(subset = ['Cause Number'], ignore_index=True, inplace=True, keep='last')
+
+        #Clear what's currently on the Criminal Cases worksheet
+        inactive_sheet.clear()
+
+        #Now upload to Inactive Cases worksheet in 'Pending Reports' spreadsheet and leave a message
+        inactive_sheet.update([current_inactive_table_df.columns.values.tolist()] + current_inactive_table_df.values.tolist())
+    
+    elif len(current_inactive_table_df) == 0 and len(new_inactive_df) > 0:
         #Now upload to Inactive Cases worksheet in 'Pending Reports' spreadsheet and leave a message
         inactive_sheet.update([new_inactive_df.columns.values.tolist()] + new_inactive_df.values.tolist())
 
         print('Inactive Cases Updated!')
+
+    else:
+        #Both are empty, so do nothing.
         return
 
-def update_criminal_inactive_cases(new_inactive_df):
+def update_criminal_inactive_cases(new_inactive_df, report):
     """
     This function takes in the newly created inactive cases df and updates it with the current data on the 'Pending Reports' spreadsheet.
     It will connect to the Google Sheet, load the current data, append the new data to the current data, and drop duplicates without 
@@ -964,7 +1002,7 @@ def update_criminal_inactive_cases(new_inactive_df):
     #Load the data currently on the inactive cases tab in the 'Pending Reports' spreadsheet
     current_inactive_table_df = pd.DataFrame(inactive_sheet.get_all_records())
 
-    if len(current_inactive_table_df) > 0:
+    if len(current_inactive_table_df) > 0 and len(new_inactive_df) > 0:
         #First, Verify that all Cause Numbers are represented as strings
         new_inactive_df['Cause Number'] = new_inactive_df['Cause Number'].astype(str).str.strip()
         current_inactive_table_df['Cause Number'] = current_inactive_table_df['Cause Number'].astype(str).str.strip()
@@ -1039,9 +1077,50 @@ def update_criminal_inactive_cases(new_inactive_df):
         print('Inactive Cases Updated!')
         return
     
-    else:
+    elif len(current_inactive_table_df) > 0 and len(new_inactive_df) == 0:
+        #First, Verify that all Cause Numbers are represented as strings
+        current_inactive_table_df['Cause Number'] = current_inactive_table_df['Cause Number'].astype(str).str.strip()
+
+        #Split it into active and inactive cases for the current report's county
+        active_table_df = current_inactive_table_df[(current_inactive_table_df['Status'] == 'Active') & (current_inactive_table_df['County'] == report['County'])]
+
+        inactive_table_df = current_inactive_table_df[(current_inactive_table_df['Status'] == 'Inactive') & (current_inactive_table_df['County'] == report['County'])]
+
+        #Since the new_inactive_df is empty in this case, all of the inactive_table_df cases must now be considered reactivated.
+        #We need to change the status of these cases to 'Active' and set the 'Estimated Inactive End Date' to the current report's 'As Of Date'.
+        #Then add these cases to the active_table_df and remove them from the inactive_table_df
+        reactivated_cases_df = inactive_table_df
+        if len(reactivated_cases_df) > 0:
+            reactivated_cases_df['Status'] = 'Active'
+            for i in reactivated_cases_df.index:
+                if reactivated_cases_df['Estimated Inactive End Date'].iloc[i] == '':
+                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = report['As Of Date']
+                else:
+                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = report['As Of Date'] + '\n' + str(reactivated_cases_df['Estimated Inactive End Date'].iloc[i])
+            
+            #Now add them to the active_table_df
+            active_table_df = active_table_df.append(reactivated_cases_df, ignore_index = True)
+            #And remove from inactive table df
+            inactive_table_df = inactive_table_df[~(inactive_table_df['Cause Number'].isin(reactivated_cases_df['Cause Number']))].reset_index(drop=True)
+
+        #The active_table_df should contain all cases from the inactive report for this county in this case
+        #Now append active_table_df to the total inactive_table_df and remove duplicates, keeping last.
+        #This should give use the entirely new, updated inactive table.
+        current_inactive_table_df = current_inactive_table_df.append(active_table_df, ignore_index = True)
+        current_inactive_table_df.drop_duplicates(subset = ['Cause Number'], ignore_index=True, inplace=True, keep='last')
+
+        #Clear what's currently on the Criminal Cases worksheet
+        inactive_sheet.clear()
+
+        #Now upload to Inactive Cases worksheet in 'Pending Reports' spreadsheet and leave a message
+        inactive_sheet.update([current_inactive_table_df.columns.values.tolist()] + current_inactive_table_df.values.tolist())
+    
+    elif len(current_inactive_table_df) == 0 and len(new_inactive_df) > 0:
         #Now upload to Inactive Cases worksheet in 'Pending Reports' spreadsheet and leave a message
         inactive_sheet.update([new_inactive_df.columns.values.tolist()] + new_inactive_df.values.tolist())
 
         print('Inactive Cases Updated!')
+
+    else:
+        #Both are empty, so do nothing.
         return
