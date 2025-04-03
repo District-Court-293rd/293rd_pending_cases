@@ -26,8 +26,10 @@ def build_dataframe(report_type, content):
         df = build_criminal_cases_dataframe(content)
     elif report_type == 'Juvenile':
         df = build_juvenile_cases_dataframe(content)
-    elif report_type == 'Inactive':
-        df = build_inactive_cases_dataframe(content)
+    elif report_type == 'Criminal Inactive':
+        df = build_criminal_inactive_cases_dataframe(content)
+    elif report_type == 'Civil Inactive':
+        df = build_civil_inactive_cases_dataframe(content)
     else:
         #Leave a message
         print("Something Went Wrong! Could not identify the PDF as Criminal, Civil, or Juvenile.")
