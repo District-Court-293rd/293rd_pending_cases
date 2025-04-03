@@ -592,7 +592,7 @@ with page_content.container():
                 bar_value += progress_per_file
                 progress_bar.progress(bar_value)
             
-            elif report['Report Type'] == 'Criminal Inactive' and report['Report Type'] == 'Civil Inactive':
+            elif report['Report Type'] == 'Criminal Inactive' or report['Report Type'] == 'Civil Inactive':
                 #Inform the user which file is being processed
                 info_container.info("Processing Inactivity Report: " + report['File Name'])
 
