@@ -1119,6 +1119,40 @@ def build_criminal_inactive_cases_dataframe(text):
                 temp_dict['Inactive Reason'] = inactive_reason_list
                 
                 case_list.append(temp_dict)
+
+            else:
+                #This would be the first line, so left strip it and gather info
+                case = case.lstrip()
+                
+                #Assign county
+                temp_dict['County'] = county
+                
+                #Gather the cause number
+                temp_dict['Cause Number'] = case[:19].strip()
+
+                #Gather the file date
+                temp_dict['File Date'] = case[19:31].strip()
+
+                #Get inactive start date
+                inactive_start_list.append(case[31:44].strip())
+
+                #Get inactive end date
+                inactive_end_list.append(case[44:56].strip())
+
+                #Assign Status
+                temp_dict['Status'] = 'Inactive'
+
+                #Assign Case Type
+                temp_dict['Case Type'] = 'Criminal'
+
+                #Get inactive reason
+                inactive_reason_list.append(case[56:88].strip())
+
+                #Get State Report
+                temp_dict['State Report'] = case[88:].strip()
+
+                #End of line, so move to next one
+                continue
                 
             #Reset temp_dict and lists
             temp_dict = {}
