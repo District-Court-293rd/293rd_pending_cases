@@ -1144,13 +1144,13 @@ def build_criminal_inactive_cases_dataframe(text):
             #Just grab the start and end dates
             #As well as the reason
             #Get inactive start date
-            inactive_start_list.append(case[36:46].strip())
+            inactive_start_list.append(case[36:49].strip())
 
             #Get inactive end date
-            inactive_end_list.append(case[46:65].strip())
+            inactive_end_list.append(case[49:61].strip())
 
             #Get inactive reason
-            inactive_reason_list.append(case[65:].strip())
+            inactive_reason_list.append(case[61:93].strip())
             
     #Make sure the last case gets added
     if bool(temp_dict) == True:

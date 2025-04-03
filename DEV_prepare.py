@@ -440,3 +440,15 @@ def prepare_dropped_juvenile_cases(dropped_juvenile_cases, dropped_as_of_date):
     ]]
 
     return dropped_juvenile_cases
+
+def prepare_inactive_cases(df):
+    """
+    This function will prepare the inactive case dataframe to be uploaded to the google sheet.
+    It will primarily be used to convert lists of strings to individual strings joined on new lines.
+    """
+
+    df['Inactive Start Date'] = df['Inactive Start Date'].apply(convert_name_list_to_string).str.strip()
+    df['Inactive End Date'] = df['Inactive End Date'].apply(convert_name_list_to_string).str.strip()
+    df['Inactive Reason'] = df['Inactive Reason'].apply(convert_name_list_to_string).str.strip()
+
+    return df

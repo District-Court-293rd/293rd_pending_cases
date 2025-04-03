@@ -195,10 +195,12 @@ def update_spreadsheet(report_type, content):
         #Update pending and disposed juvenile cases in google sheet
         update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases)
     elif report_type == 'Criminal Inactive':
-        #Update the inactive spreadsheet. It's a simple report, so no need to prepare it
+        #Update the inactive spreadsheet.
+        DEV_prepare.prepare_inactive_cases(df)
         update_criminal_inactive_cases(df)
     elif report_type == 'Civil Inactive':
-        #Update the inactive spreadsheet. It's a simple report, so no need to prepare it
+        #Update the inactive spreadsheet.
+        DEV_prepare.prepare_inactive_cases(df)
         update_civil_inactive_cases(df)
     else:
         #Prepare the df and add new columns
@@ -852,14 +854,6 @@ def update_civil_inactive_cases(new_inactive_df):
     #Load the data currently on the inactive cases tab in the 'Pending Reports' spreadsheet
     current_inactive_table_df = pd.DataFrame(inactive_sheet.get_all_records())
 
-    #Convert the lists of strings to a single string in the new_inactive_df
-    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].apply(DEV_prepare.convert_name_list_to_string)
-    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].astype(str).str.strip()
-    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].apply(DEV_prepare.convert_name_list_to_string)
-    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].astype(str).str.strip()
-    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].apply(DEV_prepare.convert_name_list_to_string)
-    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].astype(str).str.strip()
-
     if len(current_inactive_table_df) > 0:
         #First, Verify that all Cause Numbers are represented as strings
         new_inactive_df['Cause Number'] = new_inactive_df['Cause Number'].astype(str).str.strip()
@@ -966,14 +960,6 @@ def update_criminal_inactive_cases(new_inactive_df):
 
     #Load the data currently on the inactive cases tab in the 'Pending Reports' spreadsheet
     current_inactive_table_df = pd.DataFrame(inactive_sheet.get_all_records())
-
-    #Convert the lists of strings to a single string in the new_inactive_df
-    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].apply(DEV_prepare.convert_name_list_to_string)
-    new_inactive_df['Inactive Start Date'] = new_inactive_df['Inactive Start Date'].astype(str).str.strip()
-    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].apply(DEV_prepare.convert_name_list_to_string)
-    new_inactive_df['Inactive End Date'] = new_inactive_df['Inactive End Date'].astype(str).str.strip()
-    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].apply(DEV_prepare.convert_name_list_to_string)
-    new_inactive_df['Inactive Reason'] = new_inactive_df['Inactive Reason'].astype(str).str.strip()
 
     if len(current_inactive_table_df) > 0:
         #First, Verify that all Cause Numbers are represented as strings
