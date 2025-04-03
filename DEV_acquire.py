@@ -964,9 +964,13 @@ def build_civil_inactive_cases_dataframe(text):
             #Check if the temp_dict is empty
             if bool(temp_dict) == True:
                 #Reverse the lists so that the newest dates appear first
-                temp_dict['Inactive Start Date'] = inactive_start_list.reverse()
-                temp_dict['Inactive End Date'] = inactive_end_list.reverse()
-                temp_dict['Inactive Reason'] = inactive_reason_list.reverse()
+                inactive_start_list.reverse()
+                inactive_end_list.reverse()
+                inactive_reason_list.reverse()
+
+                temp_dict['Inactive Start Date'] = inactive_start_list
+                temp_dict['Inactive End Date'] = inactive_end_list
+                temp_dict['Inactive Reason'] = inactive_reason_list
                 
                 case_list.append(temp_dict)
                 
@@ -1017,9 +1021,13 @@ def build_civil_inactive_cases_dataframe(text):
             
     #Make sure the last case gets added
     if bool(temp_dict) == True:
-        temp_dict['Inactive Start Date'] = inactive_start_list.reverse()
-        temp_dict['Inactive End Date'] = inactive_end_list.reverse()
-        temp_dict['Inactive Reason'] = inactive_reason_list.reverse()
+        inactive_start_list.reverse()
+        inactive_end_list.reverse()
+        inactive_reason_list.reverse()
+
+        temp_dict['Inactive Start Date'] = inactive_start_list
+        temp_dict['Inactive End Date'] = inactive_end_list
+        temp_dict['Inactive Reason'] = inactive_reason_list
 
         case_list.append(temp_dict)
     
@@ -1102,9 +1110,13 @@ def build_criminal_inactive_cases_dataframe(text):
             #Check if the temp_dict is empty
             if bool(temp_dict) == True:
                 #Reverse the lists so that the newest dates appear first
-                temp_dict['Inactive Start Date'] = inactive_start_list.reverse()
-                temp_dict['Inactive End Date'] = inactive_end_list.reverse()
-                temp_dict['Inactive Reason'] = inactive_reason_list.reverse()
+                inactive_start_list.reverse()
+                inactive_end_list.reverse()
+                inactive_reason_list.reverse()
+
+                temp_dict['Inactive Start Date'] = inactive_start_list
+                temp_dict['Inactive End Date'] = inactive_end_list
+                temp_dict['Inactive Reason'] = inactive_reason_list
                 
                 case_list.append(temp_dict)
                 
@@ -1158,9 +1170,13 @@ def build_criminal_inactive_cases_dataframe(text):
             
     #Make sure the last case gets added
     if bool(temp_dict) == True:
-        temp_dict['Inactive Start Date'] = inactive_start_list.reverse()
-        temp_dict['Inactive End Date'] = inactive_end_list.reverse()
-        temp_dict['Inactive Reason'] = inactive_reason_list.reverse()
+        inactive_start_list.reverse()
+        inactive_end_list.reverse()
+        inactive_reason_list.reverse()
+
+        temp_dict['Inactive Start Date'] = inactive_start_list
+        temp_dict['Inactive End Date'] = inactive_end_list
+        temp_dict['Inactive Reason'] = inactive_reason_list
 
         case_list.append(temp_dict)
     
