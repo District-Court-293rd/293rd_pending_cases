@@ -26,6 +26,10 @@ def build_dataframe(report_type, content):
         df = build_criminal_cases_dataframe(content)
     elif report_type == 'Juvenile':
         df = build_juvenile_cases_dataframe(content)
+    elif report_type == 'Criminal Inactive':
+        df = build_criminal_inactive_cases_dataframe(content)
+    elif report_type == 'Civil Inactive':
+        df = build_civil_inactive_cases_dataframe(content)
     else:
         #Leave a message
         print("Something Went Wrong! Could not identify the PDF as Criminal, Civil, or Juvenile.")
@@ -891,5 +895,334 @@ def build_juvenile_cases_dataframe(text):
     df["Last As Of Date"] = report_as_of_date
     df["Report Generated Date"] = report_as_of_date
     df["Disposed As Of Date"] = report_as_of_date
+    
+    return df
+
+def build_civil_inactive_cases_dataframe(text):
+    """
+    This function takes in the entire PDF document as a string of text. It will gather the info for each case
+    and add the info to a dictionary. The dictionary for each case will be added to a list which will be turned into
+    a dataframe.
+    
+    Parameter:
+        -text: A string consisting of the text of the entire inactive cases PDF document.
+        
+    Returns:
+        -df: A dataframe of the newly gathered inactive case info
+    """
+    
+    #Initialize containers
+    case_list = []
+    inactive_start_list = []
+    inactive_end_list = []
+    inactive_reason_list = []
+    temp_dict = {}
+    
+    #Separate the first header from the body
+    #We'll use this to identify the county later
+    header = text[:370]
+
+    #Use regex to find the 'AS OF' and 'RAN ON' dates
+    dates = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)
+
+    #For 'AS OF' date:
+    report_as_of_date = dates[1]
+    
+    #For county, check the name at the beginning of the header
+    if header.count('LEOPOLDO VIELMA') >= 1:
+        county = 'Maverick'
+    elif header.count('MARICELA G. GONZALEZ') >= 1:
+        county = 'Dimmit'
+    elif header.count('RACHEL P. RAMIREZ') >= 1:
+        county = 'Zavala'
+    else:
+        county = 'Unknown'
+    
+    #Body
+    body = text[370:]
+    
+    #Remove subsequent page headers
+    body = re.sub(r"""\s*[A-Z\.\' \n-]*\d{2}/\d{2}/\d{4}\n\s*[A-Z0-9 \:-]*\d{2}/\d{2}/\d{4}[A-Z0-9 \n#-]*INACTIVE REASON\s*\n\n""", '', body)
+    
+    #Split the text on the '\n' to isolate each case
+    cases = body.split('\n')
+    
+    #Remove cases that happen to be empty or consist of whitespace only
+    cases = [case for case in cases if case.isspace() == False and len(case) > 0]
+    
+    #Check the case count
+    num_cases = cases.pop()
+    num_cases = num_cases[19:].strip()
+    
+    #If there are zero inactive cases on the report, return
+    if num_cases == '0':
+        return pd.DataFrame()
+    
+    for case in cases:
+        #Check to see if this line is the start of a new case
+        if case[:35].isspace() == False:
+            #Check if the temp_dict is empty
+            if bool(temp_dict) == True:
+                #Reverse the lists so that the newest dates appear first
+                inactive_start_list.reverse()
+                inactive_end_list.reverse()
+                inactive_reason_list.reverse()
+
+                temp_dict['Inactive Start Date'] = inactive_start_list
+                temp_dict['Inactive End Date'] = inactive_end_list
+                temp_dict['Inactive Reason'] = inactive_reason_list
+                
+                case_list.append(temp_dict)
+                
+            #Reset temp_dict and lists
+            temp_dict = {}
+            inactive_start_list = []
+            inactive_end_list = []
+            inactive_reason_list = []
+            
+            #Assign county
+            temp_dict['County'] = county
+
+            #Gather the cause number
+            temp_dict['Cause Number'] = case[:27].strip()
+
+            #Gather the file date
+            temp_dict['File Date'] = case[27:44].strip()
+
+            #Get inactive start date
+            inactive_start_list.append(case[44:54].strip())
+
+            #Get inactive end date
+            inactive_end_list.append(case[54:73].strip())
+
+            #Assign Status
+            temp_dict['Status'] = 'Inactive'
+            
+            #Assign Case Type
+            temp_dict['Case Type'] = 'Civil'
+
+            #Get inactive reason
+            inactive_reason_list.append(case[73:].strip())
+
+            #End of line, so move to next one
+            
+        else:
+            #This line is a continuation of the same case
+            #Just grab the start and end dates
+            #As well as the reason
+            #Get inactive start date
+            inactive_start_list.append(case[44:54].strip())
+
+            #Get inactive end date
+            inactive_end_list.append(case[54:73].strip())
+
+            #Get inactive reason
+            inactive_reason_list.append(case[73:].strip())
+            
+    #Make sure the last case gets added
+    if bool(temp_dict) == True:
+        inactive_start_list.reverse()
+        inactive_end_list.reverse()
+        inactive_reason_list.reverse()
+
+        temp_dict['Inactive Start Date'] = inactive_start_list
+        temp_dict['Inactive End Date'] = inactive_end_list
+        temp_dict['Inactive Reason'] = inactive_reason_list
+
+        case_list.append(temp_dict)
+    
+    #How many?
+    print(f'Collected Data From {len(case_list)} Cases.')
+    
+    #Create dataframe
+    df = pd.DataFrame(case_list)
+
+    #Add 'Original As Of Date', 'Last As Of Date', and 'Estimated Inactive End Date' columns
+    df["Original As Of Date"] = report_as_of_date
+    df["Estimated Inactive End Date"] = ''
+    df["Last As Of Date"] = report_as_of_date
+    
+    return df
+
+def build_criminal_inactive_cases_dataframe(text):
+    """
+    This function takes in the entire PDF document as a string of text. It will gather the info for each case
+    and add the info to a dictionary. The dictionary for each case will be added to a list which will be turned into
+    a dataframe.
+    
+    Parameter:
+        -text: A string consisting of the text of the entire inactive criminal cases PDF document.
+        
+    Returns:
+        -df: A dataframe of the newly gathered inactive criminal case info
+    """
+    
+    #Initialize containers
+    case_list = []
+    inactive_start_list = []
+    inactive_end_list = []
+    inactive_reason_list = []
+    temp_dict = {}
+    
+    #Separate the first header from the body
+    #We'll use this to identify the county later
+    header = text[:370]
+
+    #Use regex to find the 'AS OF' and 'RAN ON' dates
+    dates = re.findall(r"[0-9]{2}/[0-9]{2}/[0-9]{4}", header)
+
+    #For 'AS OF' date:
+    report_as_of_date = dates[1]
+    
+    #For county, check the name at the beginning of the header
+    if header.count('LEOPOLDO VIELMA') >= 1:
+        county = 'Maverick'
+    elif header.count('MARICELA G. GONZALEZ') >= 1:
+        county = 'Dimmit'
+    elif header.count('RACHEL P. RAMIREZ') >= 1:
+        county = 'Zavala'
+    else:
+        county = 'Unknown'
+    
+    #Body
+    body = text[368:]
+    
+    #Remove all subsequent headers with regex
+    body = re.sub(r"""\n\x0c\s*[A-Z\.\' \n-]*\d{2}/\d{2}/\d{4}\n\s*[A-Z0-9 \:-]*\d{2}/\d{2}/\d{4}[A-Z0-9 \n#-]*STATE REPORT COLUMN\n\n""", '', body)
+    
+    #Split the text on the '\n' to isolate each case
+    cases = body.split('\n')
+    
+    #Remove cases that happen to be empty or consist of whitespace only
+    cases = [case for case in cases if case.isspace() == False and len(case) > 0]
+    
+    #Check the case count
+    num_cases = cases.pop()
+    num_cases = num_cases[19:].strip()
+    
+    #If there are zero inactive cases on the report, return
+    if num_cases == '0':
+        return pd.DataFrame()
+    
+    for case in cases:
+        #Check to see if this line is the start of a new case
+        if case[:35].isspace() == False:
+            #Check if the temp_dict is empty
+            if bool(temp_dict) == True:
+                #Reverse the lists so that the newest dates appear first
+                inactive_start_list.reverse()
+                inactive_end_list.reverse()
+                inactive_reason_list.reverse()
+
+                temp_dict['Inactive Start Date'] = inactive_start_list
+                temp_dict['Inactive End Date'] = inactive_end_list
+                temp_dict['Inactive Reason'] = inactive_reason_list
+                
+                case_list.append(temp_dict)
+
+            else:
+                #This would be the first line, so left strip it and gather info
+                case = case.lstrip()
+                
+                #Assign county
+                temp_dict['County'] = county
+                
+                #Gather the cause number
+                temp_dict['Cause Number'] = case[:19].strip()
+
+                #Gather the file date
+                temp_dict['File Date'] = case[19:31].strip()
+
+                #Get inactive start date
+                inactive_start_list.append(case[31:44].strip())
+
+                #Get inactive end date
+                inactive_end_list.append(case[44:56].strip())
+
+                #Assign Status
+                temp_dict['Status'] = 'Inactive'
+
+                #Assign Case Type
+                temp_dict['Case Type'] = 'Criminal'
+
+                #Get inactive reason
+                inactive_reason_list.append(case[56:88].strip())
+
+                #Get State Report
+                temp_dict['State Report'] = case[88:].strip()
+
+                #End of line, so move to next one
+                continue
+                
+            #Reset temp_dict and lists
+            temp_dict = {}
+            inactive_start_list = []
+            inactive_end_list = []
+            inactive_reason_list = []
+            
+            #Assign county
+            temp_dict['County'] = county
+
+            #Gather the cause number
+            temp_dict['Cause Number'] = case[:24].strip()
+
+            #Gather the file date
+            temp_dict['File Date'] = case[24:36].strip()
+
+            #Get inactive start date
+            inactive_start_list.append(case[36:49].strip())
+
+            #Get inactive end date
+            inactive_end_list.append(case[49:61].strip())
+
+            #Assign Status
+            temp_dict['Status'] = 'Inactive'
+            
+            #Assign Case Type
+            temp_dict['Case Type'] = 'Criminal'
+
+            #Get inactive reason
+            inactive_reason_list.append(case[61:93].strip())
+            
+            #Get State Report
+            temp_dict['State Report'] = case[93:].strip()
+
+            #End of line, so move to next one
+            
+        else:
+            #This line is a continuation of the same case
+            #Just grab the start and end dates
+            #As well as the reason
+            #Get inactive start date
+            inactive_start_list.append(case[36:49].strip())
+
+            #Get inactive end date
+            inactive_end_list.append(case[49:61].strip())
+
+            #Get inactive reason
+            inactive_reason_list.append(case[61:93].strip())
+            
+    #Make sure the last case gets added
+    if bool(temp_dict) == True:
+        inactive_start_list.reverse()
+        inactive_end_list.reverse()
+        inactive_reason_list.reverse()
+
+        temp_dict['Inactive Start Date'] = inactive_start_list
+        temp_dict['Inactive End Date'] = inactive_end_list
+        temp_dict['Inactive Reason'] = inactive_reason_list
+
+        case_list.append(temp_dict)
+    
+    #How many?
+    print(f'Collected Data From {len(case_list)} Cases.')
+    
+    #Create dataframe
+    df = pd.DataFrame(case_list)
+
+    #Add 'Original As Of Date', 'Last As Of Date', and 'Estimated Inactive End Date' columns
+    df["Original As Of Date"] = report_as_of_date
+    df["Estimated Inactive End Date"] = ''
+    df["Last As Of Date"] = report_as_of_date
     
     return df
