@@ -911,6 +911,9 @@ def update_civil_inactive_cases(new_inactive_df, report):
                     inactive_table_df['Last As Of Date'].iloc[i] = str(new_inactive_df['Last As Of Date'].iloc[0]) + str(inactive_table_df['Last As Of Date'].iloc[i])[10:]
                 else:
                     inactive_table_df['Last As Of Date'].iloc[i] = str(new_inactive_df['Last As Of Date'].iloc[0])
+            
+            #Update the load DateTime
+            inactive_table_df['Load DateTime'] = new_inactive_df['Load DateTime']
         
         #Now append inactive table df to the new inactive cases df and drop duplicates, keeping last.
         #This should keep all updated info intact while adding the entirely new inactive cases to the df
@@ -1052,7 +1055,7 @@ def update_criminal_inactive_cases(new_inactive_df, report):
             active_table_df = active_table_df[~(active_table_df['Cause Number'].isin(inactivated_cases_df['Cause Number']))].reset_index(drop=True)
 
         #At this point, all cases in the inactive_table_df will be in the new_inactive_df.
-        #All that needs to be updated now is the last as of date
+        #All that needs to be updated now is the last as of date and load dateTime
         if len(inactive_table_df) > 0:
             inactive_table_df = inactive_table_df.reset_index(drop=True)
             for i in inactive_table_df.index:
@@ -1060,6 +1063,9 @@ def update_criminal_inactive_cases(new_inactive_df, report):
                     inactive_table_df['Last As Of Date'].iloc[i] = str(new_inactive_df['Last As Of Date'].iloc[0]) + str(inactive_table_df['Last As Of Date'].iloc[i])[10:]
                 else:
                     inactive_table_df['Last As Of Date'].iloc[i] = str(new_inactive_df['Last As Of Date'].iloc[0])
+            
+            #Update the load DateTime
+            inactive_table_df['Load DateTime'] = new_inactive_df['Load DateTime']
         
         #Now append inactive table df to the new inactive cases df and drop duplicates, keeping last.
         #This should keep all updated info intact while adding the entirely new inactive cases to the df
