@@ -333,11 +333,11 @@ if len(civil_inactive_df) > 0:
     civil_inactive_df['Latest Report Date'] = civil_inactive_df['Latest Report Date'].apply(convert_as_of_date_format)
 
     dimmit_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Latest Report Date'].max()
-    dimmit_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Load DateTime'].max()[:16]
+    dimmit_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Latest Load DateTime'].max()[:16]
     maverick_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Latest Report Date'].max()
-    maverick_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Load DateTime'].max()[:16]
+    maverick_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Latest Load DateTime'].max()[:16]
     zavala_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Latest Report Date'].max()
-    zavala_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Load DateTime'].max()[:16]
+    zavala_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Latest Load DateTime'].max()[:16]
 
     last_as_of_dict['Civil Inactive'] = {
         'Dimmit': dimmit_civil_inactive_latest_report_date,
@@ -373,11 +373,11 @@ if len(criminal_inactive_df) > 0:
     criminal_inactive_df['Latest Report Date'] = criminal_inactive_df['Latest Report Date'].apply(convert_as_of_date_format)
 
     dimmit_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Latest Report Date'].max()
-    dimmit_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Load DateTime'].max()[:16]
+    dimmit_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Latest Load DateTime'].max()[:16]
     maverick_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Latest Report Date'].max()
-    maverick_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Load DateTime'].max()[:16]
+    maverick_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Latest Load DateTime'].max()[:16]
     zavala_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Latest Report Date'].max()
-    zavala_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Load DateTime'].max()[:16]
+    zavala_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Latest Load DateTime'].max()[:16]
 
     last_as_of_dict['Criminal Inactive'] = {
         'Dimmit': dimmit_criminal_inactive_latest_report_date,
@@ -808,11 +808,11 @@ with page_content.container():
             civil_inactive_df['Latest Report Date'] = civil_inactive_df['Latest Report Date'].apply(convert_as_of_date_format)
 
             dimmit_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Latest Report Date'].max()
-            dimmit_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Load DateTime'].max()[:16]
+            dimmit_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Latest Load DateTime'].max()[:16]
             maverick_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Latest Report Date'].max()
-            maverick_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Load DateTime'].max()[:16]
+            maverick_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Latest Load DateTime'].max()[:16]
             zavala_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Latest Report Date'].max()
-            zavala_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Load DateTime'].max()[:16]
+            zavala_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Latest Load DateTime'].max()[:16]
 
             as_of_date_list.append(dimmit_civil_inactive_latest_report_date)
             as_of_date_list.append(maverick_civil_inactive_latest_report_date)
@@ -835,11 +835,11 @@ with page_content.container():
             criminal_inactive_df['Latest Report Date'] = criminal_inactive_df['Latest Report Date'].apply(convert_as_of_date_format)
 
             dimmit_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Latest Report Date'].max()
-            dimmit_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Load DateTime'].max()[:16]
+            dimmit_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Latest Load DateTime'].max()[:16]
             maverick_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Latest Report Date'].max()
-            maverick_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Load DateTime'].max()[:16]
+            maverick_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Latest Load DateTime'].max()[:16]
             zavala_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Latest Report Date'].max()
-            zavala_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Load DateTime'].max()[:16]
+            zavala_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Latest Load DateTime'].max()[:16]
 
             as_of_date_list.append(dimmit_criminal_inactive_latest_report_date)
             as_of_date_list.append(maverick_criminal_inactive_latest_report_date)
