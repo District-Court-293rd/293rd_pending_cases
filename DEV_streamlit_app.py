@@ -404,36 +404,37 @@ else:
     }
 
 #Find the max as of date and inform the user of missing reports
-max_as_of_date = reverse_as_of_date_format(max(as_of_date_list))
+max_as_of_date = max(as_of_date_list)
+readable_max_as_of_date = reverse_as_of_date_format(max(as_of_date_list))
 
 missing_report_container = st.empty()
 with missing_report_container.container():
     if dimmit_civil_last_as_of_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + readable_max_as_of_date)
     if dimmit_civil_inactive_latest_report_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Dimmit Civil Inactive Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Dimmit Civil Inactive Report with an As Of Date = " + readable_max_as_of_date)
     if dimmit_criminal_last_as_of_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + readable_max_as_of_date)
     if dimmit_criminal_inactive_latest_report_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Dimmit Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Dimmit Criminal Inactive Report with an As Of Date = " + readable_max_as_of_date)
     if maverick_civil_last_as_of_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + readable_max_as_of_date)
     if maverick_civil_inactive_latest_report_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Maverick Civil Inactive Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Maverick Civil Inactive Report with an As Of Date = " + readable_max_as_of_date)
     if maverick_criminal_last_as_of_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + readable_max_as_of_date)
     if maverick_criminal_inactive_latest_report_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Maverick Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Maverick Criminal Inactive Report with an As Of Date = " + readable_max_as_of_date)
     if zavala_civil_last_as_of_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + readable_max_as_of_date)
     if zavala_civil_inactive_latest_report_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Zavala Civil Inactive Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Zavala Civil Inactive Report with an As Of Date = " + readable_max_as_of_date)
     if zavala_criminal_last_as_of_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + readable_max_as_of_date)
     if zavala_criminal_inactive_latest_report_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Zavala Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Zavala Criminal Inactive Report with an As Of Date = " + readable_max_as_of_date)
     if juvenile_last_as_of_date != max_as_of_date:
-        st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + max_as_of_date)
+        st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + readable_max_as_of_date)
 
 #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
 with st.sidebar:
@@ -852,36 +853,37 @@ with page_content.container():
             zavala_criminal_inactive_latest_load_date = '0000-00-00 00:00'
 
         #Find the max as of date and inform the user of missing reports
-        max_as_of_date = reverse_as_of_date_format(max(as_of_date_list))
+        max_as_of_date = max(as_of_date_list)
+        readable_max_as_of_date = reverse_as_of_date_format(max(as_of_date_list))
 
         missing_report_container = st.empty()
         with missing_report_container.container():
             if dimmit_civil_last_as_of_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + readable_max_as_of_date)
             if dimmit_civil_inactive_latest_report_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Dimmit Civil Inactive Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Dimmit Civil Inactive Report with an As Of Date = " + readable_max_as_of_date)
             if dimmit_criminal_last_as_of_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + readable_max_as_of_date)
             if dimmit_criminal_inactive_latest_report_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Dimmit Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Dimmit Criminal Inactive Report with an As Of Date = " + readable_max_as_of_date)
             if maverick_civil_last_as_of_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + readable_max_as_of_date)
             if maverick_civil_inactive_latest_report_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Maverick Civil Inactive Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Maverick Civil Inactive Report with an As Of Date = " + readable_max_as_of_date)
             if maverick_criminal_last_as_of_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + readable_max_as_of_date)
             if maverick_criminal_inactive_latest_report_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Maverick Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Maverick Criminal Inactive Report with an As Of Date = " + readable_max_as_of_date)
             if zavala_civil_last_as_of_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + readable_max_as_of_date)
             if zavala_civil_inactive_latest_report_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Zavala Civil Inactive Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Zavala Civil Inactive Report with an As Of Date = " + readable_max_as_of_date)
             if zavala_criminal_last_as_of_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + readable_max_as_of_date)
             if zavala_criminal_inactive_latest_report_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Zavala Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Zavala Criminal Inactive Report with an As Of Date = " + readable_max_as_of_date)
             if juvenile_last_as_of_date != max_as_of_date:
-                st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + max_as_of_date)
+                st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + readable_max_as_of_date)
 
         #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
         with st.sidebar:
