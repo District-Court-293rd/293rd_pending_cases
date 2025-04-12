@@ -237,8 +237,8 @@ st.set_page_config(
 
 #Gather the most recent 'As Of' and 'Load' dates for each section
 common_df = get_spreadsheet_data("DEV_Common_Table", credentials)
-civil_inactive_df = get_spreadsheet_data("DEV_Civil_Inactive_Cases")
-criminal_inactive_df = get_spreadsheet_data("DEV_Criminal_Inactive_Cases")
+civil_inactive_df = get_spreadsheet_data("DEV_Civil_Inactive_Cases", credentials)
+criminal_inactive_df = get_spreadsheet_data("DEV_Criminal_Inactive_Cases", credentials)
 
 if len(common_df) > 0:
     #Verify the columns are string types. Google sheets can mess with the data types
@@ -712,8 +712,8 @@ with page_content.container():
 
         #Gather the most recent 'As Of' and 'Load' dates for each section
         common_df = get_spreadsheet_data("DEV_Common_Table", credentials)
-        civil_inactive_df = get_spreadsheet_data("DEV_Civil_Inactive_Cases")
-        criminal_inactive_df = get_spreadsheet_data("DEV_Criminal_Inactive_Cases")
+        civil_inactive_df = get_spreadsheet_data("DEV_Civil_Inactive_Cases", credentials)
+        criminal_inactive_df = get_spreadsheet_data("DEV_Criminal_Inactive_Cases", credentials)
 
         if len(common_df) > 0:
             #Verify the columns are string types. Google sheets can mess with the data types
