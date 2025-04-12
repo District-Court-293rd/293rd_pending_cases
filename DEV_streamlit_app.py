@@ -290,6 +290,21 @@ if len(common_df) > 0:
                         juvenile_last_as_of_date]
     
 else:
+    dimmit_civil_last_as_of_date = '00000000'
+    dimmit_civil_last_load_date = '00000000'
+    dimmit_criminal_last_as_of_date = '00000000'
+    dimmit_criminal_last_load_date = '00000000'
+    maverick_civil_last_as_of_date = '00000000'
+    maverick_civil_last_load_date = '00000000'
+    maverick_criminal_last_as_of_date = '00000000'
+    maverick_criminal_last_load_date = '00000000'
+    zavala_civil_last_as_of_date = '00000000'
+    zavala_civil_last_load_date = '00000000'
+    zavala_criminal_last_as_of_date = '00000000'
+    zavala_criminal_last_load_date = '00000000'
+    juvenile_last_as_of_date = '00000000'
+    juvenile_last_load_date = '00000000'
+
     #Create a dictionary that we can use to store the last as of date for each county and report type
     last_as_of_dict = {
         'Civil': {
@@ -334,6 +349,13 @@ if len(civil_inactive_df) > 0:
     as_of_date_list.append(maverick_civil_inactive_latest_report_date)
     as_of_date_list.append(zavala_civil_inactive_latest_report_date)
 else:
+    dimmit_civil_inactive_latest_report_date = '00000000'
+    dimmit_civil_inactive_latest_load_date = '00000000'
+    maverick_civil_inactive_latest_report_date = '00000000'
+    maverick_civil_inactive_latest_load_date = '00000000'
+    zavala_civil_inactive_latest_report_date = '00000000'
+    zavala_civil_inactive_latest_load_date = '00000000'
+
     #Create a dictionary that we can use to store the last as of date for each county and report type
     last_as_of_dict['Civil Inactive'] = {
         'Dimmit': '00000000',
@@ -367,6 +389,13 @@ if len(criminal_inactive_df) > 0:
     as_of_date_list.append(maverick_criminal_inactive_latest_report_date)
     as_of_date_list.append(zavala_criminal_inactive_latest_report_date)
 else:
+    dimmit_criminal_inactive_latest_report_date = '00000000'
+    dimmit_criminal_inactive_latest_load_date = '00000000'
+    maverick_criminal_inactive_latest_report_date = '00000000'
+    maverick_criminal_inactive_latest_load_date = '00000000'
+    zavala_criminal_inactive_latest_report_date = '00000000'
+    zavala_criminal_inactive_latest_load_date = '00000000'
+
     #Create a dictionary that we can use to store the last as of date for each county and report type
     last_as_of_dict['Criminal Inactive'] = {
         'Dimmit': '00000000',
@@ -750,6 +779,21 @@ with page_content.container():
                                 juvenile_last_as_of_date]
             
         else:
+            dimmit_civil_last_as_of_date = '00000000'
+            dimmit_civil_last_load_date = '00000000'
+            dimmit_criminal_last_as_of_date = '00000000'
+            dimmit_criminal_last_load_date = '00000000'
+            maverick_civil_last_as_of_date = '00000000'
+            maverick_civil_last_load_date = '00000000'
+            maverick_criminal_last_as_of_date = '00000000'
+            maverick_criminal_last_load_date = '00000000'
+            zavala_civil_last_as_of_date = '00000000'
+            zavala_civil_last_load_date = '00000000'
+            zavala_criminal_last_as_of_date = '00000000'
+            zavala_criminal_last_load_date = '00000000'
+            juvenile_last_as_of_date = '00000000'
+            juvenile_last_load_date = '00000000'
+
             #Create a list to find the max as of date
             as_of_date_list = ['00000000']
 
@@ -772,6 +816,13 @@ with page_content.container():
             as_of_date_list.append(dimmit_civil_inactive_latest_report_date)
             as_of_date_list.append(maverick_civil_inactive_latest_report_date)
             as_of_date_list.append(zavala_civil_inactive_latest_report_date)
+        else:
+            dimmit_civil_inactive_latest_report_date = '00000000'
+            dimmit_civil_inactive_latest_load_date = '00000000'
+            maverick_civil_inactive_latest_report_date = '00000000'
+            maverick_civil_inactive_latest_load_date = '00000000'
+            zavala_civil_inactive_latest_report_date = '00000000'
+            zavala_civil_inactive_latest_load_date = '00000000'
 
         if len(criminal_inactive_df) > 0:
             #Verify the columns are string types. Google sheets can mess with the data types
@@ -792,6 +843,13 @@ with page_content.container():
             as_of_date_list.append(dimmit_criminal_inactive_latest_report_date)
             as_of_date_list.append(maverick_criminal_inactive_latest_report_date)
             as_of_date_list.append(zavala_criminal_inactive_latest_report_date)
+        else:
+            dimmit_criminal_inactive_latest_report_date = '00000000'
+            dimmit_criminal_inactive_latest_load_date = '00000000'
+            maverick_criminal_inactive_latest_report_date = '00000000'
+            maverick_criminal_inactive_latest_load_date = '00000000'
+            zavala_criminal_inactive_latest_report_date = '00000000'
+            zavala_criminal_inactive_latest_load_date = '00000000'
 
         #Find the max as of date and inform the user of missing reports
         max_as_of_date = reverse_as_of_date_format(max(as_of_date_list))
