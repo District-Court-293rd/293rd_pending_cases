@@ -446,13 +446,15 @@ def prepare_inactive_cases(df):
     This function will prepare the inactive case dataframe to be uploaded to the google sheet.
     It will primarily be used to convert lists of strings to individual strings joined on new lines.
     """
+    #the df could be empty, so do a check.
+    if len(df) > 0:
+        df['Inactive Start Date'] = df['Inactive Start Date'].apply(convert_name_list_to_string).str.strip()
+        df['Inactive End Date'] = df['Inactive End Date'].apply(convert_name_list_to_string).str.strip()
+        df['Inactive Reason'] = df['Inactive Reason'].apply(convert_name_list_to_string).str.strip()
 
-    df['Inactive Start Date'] = df['Inactive Start Date'].apply(convert_name_list_to_string).str.strip()
-    df['Inactive End Date'] = df['Inactive End Date'].apply(convert_name_list_to_string).str.strip()
-    df['Inactive Reason'] = df['Inactive Reason'].apply(convert_name_list_to_string).str.strip()
-
-    #Create Load DateTime column
-    america_central_tz = pytz.timezone('America/Chicago')
-    df['Load DateTime'] = str(datetime.now(tz = america_central_tz))
+        #Create Load DateTime column
+        america_central_tz = pytz.timezone('America/Chicago')
+        df['Load DateTime'] = str(datetime.now(tz = america_central_tz))
+        df['Latest Load DateTime'] = str(datetime.now(tz = america_central_tz))
 
     return df

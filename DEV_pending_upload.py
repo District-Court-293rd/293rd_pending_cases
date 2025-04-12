@@ -196,15 +196,11 @@ def update_spreadsheet(report):
         update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases)
     elif report['Report Type'] == 'Criminal Inactive':
         #Update the inactive spreadsheet.
-        if len(df) > 0:
-            DEV_prepare.prepare_inactive_cases(df)
-
+        DEV_prepare.prepare_inactive_cases(df)
         update_criminal_inactive_cases(df, report)
     elif report['Report Type'] == 'Civil Inactive':
         #Update the inactive spreadsheet.
-        if len(df) > 0:
-            DEV_prepare.prepare_inactive_cases(df)
-
+        DEV_prepare.prepare_inactive_cases(df)
         update_civil_inactive_cases(df, report)
     else:
         #Prepare the df and add new columns
@@ -923,6 +919,10 @@ def update_civil_inactive_cases(new_inactive_df, report):
         #Now append the active table df. This should give us all cases associated with the current county
         current_county_df = inactive_table_df.append(active_table_df, ignore_index = True)
 
+        #Update the 'Latest Report Date' and 'Latest Load DateTime' columns
+        current_county_df['Latest Report Date'] = report['As Of Date']
+        current_county_df['Latest Load DateTime'] = report['Load DateTime']
+
         #Now append current_county_df to the total inactive_table_df and remove duplicates, keeping last.
         #This should give use the entirely new, updated inactive table.
         current_inactive_table_df = current_inactive_table_df.append(current_county_df, ignore_index = True)
@@ -964,6 +964,10 @@ def update_civil_inactive_cases(new_inactive_df, report):
             inactive_table_df = inactive_table_df[~(inactive_table_df['Cause Number'].isin(reactivated_cases_df['Cause Number']))].reset_index(drop=True)
 
         #The active_table_df should contain all cases from the inactive report for this county in this case
+        #Update the 'Latest Report Date' and 'Latest Load DateTime' columns
+        active_table_df['Latest Report Date'] = report['As Of Date']
+        active_table_df['Latest Load DateTime'] = report['Load DateTime']
+
         #Now append active_table_df to the total inactive_table_df and remove duplicates, keeping last.
         #This should give use the entirely new, updated inactive table.
         current_inactive_table_df = current_inactive_table_df.append(active_table_df, ignore_index = True)
@@ -1075,6 +1079,10 @@ def update_criminal_inactive_cases(new_inactive_df, report):
         #Now append the active table df. This should give us all cases associated with the current county
         current_county_df = inactive_table_df.append(active_table_df, ignore_index = True)
 
+        #Update the 'Latest Report Date' and 'Latest Load DateTime' columns
+        current_county_df['Latest Report Date'] = report['As Of Date']
+        current_county_df['Latest Load DateTime'] = report['Load DateTime']
+
         #Now append current_county_df to the total inactive_table_df and remove duplicates, keeping last.
         #This should give use the entirely new, updated inactive table.
         current_inactive_table_df = current_inactive_table_df.append(current_county_df, ignore_index = True)
@@ -1116,6 +1124,10 @@ def update_criminal_inactive_cases(new_inactive_df, report):
             inactive_table_df = inactive_table_df[~(inactive_table_df['Cause Number'].isin(reactivated_cases_df['Cause Number']))].reset_index(drop=True)
 
         #The active_table_df should contain all cases from the inactive report for this county in this case
+        #Update the 'Latest Report Date' and 'Latest Load DateTime' columns
+        active_table_df['Latest Report Date'] = report['As Of Date']
+        active_table_df['Latest Load DateTime'] = report['Load DateTime']
+
         #Now append active_table_df to the total inactive_table_df and remove duplicates, keeping last.
         #This should give use the entirely new, updated inactive table.
         current_inactive_table_df = current_inactive_table_df.append(active_table_df, ignore_index = True)

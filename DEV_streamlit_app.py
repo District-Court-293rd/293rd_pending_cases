@@ -13,6 +13,8 @@ import gspread
 import streamlit_authenticator as stauth
 from pathlib import Path
 import re
+from datetime import datetime
+import pytz
 
 
 credentials = {
@@ -205,23 +207,23 @@ def check_report_requirements(county, report_type, is_293rd, as_of_date, last_as
     
     #Get the corresponding last as of date from the common table
     if report_type == 'Juvenile':
-        common_table_last_as_of_date = last_as_of_dict['Juvenile']
+        table_last_as_of_date = last_as_of_dict['Juvenile']
     elif report_type == 'Civil Disposed':
-        common_table_last_as_of_date = last_as_of_dict['Civil'][county]
+        table_last_as_of_date = last_as_of_dict['Civil'][county]
     elif report_type == 'Criminal Disposed':
-        common_table_last_as_of_date = last_as_of_dict['Criminal'][county]
+        table_last_as_of_date = last_as_of_dict['Criminal'][county]
     else:
-        common_table_last_as_of_date = last_as_of_dict[report_type][county]
+        table_last_as_of_date = last_as_of_dict[report_type][county]
 
     #If common table as of date is empty, set to all 0's
-    if len(common_table_last_as_of_date) == 0:
-        common_table_last_as_of_date = '00000000'
+    if len(table_last_as_of_date) == 0:
+        table_last_as_of_date = '00000000'
     
     #Convert the report as of date to a usable format
     as_of_date = convert_as_of_date_format(as_of_date)
 
     #Check that the as of date is greater than or equal to the last of date found in the common table
-    if as_of_date < common_table_last_as_of_date:
+    if as_of_date < table_last_as_of_date:
         st.error("The Report As Of Date Must Be Greater Than Or Equal to the Last As Of Date For That Report Type and County")
         report_meets_requirements = False
     
@@ -235,6 +237,8 @@ st.set_page_config(
 
 #Gather the most recent 'As Of' and 'Load' dates for each section
 common_df = get_spreadsheet_data("DEV_Common_Table", credentials)
+civil_inactive_df = get_spreadsheet_data("DEV_Civil_Inactive_Cases")
+criminal_inactive_df = get_spreadsheet_data("DEV_Criminal_Inactive_Cases")
 
 if len(common_df) > 0:
     #Verify the columns are string types. Google sheets can mess with the data types
@@ -285,57 +289,6 @@ if len(common_df) > 0:
                         zavala_criminal_last_as_of_date,
                         juvenile_last_as_of_date]
     
-    max_as_of_date = max(as_of_date_list)
-
-    missing_report_container = st.empty()
-    with missing_report_container.container():
-        if dimmit_civil_last_as_of_date != max_as_of_date:
-            st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-        if dimmit_criminal_last_as_of_date != max_as_of_date:
-            st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-        if maverick_civil_last_as_of_date != max_as_of_date:
-            st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-        if maverick_criminal_last_as_of_date != max_as_of_date:
-            st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-        if zavala_civil_last_as_of_date != max_as_of_date:
-            st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-        if zavala_criminal_last_as_of_date != max_as_of_date:
-            st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-        if juvenile_last_as_of_date != max_as_of_date:
-            st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-
-    #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
-    with st.sidebar:
-        sidebar_container = st.empty()
-        with sidebar_container.container():
-            st.subheader("Dimmit Civil Cases")
-            st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_civil_last_as_of_date))
-            st.write("Latest Load Date: " + convert_datetime_format(dimmit_civil_last_load_date))
-            st.divider()
-            st.subheader("Dimmit Criminal Cases")
-            st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_criminal_last_as_of_date))
-            st.write("Latest Load Date: " + convert_datetime_format(dimmit_criminal_last_load_date))
-            st.divider()
-            st.subheader("Maverick Civil Cases")
-            st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_civil_last_as_of_date))
-            st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
-            st.divider()
-            st.subheader("Maverick Criminal Cases")
-            st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_criminal_last_as_of_date))
-            st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
-            st.divider()
-            st.subheader("Zavala Civil Cases")
-            st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_civil_last_as_of_date))
-            st.write("Latest Load Date: " + convert_datetime_format(zavala_civil_last_load_date))
-            st.divider()
-            st.subheader("Zavala Criminal Cases")
-            st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_criminal_last_as_of_date))
-            st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_last_load_date))
-            st.divider()
-            st.subheader("Juvenile Cases")
-            st.write("Latest As Of Date: " + reverse_as_of_date_format(juvenile_last_as_of_date))
-            st.write("Latest Load Date: " + convert_datetime_format(juvenile_last_load_date))
-            st.divider()
 else:
     #Create a dictionary that we can use to store the last as of date for each county and report type
     last_as_of_dict = {
@@ -351,6 +304,164 @@ else:
         },
         'Juvenile': '00000000'
     }
+
+    #Create a list to find the max as of date
+    as_of_date_list = ['00000000']
+
+if len(civil_inactive_df) > 0:
+    #Verify the columns are string types. Google sheets can mess with the data types
+    civil_inactive_df['Latest Report Date'] = civil_inactive_df['Latest Report Date'].astype(str).str.strip()
+    civil_inactive_df['Latest Load DateTime'] = civil_inactive_df['Latest Load DateTime'].astype(str).str.strip()
+    civil_inactive_df['County'] = civil_inactive_df['County'].astype(str).str.strip()
+
+    #Convert 'Last As Of Date' to YYYYMMDD format so that the max() function works properly.
+    civil_inactive_df['Latest Report Date'] = civil_inactive_df['Latest Report Date'].apply(convert_as_of_date_format)
+
+    dimmit_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Latest Report Date'].max()
+    dimmit_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Load DateTime'].max()[:16]
+    maverick_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Latest Report Date'].max()
+    maverick_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Load DateTime'].max()[:16]
+    zavala_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Latest Report Date'].max()
+    zavala_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Load DateTime'].max()[:16]
+
+    last_as_of_dict['Civil Inactive'] = {
+        'Dimmit': dimmit_civil_inactive_latest_report_date,
+        'Maverick': maverick_civil_inactive_latest_report_date,
+        'Zavala': zavala_civil_inactive_latest_report_date
+    }
+
+    as_of_date_list.append(dimmit_civil_inactive_latest_report_date)
+    as_of_date_list.append(maverick_civil_inactive_latest_report_date)
+    as_of_date_list.append(zavala_civil_inactive_latest_report_date)
+else:
+    #Create a dictionary that we can use to store the last as of date for each county and report type
+    last_as_of_dict['Civil Inactive'] = {
+        'Dimmit': '00000000',
+        'Maverick': '00000000',
+        'Zavala': '00000000',
+    }
+
+if len(criminal_inactive_df) > 0:
+    #Verify the columns are string types. Google sheets can mess with the data types
+    criminal_inactive_df['Latest Report Date'] = criminal_inactive_df['Latest Report Date'].astype(str).str.strip()
+    criminal_inactive_df['Latest Load DateTime'] = criminal_inactive_df['Latest Load DateTime'].astype(str).str.strip()
+    criminal_inactive_df['County'] = criminal_inactive_df['County'].astype(str).str.strip()
+
+    #Convert 'Last As Of Date' to YYYYMMDD format so that the max() function works properly.
+    criminal_inactive_df['Latest Report Date'] = criminal_inactive_df['Latest Report Date'].apply(convert_as_of_date_format)
+
+    dimmit_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Latest Report Date'].max()
+    dimmit_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Load DateTime'].max()[:16]
+    maverick_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Latest Report Date'].max()
+    maverick_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Load DateTime'].max()[:16]
+    zavala_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Latest Report Date'].max()
+    zavala_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Load DateTime'].max()[:16]
+
+    last_as_of_dict['Criminal Inactive'] = {
+        'Dimmit': dimmit_criminal_inactive_latest_report_date,
+        'Maverick': maverick_criminal_inactive_latest_report_date,
+        'Zavala': zavala_criminal_inactive_latest_report_date
+    }
+
+    as_of_date_list.append(dimmit_criminal_inactive_latest_report_date)
+    as_of_date_list.append(maverick_criminal_inactive_latest_report_date)
+    as_of_date_list.append(zavala_criminal_inactive_latest_report_date)
+else:
+    #Create a dictionary that we can use to store the last as of date for each county and report type
+    last_as_of_dict['Criminal Inactive'] = {
+        'Dimmit': '00000000',
+        'Maverick': '00000000',
+        'Zavala': '00000000',
+    }
+
+#Find the max as of date and inform the user of missing reports
+max_as_of_date = reverse_as_of_date_format(max(as_of_date_list))
+
+missing_report_container = st.empty()
+with missing_report_container.container():
+    if dimmit_civil_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + max_as_of_date)
+    if dimmit_civil_inactive_latest_report_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Dimmit Civil Inactive Report with an As Of Date = " + max_as_of_date)
+    if dimmit_criminal_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + max_as_of_date)
+    if dimmit_criminal_inactive_latest_report_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Dimmit Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+    if maverick_civil_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + max_as_of_date)
+    if maverick_civil_inactive_latest_report_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Maverick Civil Inactive Report with an As Of Date = " + max_as_of_date)
+    if maverick_criminal_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + max_as_of_date)
+    if maverick_criminal_inactive_latest_report_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Maverick Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+    if zavala_civil_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + max_as_of_date)
+    if zavala_civil_inactive_latest_report_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Zavala Civil Inactive Report with an As Of Date = " + max_as_of_date)
+    if zavala_criminal_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + max_as_of_date)
+    if zavala_criminal_inactive_latest_report_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Zavala Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+    if juvenile_last_as_of_date != max_as_of_date:
+        st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + max_as_of_date)
+
+#Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
+with st.sidebar:
+    sidebar_container = st.empty()
+    with sidebar_container.container():
+        st.subheader("Dimmit Civil Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_civil_last_as_of_date))
+        st.write("Latest Load Date: " + convert_datetime_format(dimmit_civil_last_load_date))
+        st.divider()
+        st.subheader("Dimmit Civil Inactive Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_civil_inactive_latest_report_date))
+        st.write("Latest Load Date: " + convert_datetime_format(dimmit_civil_inactive_latest_load_date))
+        st.divider()
+        st.subheader("Dimmit Criminal Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_criminal_last_as_of_date))
+        st.write("Latest Load Date: " + convert_datetime_format(dimmit_criminal_last_load_date))
+        st.divider()
+        st.subheader("Dimmit Criminal Inactive Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_criminal_inactive_latest_report_date))
+        st.write("Latest Load Date: " + convert_datetime_format(dimmit_criminal_inactive_latest_load_date))
+        st.divider()
+        st.subheader("Maverick Civil Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_civil_last_as_of_date))
+        st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
+        st.divider()
+        st.subheader("Maverick Civil Inactive Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_civil_inactive_latest_report_date))
+        st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_inactive_latest_load_date))
+        st.divider()
+        st.subheader("Maverick Criminal Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_criminal_last_as_of_date))
+        st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
+        st.divider()
+        st.subheader("Maverick Criminal Inactive Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_criminal_inactive_latest_report_date))
+        st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_inactive_latest_load_date))
+        st.divider()
+        st.subheader("Zavala Civil Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_civil_last_as_of_date))
+        st.write("Latest Load Date: " + convert_datetime_format(zavala_civil_last_load_date))
+        st.divider()
+        st.subheader("Zavala Civil Inactive Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_civil_inactive_latest_report_date))
+        st.write("Latest Load Date: " + convert_datetime_format(zavala_civil_inactive_latest_load_date))
+        st.divider()
+        st.subheader("Zavala Criminal Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_criminal_last_as_of_date))
+        st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_last_load_date))
+        st.divider()
+        st.subheader("Zavala Criminal Inactive Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_criminal_inactive_latest_report_date))
+        st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_inactive_latest_load_date))
+        st.divider()
+        st.subheader("Juvenile Cases")
+        st.write("Latest As Of Date: " + reverse_as_of_date_format(juvenile_last_as_of_date))
+        st.write("Latest Load Date: " + convert_datetime_format(juvenile_last_load_date))
+        st.divider()
 
 #Create a placeholder for the page content
 page_content = st.empty()
@@ -478,6 +589,10 @@ with page_content.container():
                 else:
                     as_of_date = 'Unknown'
 
+                #In case of empty inactivity report, get the current load dateTime and add it to the report dict
+                america_central_tz = pytz.timezone('America/Chicago')
+                load_dateTime = str(datetime.now(tz = america_central_tz))
+
                 #Create the dictionary
                 temp_dict = {
                     'File Name': file_object.name,
@@ -485,7 +600,8 @@ with page_content.container():
                     'Report Type': report_type,
                     'Is 293rd': is_293rd,
                     'As Of Date': as_of_date,
-                    'Content': content
+                    'Content': content,
+                    'Load DateTime': load_dateTime
                 }
 
                 #Append temp_dict to report_list
@@ -544,7 +660,7 @@ with page_content.container():
         report_df = pd.DataFrame(report_list)
 
         duplicate_reports = report_df[report_df.duplicated(['County', 'Report Type'], keep = False)]
-        if len(duplicate_reports[duplicate_reports['Report Type'] != 'Inactive']) > 0:
+        if len(duplicate_reports[(duplicate_reports['Report Type'] != 'Criminal Inactive') & (duplicate_reports['Report Type'] != 'Civil Inactive')]) > 0:
             info_container.empty()
             progress_message_container.empty()
             progress_message_container.header("Error: At least one duplicate report found. Please add the correct report and try again.")
@@ -560,71 +676,44 @@ with page_content.container():
 
         #Use a for loop to iterate through the uploaded files
         for report in report_list:
-            if report['Report Type'] != 'Criminal Inactive' and report['Report Type'] != 'Civil Inactive':
 
-                #Inform the user which file is being processed
-                info_container.info("Verifying " + report['File Name'] + " meets report requirements...")
+            #Inform the user which file is being processed
+            info_container.info("Verifying " + report['File Name'] + " meets report requirements...")
 
-                #Check if report meets requirements
-                report_meets_requirements = check_report_requirements(report['County'], report['Report Type'], report['Is 293rd'], report['As Of Date'], last_as_of_dict)
+            #Check if report meets requirements
+            report_meets_requirements = check_report_requirements(report['County'], report['Report Type'], report['Is 293rd'], report['As Of Date'], last_as_of_dict)
 
-                #If report passes requirements check, build and prepare the dataframe, then update the spreadsheet
-                if report_meets_requirements == True:
-                    info_container.empty()
-                    info_container.info("Began Processing " + report['File Name'])
-                    DEV_pending_upload.update_spreadsheet(report)
-                else:
-                    st.error(report['File Name'] + " Did Not Meet Requirements and Will Not Be Processed. Please double check it is the correct version and date.")
-                    info_container.empty()
-                    #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
-                    bar_value += progress_per_file
-                    progress_bar.progress(bar_value)
-                    continue
-
-                #Leave a success message
-                success_container.empty()
-                st.success("Pending Reports was successfully updated with " + report['File Name'])
-
-                #Clear container
+            #If report passes requirements check, build and prepare the dataframe, then update the spreadsheet
+            if report_meets_requirements == True:
                 info_container.empty()
-
-                #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
-                bar_value += progress_per_file
-                progress_bar.progress(bar_value)
-            
-            elif report['Report Type'] == 'Criminal Inactive' or report['Report Type'] == 'Civil Inactive':
-                #Inform the user which file is being processed
-                info_container.info("Processing Inactivity Report: " + report['File Name'])
-
-                if report['County'] == 'Unknown':
-                    st.error("Could not identify county for Inactivity Report: " + report['File Name'])
-                    st.error("Skipping this file...")
-                    #Clear container
-                    info_container.empty()
-                    #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
-                    bar_value += progress_per_file
-                    progress_bar.progress(bar_value)
-                    continue
-
-                #Now process the report and update the spreadsheet
+                info_container.info("Began Processing " + report['File Name'])
                 DEV_pending_upload.update_spreadsheet(report)
-
-                #Leave a success message
-                success_container.empty()
-                st.success("Pending Reports was successfully updated with " + report['File Name'])
-
-                #Clear container
+            else:
+                st.error(report['File Name'] + " Did Not Meet Requirements and Will Not Be Processed. Please double check it is the correct version and date.")
                 info_container.empty()
-
                 #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
                 bar_value += progress_per_file
                 progress_bar.progress(bar_value)
+                continue
+
+            #Leave a success message
+            success_container.empty()
+            st.success("Pending Reports was successfully updated with " + report['File Name'])
+
+            #Clear container
+            info_container.empty()
+
+            #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
+            bar_value += progress_per_file
+            progress_bar.progress(bar_value)
 
         #Update message
         progress_message_container.header("Complete! All Accepted Files Processed Successfully!")
 
         #Gather the most recent 'As Of' and 'Load' dates for each section
         common_df = get_spreadsheet_data("DEV_Common_Table", credentials)
+        civil_inactive_df = get_spreadsheet_data("DEV_Civil_Inactive_Cases")
+        criminal_inactive_df = get_spreadsheet_data("DEV_Criminal_Inactive_Cases")
 
         if len(common_df) > 0:
             #Verify the columns are string types. Google sheets can mess with the data types
@@ -653,59 +742,140 @@ with page_content.container():
 
             #Create a list to find the max as of date
             as_of_date_list = [dimmit_civil_last_as_of_date,
-                               dimmit_criminal_last_as_of_date,
-                               maverick_civil_last_as_of_date,
-                               maverick_criminal_last_as_of_date,
-                               zavala_civil_last_as_of_date,
-                               zavala_criminal_last_as_of_date,
-                               juvenile_last_as_of_date]
+                                dimmit_criminal_last_as_of_date,
+                                maverick_civil_last_as_of_date,
+                                maverick_criminal_last_as_of_date,
+                                zavala_civil_last_as_of_date,
+                                zavala_criminal_last_as_of_date,
+                                juvenile_last_as_of_date]
             
-            max_as_of_date = max(as_of_date_list)
+        else:
+            #Create a list to find the max as of date
+            as_of_date_list = ['00000000']
 
-            missing_report_container.empty()
-            with missing_report_container.container():
-                if dimmit_civil_last_as_of_date != max_as_of_date:
-                    st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-                if dimmit_criminal_last_as_of_date != max_as_of_date:
-                    st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-                if maverick_civil_last_as_of_date != max_as_of_date:
-                    st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-                if maverick_criminal_last_as_of_date != max_as_of_date:
-                    st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-                if zavala_civil_last_as_of_date != max_as_of_date:
-                    st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-                if zavala_criminal_last_as_of_date != max_as_of_date:
-                    st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
-                if juvenile_last_as_of_date != max_as_of_date:
-                    st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + reverse_as_of_date_format(max_as_of_date))
+        if len(civil_inactive_df) > 0:
+            #Verify the columns are string types. Google sheets can mess with the data types
+            civil_inactive_df['Latest Report Date'] = civil_inactive_df['Latest Report Date'].astype(str).str.strip()
+            civil_inactive_df['Latest Load DateTime'] = civil_inactive_df['Latest Load DateTime'].astype(str).str.strip()
+            civil_inactive_df['County'] = civil_inactive_df['County'].astype(str).str.strip()
 
-            #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
-            #Empty the original content
-            sidebar_container.empty()
-            with st.sidebar:
+            #Convert 'Last As Of Date' to YYYYMMDD format so that the max() function works properly.
+            civil_inactive_df['Latest Report Date'] = civil_inactive_df['Latest Report Date'].apply(convert_as_of_date_format)
+
+            dimmit_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Latest Report Date'].max()
+            dimmit_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Dimmit']['Load DateTime'].max()[:16]
+            maverick_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Latest Report Date'].max()
+            maverick_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Maverick']['Load DateTime'].max()[:16]
+            zavala_civil_inactive_latest_report_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Latest Report Date'].max()
+            zavala_civil_inactive_latest_load_date = civil_inactive_df[civil_inactive_df['County'] == 'Zavala']['Load DateTime'].max()[:16]
+
+            as_of_date_list.append(dimmit_civil_inactive_latest_report_date)
+            as_of_date_list.append(maverick_civil_inactive_latest_report_date)
+            as_of_date_list.append(zavala_civil_inactive_latest_report_date)
+
+        if len(criminal_inactive_df) > 0:
+            #Verify the columns are string types. Google sheets can mess with the data types
+            criminal_inactive_df['Latest Report Date'] = criminal_inactive_df['Latest Report Date'].astype(str).str.strip()
+            criminal_inactive_df['Latest Load DateTime'] = criminal_inactive_df['Latest Load DateTime'].astype(str).str.strip()
+            criminal_inactive_df['County'] = criminal_inactive_df['County'].astype(str).str.strip()
+
+            #Convert 'Last As Of Date' to YYYYMMDD format so that the max() function works properly.
+            criminal_inactive_df['Latest Report Date'] = criminal_inactive_df['Latest Report Date'].apply(convert_as_of_date_format)
+
+            dimmit_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Latest Report Date'].max()
+            dimmit_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Dimmit']['Load DateTime'].max()[:16]
+            maverick_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Latest Report Date'].max()
+            maverick_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Maverick']['Load DateTime'].max()[:16]
+            zavala_criminal_inactive_latest_report_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Latest Report Date'].max()
+            zavala_criminal_inactive_latest_load_date = criminal_inactive_df[criminal_inactive_df['County'] == 'Zavala']['Load DateTime'].max()[:16]
+
+            as_of_date_list.append(dimmit_criminal_inactive_latest_report_date)
+            as_of_date_list.append(maverick_criminal_inactive_latest_report_date)
+            as_of_date_list.append(zavala_criminal_inactive_latest_report_date)
+
+        #Find the max as of date and inform the user of missing reports
+        max_as_of_date = reverse_as_of_date_format(max(as_of_date_list))
+
+        missing_report_container = st.empty()
+        with missing_report_container.container():
+            if dimmit_civil_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + max_as_of_date)
+            if dimmit_civil_inactive_latest_report_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Dimmit Civil Inactive Report with an As Of Date = " + max_as_of_date)
+            if dimmit_criminal_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Dimmit Criminal Report with an As Of Date = " + max_as_of_date)
+            if dimmit_criminal_inactive_latest_report_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Dimmit Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+            if maverick_civil_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Maverick Civil Report with an As Of Date = " + max_as_of_date)
+            if maverick_civil_inactive_latest_report_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Maverick Civil Inactive Report with an As Of Date = " + max_as_of_date)
+            if maverick_criminal_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Maverick Criminal Report with an As Of Date = " + max_as_of_date)
+            if maverick_criminal_inactive_latest_report_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Maverick Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+            if zavala_civil_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Zavala Civil Report with an As Of Date = " + max_as_of_date)
+            if zavala_civil_inactive_latest_report_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Zavala Civil Inactive Report with an As Of Date = " + max_as_of_date)
+            if zavala_criminal_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Zavala Criminal Report with an As Of Date = " + max_as_of_date)
+            if zavala_criminal_inactive_latest_report_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Zavala Criminal Inactive Report with an As Of Date = " + max_as_of_date)
+            if juvenile_last_as_of_date != max_as_of_date:
+                st.info("Report Missing - Please Upload a Juvenile Report with an As Of Date = " + max_as_of_date)
+
+        #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
+        with st.sidebar:
+            sidebar_container = st.empty()
+            with sidebar_container.container():
                 st.subheader("Dimmit Civil Cases")
                 st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_civil_last_as_of_date))
                 st.write("Latest Load Date: " + convert_datetime_format(dimmit_civil_last_load_date))
+                st.divider()
+                st.subheader("Dimmit Civil Inactive Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_civil_inactive_latest_report_date))
+                st.write("Latest Load Date: " + convert_datetime_format(dimmit_civil_inactive_latest_load_date))
                 st.divider()
                 st.subheader("Dimmit Criminal Cases")
                 st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_criminal_last_as_of_date))
                 st.write("Latest Load Date: " + convert_datetime_format(dimmit_criminal_last_load_date))
                 st.divider()
+                st.subheader("Dimmit Criminal Inactive Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(dimmit_criminal_inactive_latest_report_date))
+                st.write("Latest Load Date: " + convert_datetime_format(dimmit_criminal_inactive_latest_load_date))
+                st.divider()
                 st.subheader("Maverick Civil Cases")
                 st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_civil_last_as_of_date))
                 st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
+                st.divider()
+                st.subheader("Maverick Civil Inactive Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_civil_inactive_latest_report_date))
+                st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_inactive_latest_load_date))
                 st.divider()
                 st.subheader("Maverick Criminal Cases")
                 st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_criminal_last_as_of_date))
                 st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_last_load_date))
                 st.divider()
+                st.subheader("Maverick Criminal Inactive Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(maverick_criminal_inactive_latest_report_date))
+                st.write("Latest Load Date: " + convert_datetime_format(maverick_civil_inactive_latest_load_date))
+                st.divider()
                 st.subheader("Zavala Civil Cases")
                 st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_civil_last_as_of_date))
                 st.write("Latest Load Date: " + convert_datetime_format(zavala_civil_last_load_date))
                 st.divider()
+                st.subheader("Zavala Civil Inactive Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_civil_inactive_latest_report_date))
+                st.write("Latest Load Date: " + convert_datetime_format(zavala_civil_inactive_latest_load_date))
+                st.divider()
                 st.subheader("Zavala Criminal Cases")
                 st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_criminal_last_as_of_date))
                 st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_last_load_date))
+                st.divider()
+                st.subheader("Zavala Criminal Inactive Cases")
+                st.write("Latest As Of Date: " + reverse_as_of_date_format(zavala_criminal_inactive_latest_report_date))
+                st.write("Latest Load Date: " + convert_datetime_format(zavala_criminal_inactive_latest_load_date))
                 st.divider()
                 st.subheader("Juvenile Cases")
                 st.write("Latest As Of Date: " + reverse_as_of_date_format(juvenile_last_as_of_date))
