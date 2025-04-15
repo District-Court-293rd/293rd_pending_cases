@@ -21,6 +21,7 @@ ols_criminal_sheet_name = 'DEV_OLS_Criminal_Cases'
 closed_ols_criminal_sheet_name = 'DEV_Closed_OLS_Criminal_Cases'
 criminal_inactive_sheet_name = 'DEV_Criminal_Inactive_Cases'
 civil_inactive_sheet_name = 'DEV_Civil_Inactive_Cases'
+report_tracker_sheet_name = 'DEV_Report_Tracker'
 
 credentials = {
   "type": st.secrets["type"],
@@ -171,6 +172,38 @@ def convert_to_common_table_df(case_df):
 
     return df
 
+def update_report_tracker(report):
+    """
+    This function will update the report tracker tab with the 'As Of Date' of the report just uploaded.
+    This allows us to keep track of the which reports were uploaded last and if any still need to be uploaded
+    before continuing with a future date.
+    """
+    #Set up credentials to interact with Google Sheets
+    gc = gspread.service_account_from_dict(credentials)
+    
+    #Open 'Pending Reports' Google Sheet By Name
+    gsheet = gc.open(google_sheet_name)
+
+    #Make connection to 'DEV_Report_Tracker'
+    report_tracker_sheet = gsheet.worksheet(report_tracker_sheet_name)
+
+    #Load the data currently on the report tracker tab in the 'Pending Reports' spreadsheet
+    report_tracker_df = pd.DataFrame(report_tracker_sheet.get_all_records())
+
+    #Verify the columns are string types. Google sheets can mess with the data types
+    report_tracker_df['County'] = report_tracker_df['County'].astype(str).str.strip()
+    report_tracker_df['Report Type'] = report_tracker_df['Report Type'].astype(str).str.strip()
+
+    #Update the df with the new report date and load datetime
+    report_tracker_df.loc[(report_tracker_df['County'] == report['County']) & (report_tracker_df['Report Type'] == report['Report Type']), ['Report Date']] = report['As Of Date']
+    report_tracker_df.loc[(report_tracker_df['County'] == report['County']) & (report_tracker_df['Report Type'] == report['Report Type']), ['Load DateTime']] = report['Load DateTime']
+
+    #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
+    report_tracker_sheet.clear()
+    report_tracker_df.sort_values(by = ['County','Report Type'], ignore_index=True, inplace=True)
+    report_tracker_sheet.update([report_tracker_df.columns.values.tolist()] + report_tracker_df.values.tolist())
+
+
 def update_spreadsheet(report):
     """
     This function takes in a list containing the file paths of the PDFs that need to be extracted. It'll loop
@@ -216,6 +249,9 @@ def update_spreadsheet(report):
         else:
             #Add to civil cases tab
             update_civil_cases(df)
+
+    #Update the report tracker tab
+    update_report_tracker(report)
     
     return
     
@@ -919,10 +955,6 @@ def update_civil_inactive_cases(new_inactive_df, report):
         #Now append the active table df. This should give us all cases associated with the current county
         current_county_df = inactive_table_df.append(active_table_df, ignore_index = True)
 
-        #Update the 'Latest Report Date' and 'Latest Load DateTime' columns
-        current_county_df['Latest Report Date'] = report['As Of Date']
-        current_county_df['Latest Load DateTime'] = report['Load DateTime']
-
         #Now append current_county_df to the total inactive_table_df and remove duplicates, keeping last.
         #This should give use the entirely new, updated inactive table.
         current_inactive_table_df = current_inactive_table_df.append(current_county_df, ignore_index = True)
@@ -964,10 +996,6 @@ def update_civil_inactive_cases(new_inactive_df, report):
             inactive_table_df = inactive_table_df[~(inactive_table_df['Cause Number'].isin(reactivated_cases_df['Cause Number']))].reset_index(drop=True)
 
         #The active_table_df should contain all cases from the inactive report for this county in this case
-        #Update the 'Latest Report Date' and 'Latest Load DateTime' columns
-        active_table_df['Latest Report Date'] = report['As Of Date']
-        active_table_df['Latest Load DateTime'] = report['Load DateTime']
-
         #Now append active_table_df to the total inactive_table_df and remove duplicates, keeping last.
         #This should give use the entirely new, updated inactive table.
         current_inactive_table_df = current_inactive_table_df.append(active_table_df, ignore_index = True)
@@ -1079,10 +1107,6 @@ def update_criminal_inactive_cases(new_inactive_df, report):
         #Now append the active table df. This should give us all cases associated with the current county
         current_county_df = inactive_table_df.append(active_table_df, ignore_index = True)
 
-        #Update the 'Latest Report Date' and 'Latest Load DateTime' columns
-        current_county_df['Latest Report Date'] = report['As Of Date']
-        current_county_df['Latest Load DateTime'] = report['Load DateTime']
-
         #Now append current_county_df to the total inactive_table_df and remove duplicates, keeping last.
         #This should give use the entirely new, updated inactive table.
         current_inactive_table_df = current_inactive_table_df.append(current_county_df, ignore_index = True)
@@ -1124,10 +1148,6 @@ def update_criminal_inactive_cases(new_inactive_df, report):
             inactive_table_df = inactive_table_df[~(inactive_table_df['Cause Number'].isin(reactivated_cases_df['Cause Number']))].reset_index(drop=True)
 
         #The active_table_df should contain all cases from the inactive report for this county in this case
-        #Update the 'Latest Report Date' and 'Latest Load DateTime' columns
-        active_table_df['Latest Report Date'] = report['As Of Date']
-        active_table_df['Latest Load DateTime'] = report['Load DateTime']
-
         #Now append active_table_df to the total inactive_table_df and remove duplicates, keeping last.
         #This should give use the entirely new, updated inactive table.
         current_inactive_table_df = current_inactive_table_df.append(active_table_df, ignore_index = True)
