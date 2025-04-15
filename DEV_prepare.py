@@ -455,6 +455,5 @@ def prepare_inactive_cases(df):
         #Create Load DateTime column
         america_central_tz = pytz.timezone('America/Chicago')
         df['Load DateTime'] = str(datetime.now(tz = america_central_tz))
-        df['Latest Load DateTime'] = str(datetime.now(tz = america_central_tz))
 
     return df
