@@ -787,7 +787,7 @@ as_of_date_list = [dimmit_civil_last_as_of_date,
 max_as_of_date = max(as_of_date_list)
 readable_max_as_of_date = reverse_as_of_date_format(max(as_of_date_list))
 
-missing_report_container = st.empty()
+missing_report_container.empty()
 with missing_report_container.container():
     if dimmit_civil_last_as_of_date != max_as_of_date:
         st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + readable_max_as_of_date)
@@ -830,7 +830,7 @@ with missing_report_container.container():
 
 #Create a sidebar to display the most recent 'As Of' and 'Load' dates for each section
 with st.sidebar:
-    sidebar_container = st.empty()
+    sidebar_container.empty()
     with sidebar_container.container():
         st.subheader("Dimmit County")
         st.write("Latest Civil Pending Report Date: " + reverse_as_of_date_format(dimmit_civil_last_as_of_date))
