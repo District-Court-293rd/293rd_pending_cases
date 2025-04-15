@@ -1041,7 +1041,6 @@ def build_civil_inactive_cases_dataframe(text):
     df["Original As Of Date"] = report_as_of_date
     df["Estimated Inactive End Date"] = ''
     df["Last As Of Date"] = report_as_of_date
-    df["Latest Report Date"] = report_as_of_date
     
     return df
 
@@ -1225,6 +1224,5 @@ def build_criminal_inactive_cases_dataframe(text):
     df["Original As Of Date"] = report_as_of_date
     df["Estimated Inactive End Date"] = ''
     df["Last As Of Date"] = report_as_of_date
-    df["Latest Report Date"] = report_as_of_date
     
     return df
