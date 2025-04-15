@@ -247,25 +247,25 @@ if len(report_tracker_df) > 0:
     #Convert 'Last As Of Date' to YYYYMMDD format so that the max() function works properly.
     report_tracker_df['Report Date'] = report_tracker_df['Report Date'].apply(convert_as_of_date_format)
 
-    dimmit_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'][0]
-    dimmit_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'][0]
-    dimmit_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'][0]
-    dimmit_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'][0]
-    dimmit_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'][0]
-    dimmit_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'][0]
-    maverick_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'][0]
-    maverick_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'][0]
-    maverick_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'][0]
-    maverick_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'][0]
-    maverick_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'][0]
-    maverick_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'][0]
-    zavala_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'][0]
-    zavala_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'][0]
-    zavala_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'][0]
-    zavala_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'][0]
-    zavala_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'][0]
-    zavala_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'][0]
-    juvenile_last_as_of_date = report_tracker_df[report_tracker_df['Report Type'] == 'Juvenile']['Report Date'][0]
+    dimmit_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'].max()
+    dimmit_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'].max()
+    dimmit_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'].max()
+    dimmit_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'].max()
+    dimmit_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'].max()
+    dimmit_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'].max()
+    maverick_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'].max()
+    maverick_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'].max()
+    maverick_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'].max()
+    maverick_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'].max()
+    maverick_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'].max()
+    maverick_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'].max()
+    zavala_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'].max()
+    zavala_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'].max()
+    zavala_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'].max()
+    zavala_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'].max()
+    zavala_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'].max()
+    zavala_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'].max()
+    juvenile_last_as_of_date = report_tracker_df[report_tracker_df['Report Type'] == 'Juvenile']['Report Date'].max()
     
 else:
     dimmit_civil_last_as_of_date = '00000000'
@@ -680,25 +680,25 @@ with page_content.container():
             #Convert 'Last As Of Date' to YYYYMMDD format so that the max() function works properly.
             report_tracker_df['Report Date'] = report_tracker_df['Report Date'].apply(convert_as_of_date_format)
 
-            dimmit_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'][0]
-            dimmit_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'][0]
-            dimmit_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'][0]
-            dimmit_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'][0]
-            dimmit_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'][0]
-            dimmit_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'][0]
-            maverick_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'][0]
-            maverick_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'][0]
-            maverick_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'][0]
-            maverick_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'][0]
-            maverick_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'][0]
-            maverick_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'][0]
-            zavala_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'][0]
-            zavala_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'][0]
-            zavala_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'][0]
-            zavala_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'][0]
-            zavala_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'][0]
-            zavala_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'][0]
-            juvenile_last_as_of_date = report_tracker_df[report_tracker_df['Report Type'] == 'Juvenile']['Report Date'][0]
+            dimmit_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'].max()
+            dimmit_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'].max()
+            dimmit_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'].max()
+            dimmit_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'].max()
+            dimmit_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'].max()
+            dimmit_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Dimmit') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'].max()
+            maverick_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'].max()
+            maverick_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'].max()
+            maverick_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'].max()
+            maverick_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'].max()
+            maverick_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'].max()
+            maverick_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Maverick') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'].max()
+            zavala_civil_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil')]['Report Date'].max()
+            zavala_civil_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil Inactive')]['Report Date'].max()
+            zavala_civil_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Civil Disposed')]['Report Date'].max()
+            zavala_criminal_last_as_of_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal')]['Report Date'].max()
+            zavala_criminal_inactive_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal Inactive')]['Report Date'].max()
+            zavala_criminal_disposed_latest_report_date = report_tracker_df[(report_tracker_df['County'] == 'Zavala') & (report_tracker_df['Report Type'] == 'Criminal Disposed')]['Report Date'].max()
+            juvenile_last_as_of_date = report_tracker_df[report_tracker_df['Report Type'] == 'Juvenile']['Report Date'].max()
             
         else:
             dimmit_civil_last_as_of_date = '00000000'
@@ -762,7 +762,7 @@ with page_content.container():
         #Create a list to find the max as of date
         #But first clear the list
         as_of_date_list = []
-        
+
         as_of_date_list = [dimmit_civil_last_as_of_date,
                             dimmit_civil_inactive_latest_report_date,
                             dimmit_civil_disposed_latest_report_date,
