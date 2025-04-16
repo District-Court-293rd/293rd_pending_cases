@@ -21,6 +21,7 @@ ols_criminal_sheet_name = 'OLS Criminal Cases'
 closed_ols_criminal_sheet_name = 'Closed OLS Criminal Cases'
 criminal_inactive_sheet_name = 'Inactive Criminal Cases'
 civil_inactive_sheet_name = 'Inactive Civil Cases'
+report_tracker_sheet_name = 'Report Tracker'
 
 credentials = {
   "type": st.secrets["type"],
@@ -171,6 +172,39 @@ def convert_to_common_table_df(case_df):
 
     return df
 
+def update_report_tracker(report):
+    """
+    This function will update the report tracker tab with the 'As Of Date' of the report just uploaded.
+    This allows us to keep track of the which reports were uploaded last and if any still need to be uploaded
+    before continuing with a future date.
+    """
+    #Set up credentials to interact with Google Sheets
+    gc = gspread.service_account_from_dict(credentials)
+    
+    #Open 'Pending Reports' Google Sheet By Name
+    gsheet = gc.open(google_sheet_name)
+
+    #Make connection to 'DEV_Report_Tracker'
+    report_tracker_sheet = gsheet.worksheet(report_tracker_sheet_name)
+
+    #Load the data currently on the report tracker tab in the 'Pending Reports' spreadsheet
+    report_tracker_df = pd.DataFrame(report_tracker_sheet.get_all_records())
+
+    #Verify the columns are string types. Google sheets can mess with the data types
+    report_tracker_df['County'] = report_tracker_df['County'].astype(str).str.strip()
+    report_tracker_df['Report Type'] = report_tracker_df['Report Type'].astype(str).str.strip()
+
+    #Update the df with the new report date and load datetime
+    report_tracker_df.loc[(report_tracker_df['County'] == report['County']) & (report_tracker_df['Report Type'] == report['Report Type']), ['Report Date']] = report['As Of Date']
+    report_tracker_df.loc[(report_tracker_df['County'] == report['County']) & (report_tracker_df['Report Type'] == report['Report Type']), ['Load DateTime']] = report['Load DateTime']
+
+    #Finally upload the common_table_df to the common table worksheet in 'Pending Reports' spreadsheet
+    report_tracker_sheet.clear()
+    report_tracker_df.sort_values(by = ['County','Report Type'], ignore_index=True, inplace=True)
+    report_tracker_sheet.update([report_tracker_df.columns.values.tolist()] + report_tracker_df.values.tolist())
+
+
+
 def update_spreadsheet(report):
     """
     This function takes in a list containing the file paths of the PDFs that need to be extracted. It'll loop
@@ -196,15 +230,11 @@ def update_spreadsheet(report):
         update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases)
     elif report['Report Type'] == 'Criminal Inactive':
         #Update the inactive spreadsheet.
-        if len(df) > 0:
-            PROD_prepare.prepare_inactive_cases(df)
-
+        PROD_prepare.prepare_inactive_cases(df)
         update_criminal_inactive_cases(df, report)
     elif report['Report Type'] == 'Civil Inactive':
         #Update the inactive spreadsheet.
-        if len(df) > 0:
-            PROD_prepare.prepare_inactive_cases(df)
-
+        PROD_prepare.prepare_inactive_cases(df)
         update_civil_inactive_cases(df, report)
     else:
         #Prepare the df and add new columns
@@ -220,6 +250,9 @@ def update_spreadsheet(report):
         else:
             #Add to civil cases tab
             update_civil_cases(df)
+    
+    #Update the report tracker tab
+    update_report_tracker(report)
     
     return
     

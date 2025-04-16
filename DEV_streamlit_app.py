@@ -235,7 +235,7 @@ st.set_page_config(
      page_title="DEV Pending Reports",
  )
 
-#Gather the most recent 'As Of' and 'Load' dates for each section
+#Gather the most recent 'As Of' dates for each section
 report_tracker_df = get_spreadsheet_data("DEV_Report_Tracker", credentials)
 
 if len(report_tracker_df) > 0:
@@ -453,8 +453,9 @@ with page_content.container():
         #How much progress should be made per file?
         progress_per_file = int((100 - bar_value) / len(file_objects))
 
-        #Also create a container for the info messages
+        #Also create a container for the info and error messages
         info_container = st.empty()
+        error_container = st.empty()
 
         #Use a loop to create a dictionary for each uploaded report
         #Tell the user what's happening
@@ -571,7 +572,8 @@ with page_content.container():
                 
             else:
                 #Print an error message
-                st.error("A File Was Not Uploaded Correctly. Please Try Again")
+                error_container.error("A File Was Not Uploaded Correctly. Please Try Again")
+                st.stop()
 
         #Tell the user we have started the batch checks
         progress_message_container.empty()
@@ -586,7 +588,7 @@ with page_content.container():
                 info_container.empty()
                 progress_message_container.empty()
                 progress_message_container.header("Error: Please verify the As Of Date is the same for each report and try again.")
-                st.error("Report As Of Dates Must All Match. One or more report's as of date is not the same as the others.")
+                error_container.error("Report As Of Dates Must All Match. One or more report's as of date is not the same as the others.")
                 st.stop()
         
         success_container = st.empty()
@@ -603,7 +605,7 @@ with page_content.container():
             info_container.empty()
             progress_message_container.empty()
             progress_message_container.header("Error: A Report's As Of Date Is Greater Than The Allowed Maximum As Of Date.")
-            st.error("All Reports Must Be Updated To " + reverse_as_of_date_format(max_as_of_date) + " Before Updating To " + reverse_as_of_date_format(as_of_date_list[-1]) + ". Please Try Again.")
+            error_container.error("All Reports Must Be Updated To " + reverse_as_of_date_format(max_as_of_date) + " Before Updating To " + reverse_as_of_date_format(as_of_date_list[-1]) + ". Please Try Again.")
             st.stop()
 
         success_container = st.empty()
@@ -622,8 +624,8 @@ with page_content.container():
             info_container.empty()
             progress_message_container.empty()
             progress_message_container.header("Error: At least one duplicate report found. Please add the correct report and try again.")
-            st.error("Duplicate Report Found. Only One Report Per County and Report Type Is Allowed.")
-            st.write(duplicate_reports[['File Name', 'County', 'Report Type', 'As Of Date']])
+            error_container.error("Duplicate Report Found. Only One Report Per County and Report Type Is Allowed.")
+            error_container.error(duplicate_reports[['File Name', 'County', 'Report Type', 'As Of Date']])
             st.stop()
         
         success_container.success("No Duplicate Reports Found")
@@ -647,7 +649,7 @@ with page_content.container():
                 info_container.info("Began Processing " + report['File Name'])
                 DEV_pending_upload.update_spreadsheet(report)
             else:
-                st.error(report['File Name'] + " Did Not Meet Requirements and Will Not Be Processed. Please double check it is the correct version and date.")
+                error_container.error(report['File Name'] + " Did Not Meet Requirements and Will Not Be Processed. Please double check it is the correct version and date.")
                 info_container.empty()
                 #Update progress bar regardless of whether or not Pending Reports was successfully updated with the current file
                 bar_value += progress_per_file
@@ -791,7 +793,7 @@ missing_report_container.empty()
 with missing_report_container.container():
     #Clear the container
     missing_report_container.empty()
-    
+
     if dimmit_civil_last_as_of_date != max_as_of_date:
         st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + readable_max_as_of_date)
     if dimmit_civil_inactive_latest_report_date != max_as_of_date:
