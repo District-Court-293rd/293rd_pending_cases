@@ -671,7 +671,7 @@ with page_content.container():
         progress_message_container.header("Complete! All Accepted Files Processed Successfully!")
 
 #Gather the most recent 'As Of' and 'Load' dates for each section
-report_tracker_df = get_spreadsheet_data("DEV_Report_Tracker", credentials)
+report_tracker_df = get_spreadsheet_data("Report Tracker", credentials)
 
 if len(report_tracker_df) > 0:
     #Verify the columns are string types. Google sheets can mess with the data types
