@@ -791,9 +791,6 @@ readable_max_as_of_date = reverse_as_of_date_format(max(as_of_date_list))
 
 missing_report_container.empty()
 with missing_report_container.container():
-    #Clear the container
-    missing_report_container.empty()
-
     if dimmit_civil_last_as_of_date != max_as_of_date:
         st.info("Report Missing - Please Upload a Dimmit Civil Report with an As Of Date = " + readable_max_as_of_date)
     if dimmit_civil_inactive_latest_report_date != max_as_of_date:
