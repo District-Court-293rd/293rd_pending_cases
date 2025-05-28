@@ -350,6 +350,10 @@ def prepare_disposed_juvenile_cases(disposed_juvenile_cases):
     #Add court
     disposed_juvenile_cases['Court'] = '293'
 
+    #Remove deleted cases
+    #These cases will have a blank cause number and a disposition date = 01/01/1999
+    disposed_juvenile_cases = disposed_juvenile_cases[(disposed_juvenile_cases['Cause Number'] != '') & (disposed_juvenile_cases['Disposed Dates'] != '01/01/1999')]
+
     #Set the dropped datetime column to the uploaded report's 'As Of' date
     date = disposed_juvenile_cases['Last As Of Date'].iloc[0].strip()
     time = '00:00:00'
