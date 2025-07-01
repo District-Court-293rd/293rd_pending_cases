@@ -106,9 +106,9 @@ def extract_civil_case_data(case_info, county):
 
     #Get the names associated with each label
     #Will need to set up the lists before the loop. They will be added to the dict after the loop
-    plaintiff_names = []
+    #plaintiff_names = []
     plaintiff_attorneys = []
-    defendant_names = []
+    #defendant_names = []
     defendant_attorneys = []
 
     #As of 13 June 2023, we are no longer collecting names
@@ -141,12 +141,12 @@ def extract_civil_case_data(case_info, county):
         #As of 13 June 2023, we are no longer collecting names
 
         #Get the plaintiff name on current line
-        plaintiff_name = case_info[i][:38]
+        #plaintiff_name = case_info[i][:38]
 
         #Check if plaintiff_name is all whitesapace. If not, strip it and add to names list
         #Also check that the string is not empty
-        if plaintiff_name.isspace() == False and len(plaintiff_name) > 0:
-            plaintiff_names.append(plaintiff_name.strip())
+        #if plaintiff_name.isspace() == False and len(plaintiff_name) > 0:
+        #    plaintiff_names.append(plaintiff_name.strip())
 
         #Get the plaintiff attorney on current line
         plaintiff_attorney = case_info[i][38:64]
@@ -157,12 +157,12 @@ def extract_civil_case_data(case_info, county):
             plaintiff_attorneys.append(plaintiff_attorney.strip())
 
         #Get the defendant name on current line
-        defendant_name = case_info[i][64:94]
+        #defendant_name = case_info[i][64:94]
 
         #Check if defendant_name is all whitespace. If not, strip it and add to list
         #Also check that the string is not empty
-        if defendant_name.isspace() == False and len(defendant_name) > 0:
-            defendant_names.append(defendant_name.strip())
+        #if defendant_name.isspace() == False and len(defendant_name) > 0:
+        #    defendant_names.append(defendant_name.strip())
 
         #Get the defendant attorney on current line
         defendant_attorney = case_info[i][94:]
@@ -182,10 +182,10 @@ def extract_civil_case_data(case_info, county):
     temp_dict['Docket Type'] = docket_type
     temp_dict['ANS File'] = ans_date
     temp_dict['CR Number'] = cr_num
-    temp_dict['Plaintiff Name'] = plaintiff_names
-    temp_dict['Plaintiff Attorney'] = plaintiff_attorneys
-    temp_dict['Defendant Name'] = defendant_names
-    temp_dict['Defendant Attorney'] = defendant_attorneys
+    #temp_dict['Plaintiff Name'] = plaintiff_names
+    temp_dict['Plaintiff Attorney'] = list(set(plaintiff_attorneys))
+    #temp_dict['Defendant Name'] = defendant_names
+    temp_dict['Defendant Attorney'] = list(set(defendant_attorneys))
     
     #Append the temp_dict to the case_list
     case_list.append(temp_dict)
@@ -528,7 +528,7 @@ def build_criminal_cases_dataframe(text):
             #If not, add temp_dict data to case_list
             if bool(temp_dict) == True:
                 #Add list info to temp_dict
-                temp_dict['Attorney'] = attorney_names
+                temp_dict['Attorney'] = list(set(attorney_names))
                 temp_dict['First Offense'] = offense_list
                 temp_dict['ST RPT Column'] = st_rpt_list
 
@@ -553,7 +553,7 @@ def build_criminal_cases_dataframe(text):
             temp_dict['File Date'] = line[22:34].strip()
 
             #Get defendant name
-            temp_dict['Defendant'] = line[34:72].strip()
+            #temp_dict['Defendant'] = line[34:72].strip()
         
             #Get court
             temp_dict['Court'] = line[72:79].strip()
@@ -597,7 +597,7 @@ def build_criminal_cases_dataframe(text):
     #Check that the last case was added to the list
     #If not, add it
     #Add list info to temp_dict
-    temp_dict['Attorney'] = attorney_names
+    temp_dict['Attorney'] = list(set(attorney_names))
     temp_dict['First Offense'] = offense_list
     temp_dict['ST RPT Column'] = st_rpt_list
 
@@ -842,7 +842,7 @@ def build_juvenile_cases_dataframe(text):
             #temp_dict['Court'] = line[38:70].strip()
 
             #Get respondent
-            temp_dict['Respondent'] = line[70:].strip()
+            #temp_dict['Respondent'] = line[70:].strip()
 
             #End of line, so move to next one
 
