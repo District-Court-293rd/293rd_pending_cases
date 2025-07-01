@@ -242,16 +242,17 @@ def prepare_dataframe(report_type, df):
     america_central_tz = pytz.timezone('America/Chicago')
     df['Load DateTime'] = str(datetime.now(tz = america_central_tz))
 
-    #As of 13 June 2023, we are no longer collecting names
+    
     #Convert the lists of names in the civil cases dataframe to single strings with each name separated by a new line
-    #if df['Case Type'][0] != 'Criminal':
-    #    df['Plaintiff Name'] = df['Plaintiff Name'].apply(convert_name_list_to_string)
-    #    df['Plaintiff Attorney'] = df['Plaintiff Attorney'].apply(convert_name_list_to_string)
-    #    df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
-    #    df['Defendant Attorney'] = df['Defendant Attorney'].apply(convert_name_list_to_string)
+    if df['Case Type'][0] != 'Criminal':
+        df['Plaintiff Name'] = df['Plaintiff Name'].apply(convert_name_list_to_string)
+        df['Plaintiff Attorney'] = df['Plaintiff Attorney'].apply(convert_name_list_to_string)
+        df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
+        df['Defendant Attorney'] = df['Defendant Attorney'].apply(convert_name_list_to_string)
     if report_type == 'Criminal' or report_type == 'Criminal OLS':
         df['First Offense'] = df['First Offense'].apply(convert_name_list_to_string)
         df['ST RPT Column'] = df['ST RPT Column'].apply(convert_name_list_to_string)
+        df['Attorney'] = df['Attorney'].apply(convert_name_list_to_string)
     
     return df
 
@@ -300,6 +301,7 @@ def prepare_pending_juvenile_cases(pending_juvenile_cases):
         'File Date',
         'Offense',
         'Docket Date',
+        'Respondent',
         'Report Generated Date',
         'Original As Of Date',
         'Last As Of Date',
@@ -373,6 +375,7 @@ def prepare_disposed_juvenile_cases(disposed_juvenile_cases):
         'File Date',
         'Offense',
         'Docket Date',
+        'Respondent',
         'Report Generated Date',
         'Original As Of Date',
         'Last As Of Date',
@@ -430,6 +433,7 @@ def prepare_dropped_juvenile_cases(dropped_juvenile_cases, dropped_as_of_date):
         'File Date',
         'Offense',
         'Docket Date',
+        'Respondent',
         'Report Generated Date',
         'Original As Of Date',
         'Last As Of Date',
