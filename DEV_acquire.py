@@ -539,7 +539,7 @@ def build_criminal_cases_dataframe(text):
             temp_dict = {}
 
             #Reset lists
-            #attorney_names = []
+            attorney_names = []
             offense_list = []
             st_rpt_list = []
 
