@@ -244,7 +244,7 @@ def prepare_dataframe(report_type, df):
 
     
     #Convert the lists of names in the civil cases dataframe to single strings with each name separated by a new line
-    if df['Case Type'][0] != 'Criminal':
+    if report_type == 'Civil':
         #df['Plaintiff Name'] = df['Plaintiff Name'].apply(convert_name_list_to_string)
         df['Plaintiff Attorney'] = df['Plaintiff Attorney'].apply(convert_name_list_to_string)
         #df['Defendant Name'] = df['Defendant Name'].apply(convert_name_list_to_string)
