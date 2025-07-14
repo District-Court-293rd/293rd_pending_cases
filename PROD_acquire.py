@@ -107,9 +107,9 @@ def extract_civil_case_data(case_info, county):
     #Get the names associated with each label
     #Will need to set up the lists before the loop. They will be added to the dict after the loop
     #plaintiff_names = []
-    #plaintiff_attorneys = []
+    plaintiff_attorneys = []
     #defendant_names = []
-    #defendant_attorneys = []
+    defendant_attorneys = []
 
     #As of 13 June 2023, we are no longer collecting names
     #We still need to check for combined cases though and go through each line
@@ -149,12 +149,12 @@ def extract_civil_case_data(case_info, county):
         #    plaintiff_names.append(plaintiff_name.strip())
 
         #Get the plaintiff attorney on current line
-        #plaintiff_attorney = case_info[i][38:64]
+        plaintiff_attorney = case_info[i][38:64]
 
         #Check if plaintiff_attorney is all whitespace. If not, strip it and add to list
         #Also check that the string is not empty
-        #if plaintiff_attorney.isspace() == False and len(plaintiff_attorney) > 0:
-        #    plaintiff_attorneys.append(plaintiff_attorney.strip())
+        if plaintiff_attorney.isspace() == False and len(plaintiff_attorney) > 0:
+            plaintiff_attorneys.append(plaintiff_attorney.strip())
 
         #Get the defendant name on current line
         #defendant_name = case_info[i][64:94]
@@ -165,12 +165,12 @@ def extract_civil_case_data(case_info, county):
         #    defendant_names.append(defendant_name.strip())
 
         #Get the defendant attorney on current line
-        #defendant_attorney = case_info[i][94:]
+        defendant_attorney = case_info[i][94:]
 
         #Check if the defendant_attorney is all whitespace. If not, strip it and add to list
         #Also check that the string is not empty
-        #if defendant_attorney.isspace() == False and len(defendant_attorney) > 0:
-        #    defendant_attorneys.append(defendant_attorney.strip())
+        if defendant_attorney.isspace() == False and len(defendant_attorney) > 0:
+            defendant_attorneys.append(defendant_attorney.strip())
 
     #As of 13 June 2023, we are no longer collecting names
     #Now put all the info into a temp dict.
@@ -183,9 +183,9 @@ def extract_civil_case_data(case_info, county):
     temp_dict['ANS File'] = ans_date
     temp_dict['CR Number'] = cr_num
     #temp_dict['Plaintiff Name'] = plaintiff_names
-    #temp_dict['Plaintiff Attorney'] = plaintiff_attorneys
+    temp_dict['Plaintiff Attorney'] = plaintiff_attorneys
     #temp_dict['Defendant Name'] = defendant_names
-    #temp_dict['Defendant Attorney'] = defendant_attorneys
+    temp_dict['Defendant Attorney'] = defendant_attorneys
     
     #Append the temp_dict to the case_list
     case_list.append(temp_dict)
@@ -467,7 +467,7 @@ def build_criminal_cases_dataframe(text):
     
     #Initialize containers
     case_list = []
-    #attorney_names = []
+    attorney_names = []
     offense_list = []
     st_rpt_list = []
     temp_dict = {}
@@ -528,7 +528,7 @@ def build_criminal_cases_dataframe(text):
             #If not, add temp_dict data to case_list
             if bool(temp_dict) == True:
                 #Add list info to temp_dict
-                #temp_dict['Attorney'] = attorney_names
+                temp_dict['Attorney'] = list(set(attorney_names))
                 temp_dict['First Offense'] = offense_list
                 temp_dict['ST RPT Column'] = st_rpt_list
 
@@ -539,7 +539,7 @@ def build_criminal_cases_dataframe(text):
             temp_dict = {}
 
             #Reset lists
-            #attorney_names = []
+            attorney_names = []
             offense_list = []
             st_rpt_list = []
 
@@ -571,12 +571,12 @@ def build_criminal_cases_dataframe(text):
             #As of 13 June 2023, we are no longer collecting names
             
             #Get attorney name
-            #attorney_name = line[:35].strip()
+            attorney_name = line[:35].strip()
 
             #Check if attorney_name is all whitesapace. If not, strip it and add to names list
             #Also check that the string is not empty
-            #if attorney_name.isspace() == False and len(attorney_name) > 0:
-            #    attorney_names.append(attorney_name.strip())
+            if attorney_name.isspace() == False and len(attorney_name) > 0:
+                attorney_names.append(attorney_name.strip())
 
             #Get first offense
             offense = line[35:74].strip()
@@ -599,7 +599,7 @@ def build_criminal_cases_dataframe(text):
     #Check that the last case was added to the list
     #If not, add it
     #Add list info to temp_dict
-    #temp_dict['Attorney'] = attorney_names
+    temp_dict['Attorney'] = list(set(attorney_names))
     temp_dict['First Offense'] = offense_list
     temp_dict['ST RPT Column'] = st_rpt_list
 

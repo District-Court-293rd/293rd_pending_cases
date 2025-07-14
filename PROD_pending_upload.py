@@ -100,6 +100,10 @@ def convert_to_common_table_df(case_df):
         "ANS File": [],
         "CR Number": [],
         "Case Type": [],
+        #"Plaintiff": [],
+        "Plaintiff Attorney": [],
+        #"Defendant": [],
+        "Defendant Attorney": [],
         "Status": [],
         "Outstanding Warrants": [],
         "ST RPT Column": [],
@@ -143,29 +147,45 @@ def convert_to_common_table_df(case_df):
         df['Dispositions'] = case_df['Dispositions']
         df['Disposed As Of Date'] = case_df['Disposed As Of Date']
         df['Number Of Dispositions'] = case_df['Number Of Dispositions']
+        #df['Defendant'] = ''
+        df['Defendant Attorney'] = ''
+        #df['Plaintiff'] = ''
+        df['Plaintiff Attorney'] = ''
 
     #Determine if cases are criminal, juvenile, or civil. They will have different logic
     if case_df['Case Type'].iloc[0].count('Criminal') == 1:
         df['Cause'] = case_df['First Offense']
         df['Outstanding Warrants'] = case_df['Outstanding Warrants']
         df['ST RPT Column'] = case_df['ST RPT Column']
+        #df['Defendant'] = case_df['Defendant']
+        df['Defendant Attorney'] = case_df['Attorney']
         #The following columns are only available in Civil Reports, so set them to empty strings
         df['Docket Type'] = ''
         df['ANS File'] = ''
         df['CR Number'] = ''
+        #df['Plaintiff'] = ''
+        df['Plaintiff Attorney'] = ''
     elif case_df['Case Type'].iloc[0].count('Juvenile') == 1:
         df['Cause'] = case_df['Offense']
+        #df['Defendant'] = case_df['Respondent']
         #The following columns are not available in Juvenile Reports, so set them to empty strings
         df['Docket Type'] = ''
         df['ANS File'] = ''
         df['CR Number'] = ''
         df['Outstanding Warrants'] = ''
         df['ST RPT Column'] = ''
+        df['Defendant Attorney'] = ''
+        #df['Plaintiff'] = ''
+        df['Plaintiff Attorney'] = ''
     else:
         df['Cause'] = case_df['Cause of Action']
         df['Docket Type'] = case_df['Docket Type']
         df['ANS File'] = case_df['ANS File']
         df['CR Number'] = case_df['CR Number']
+        #df['Defendant'] = case_df['Defendant Name']
+        df['Defendant Attorney'] = case_df['Defendant Attorney']
+        #df['Plaintiff'] = case_df['Plaintiff Name']
+        df['Plaintiff Attorney'] = case_df['Plaintiff Attorney']
         #The following columns are only available in Criminal reports, so set them to empty strings
         df['Outstanding Warrants'] = ''
         df['ST RPT Column'] = ''
@@ -202,7 +222,6 @@ def update_report_tracker(report):
     report_tracker_sheet.clear()
     report_tracker_df.sort_values(by = ['County','Report Type'], ignore_index=True, inplace=True)
     report_tracker_sheet.update([report_tracker_df.columns.values.tolist()] + report_tracker_df.values.tolist())
-
 
 
 def update_spreadsheet(report):
@@ -574,6 +593,8 @@ def update_disposed_cases(disposed_cases):
         old_disposed_cases['Original As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Last As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Dropped DateTime'] = ''
+        #old_disposed_cases['Defendant'] = ''
+        old_disposed_cases['Attorney'] = ''
         #Comment column removed as of 10/07/2023
         #old_disposed_cases['Comments'] = ''
 
@@ -583,8 +604,10 @@ def update_disposed_cases(disposed_cases):
             'Cause Number',
             'File Date',
             'Court',
+            #'Defendant',
             'Docket Date',
             'Outstanding Warrants',
+            'Attorney',
             'First Offense',
             'ST RPT Column',
             'Report Generated Date',
@@ -613,6 +636,10 @@ def update_disposed_cases(disposed_cases):
         old_disposed_cases['Original As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Last As Of Date'] = old_disposed_cases['Disposed As Of Date']
         old_disposed_cases['Dropped DateTime'] = ''
+        #old_disposed_cases['Defendant Name'] = ''
+        old_disposed_cases['Defendant Attorney'] = ''
+        #old_disposed_cases['Plaintiff Name'] = ''
+        old_disposed_cases['Plaintiff Attorney'] = ''
         #Comment column removed as of 10/07/2023
         #old_disposed_cases['Comments'] = ''
 
@@ -626,6 +653,10 @@ def update_disposed_cases(disposed_cases):
             'Docket Type',
             'ANS File',
             'CR Number',
+            #'Plaintiff Name',
+            'Plaintiff Attorney',
+            #'Defendant Name',
+            'Defendant Attorney',
             'Report Generated Date',
             'Original As Of Date',
             'Last As Of Date',
