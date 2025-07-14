@@ -183,9 +183,9 @@ def extract_civil_case_data(case_info, county):
     temp_dict['ANS File'] = ans_date
     temp_dict['CR Number'] = cr_num
     #temp_dict['Plaintiff Name'] = plaintiff_names
-    temp_dict['Plaintiff Attorney'] = plaintiff_attorneys
+    temp_dict['Plaintiff Attorney'] = list(set(plaintiff_attorneys))
     #temp_dict['Defendant Name'] = defendant_names
-    temp_dict['Defendant Attorney'] = defendant_attorneys
+    temp_dict['Defendant Attorney'] = list(set(defendant_attorneys))
     
     #Append the temp_dict to the case_list
     case_list.append(temp_dict)
