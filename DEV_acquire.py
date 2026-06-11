@@ -833,7 +833,7 @@ def build_juvenile_cases_dataframe(text):
             dispo_date_list = []
 
             #Gather the cause number
-            temp_dict['Cause Number'] = line[9:26].strip()
+            temp_dict['Cause Number'] = line[:26].strip()
 
             #Gather the file date
             temp_dict['File Date'] = line[26:38].strip()
