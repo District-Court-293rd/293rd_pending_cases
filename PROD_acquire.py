@@ -942,7 +942,7 @@ def build_civil_inactive_cases_dataframe(text):
     body = text[370:]
     
     #Remove subsequent page headers
-    body = re.sub(r"""\s*[A-Z\.\' \n-]*\d{2}/\d{2}/\d{4}\n\s*[A-Z0-9 \:-]*\d{2}/\d{2}/\d{4}[A-Z0-9 \n#-]*INACTIVE REASON\s*\n\n""", '', body)
+    body = re.sub(r"""\s*[A-Z\.\' \n-]*\d{2}/\d{2}/\d{4}\n\s*[A-Z0-9 \:-]*\d{2}/\d{2}/\d{4}[A-Z0-9 \n#-]*INACTIVE REASON\s{29}""", '', body)
     
     #Split the text on the '\n' to isolate each case
     cases = body.split('\n')
