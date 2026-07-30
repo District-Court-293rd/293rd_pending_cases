@@ -249,11 +249,11 @@ def update_spreadsheet(report):
         update_juvenile_cases(pending_juvenile_cases, disposed_juvenile_cases)
     elif report['Report Type'] == 'Criminal Inactive':
         #Update the inactive spreadsheet.
-        PROD_prepare.prepare_inactive_cases(df)
+        df = PROD_prepare.prepare_inactive_cases(df)
         update_criminal_inactive_cases(df, report)
     elif report['Report Type'] == 'Civil Inactive':
         #Update the inactive spreadsheet.
-        PROD_prepare.prepare_inactive_cases(df)
+        df = PROD_prepare.prepare_inactive_cases(df)
         update_civil_inactive_cases(df, report)
     else:
         #Prepare the df and add new columns
