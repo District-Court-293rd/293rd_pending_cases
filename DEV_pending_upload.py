@@ -940,9 +940,9 @@ def update_civil_inactive_cases(new_inactive_df, report):
             reactivated_cases_df['Status'] = 'Active'
             for i in reactivated_cases_df.index:
                 if reactivated_cases_df['Estimated Inactive End Date'].iloc[i] == '':
-                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = new_inactive_df['Last As Of Date'].iloc[0]
+                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = report['As Of Date']
                 else:
-                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = new_inactive_df['Last As Of Date'].iloc[0] + '\n' + str(reactivated_cases_df['Estimated Inactive End Date'].iloc[i])
+                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = report['As Of Date'] + '\n' + str(reactivated_cases_df['Estimated Inactive End Date'].iloc[i])
             
             #Now add them to the active_table_df
             active_table_df = active_table_df.append(reactivated_cases_df, ignore_index = True)
@@ -974,7 +974,7 @@ def update_civil_inactive_cases(new_inactive_df, report):
             inactive_table_df['Last As Of Date'] = str(new_inactive_df['Last As Of Date'].iloc[0])
             
             #Update the load DateTime
-            inactive_table_df['Load DateTime'] = new_inactive_df['Load DateTime']
+            inactive_table_df['Load DateTime'] = new_inactive_df['Load DateTime'].iloc[0]
         
         #Now append inactive table df to the new inactive cases df and drop duplicates, keeping last.
         #This should keep all updated info intact while adding the entirely new inactive cases to the df
@@ -1089,9 +1089,9 @@ def update_criminal_inactive_cases(new_inactive_df, report):
             reactivated_cases_df['Status'] = 'Active'
             for i in reactivated_cases_df.index:
                 if reactivated_cases_df['Estimated Inactive End Date'].iloc[i] == '':
-                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = new_inactive_df['Last As Of Date'].iloc[0]
+                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = report['As Of Date']
                 else:
-                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = new_inactive_df['Last As Of Date'].iloc[0] + '\n' + str(reactivated_cases_df['Estimated Inactive End Date'].iloc[i])
+                    reactivated_cases_df['Estimated Inactive End Date'].iloc[i] = report['As Of Date'] + '\n' + str(reactivated_cases_df['Estimated Inactive End Date'].iloc[i])
             
             #Now add them to the active_table_df
             active_table_df = active_table_df.append(reactivated_cases_df, ignore_index = True)

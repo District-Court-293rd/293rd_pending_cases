@@ -460,6 +460,9 @@ def prepare_inactive_cases(df):
         df['Inactive End Date'] = df['Inactive End Date'].apply(convert_name_list_to_string).str.strip()
         df['Inactive Reason'] = df['Inactive Reason'].apply(convert_name_list_to_string).str.strip()
 
+        #Create 'Estimated Inactive End Date' Column (doesn't need a value yet)
+        df['Estimated Inactive End Date'] = ''
+
         #Create Load DateTime column
         america_central_tz = pytz.timezone('America/Chicago')
         df['Load DateTime'] = str(datetime.now(tz = america_central_tz))
