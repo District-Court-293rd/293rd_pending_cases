@@ -960,8 +960,8 @@ def update_civil_inactive_cases(new_inactive_df, report):
             prev_active_ref_df = active_table_df[(active_table_df["Cause Number"].isin(inactivated_cases_df['Cause Number']))].sort_values(by='Cause Number').reset_index(drop=True)
 
             for i in inactivated_cases_df.index:
-                inactivated_cases_df['Estimated Inactive End Date'].iloc[i] = prev_active_ref_df['Estimated Inactive End Date'].iloc[i]
-                inactivated_cases_df['Original As Of Date'].iloc[i] = prev_active_ref_df['Original As Of Date'].iloc[i]
+                inactivated_cases_df['Estimated Inactive End Date'].iloc[i] = str(prev_active_ref_df['Estimated Inactive End Date'].iloc[i])
+                inactivated_cases_df['Original As Of Date'].iloc[i] = str(prev_active_ref_df['Original As Of Date'].iloc[i])
             
             #Now add them to the inactive_table_df
             inactive_table_df = inactive_table_df.append(inactivated_cases_df, ignore_index = True).reset_index(drop=True)
@@ -974,7 +974,7 @@ def update_civil_inactive_cases(new_inactive_df, report):
             inactive_table_df['Last As Of Date'] = str(new_inactive_df['Last As Of Date'].iloc[0])
             
             #Update the load DateTime
-            inactive_table_df['Load DateTime'] = new_inactive_df['Load DateTime'].iloc[0]
+            inactive_table_df['Load DateTime'] = str(new_inactive_df['Load DateTime'].iloc[0])
         
         #Now append inactive table df to the new inactive cases df and drop duplicates, keeping last.
         #This should keep all updated info intact while adding the entirely new inactive cases to the df
@@ -1109,8 +1109,8 @@ def update_criminal_inactive_cases(new_inactive_df, report):
             prev_active_ref_df = active_table_df[(active_table_df["Cause Number"].isin(inactivated_cases_df['Cause Number']))].sort_values(by='Cause Number').reset_index(drop=True)
 
             for i in inactivated_cases_df.index:
-                inactivated_cases_df['Estimated Inactive End Date'].iloc[i] = prev_active_ref_df['Estimated Inactive End Date'].iloc[i]
-                inactivated_cases_df['Original As Of Date'].iloc[i] = prev_active_ref_df['Original As Of Date'].iloc[i]
+                inactivated_cases_df['Estimated Inactive End Date'].iloc[i] = str(prev_active_ref_df['Estimated Inactive End Date'].iloc[i])
+                inactivated_cases_df['Original As Of Date'].iloc[i] = str(prev_active_ref_df['Original As Of Date'].iloc[i])
             
             #Now add them to the inactive_table_df
             inactive_table_df = inactive_table_df.append(inactivated_cases_df, ignore_index = True).reset_index(drop=True)
@@ -1123,7 +1123,7 @@ def update_criminal_inactive_cases(new_inactive_df, report):
             inactive_table_df['Last As Of Date'] = str(new_inactive_df['Last As Of Date'].iloc[0])
             
             #Update the load DateTime
-            inactive_table_df['Load DateTime'] = new_inactive_df['Load DateTime']
+            inactive_table_df['Load DateTime'] = str(new_inactive_df['Load DateTime'].iloc[0])
         
         #Now append inactive table df to the new inactive cases df and drop duplicates, keeping last.
         #This should keep all updated info intact while adding the entirely new inactive cases to the df
