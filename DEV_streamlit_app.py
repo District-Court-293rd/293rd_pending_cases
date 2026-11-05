@@ -500,9 +500,9 @@ with page_content.container():
                     report_type = 'Civil Disposed'
                 elif header.count('CASES DISPOSED') >= 1:
                     report_type = 'Criminal Disposed'
-                elif header.count('PENDING CRIMINAL CASES - INACTIVITY REPORT') >= 1:
+                elif header.count('CRIMINAL CASES - INACTIVITY REPORT') >= 1:
                     report_type = 'Criminal Inactive'
-                elif header.count('PENDING CIVIL CASES - INACTIVITY REPORT') >= 1:
+                elif header.count('CIVIL CASES - INACTIVITY REPORT') >= 1:
                     report_type = 'Civil Inactive'
                 else:
                     report_type = 'Unknown'
